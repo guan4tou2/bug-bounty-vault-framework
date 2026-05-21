@@ -45,6 +45,18 @@ python3 -m pytest tests/test_public_skeleton.py -q
 
 Then copy the templates into a private vault and keep operational data in a separate ignored workspace.
 
+## How to Use This Framework
+
+1. Clone this repository as a clean reference skeleton.
+2. Read `docs/fresh-start.md` to create a private working vault from the templates.
+3. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
+4. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
+5. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+
+## Obsidian Setup
+
+Open the private vault folder in Obsidian after you copy the templates. Recommended core and community plugins are listed in `docs/obsidian-setup.md`.
+
 ## Core Principle
 
 Keep this repository public and generic. Put all real program data, target data, evidence, credentials, scan output, and private knowledge in a separate private environment.

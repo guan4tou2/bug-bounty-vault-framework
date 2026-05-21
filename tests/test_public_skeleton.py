@@ -26,6 +26,7 @@ def test_required_public_framework_files_exist():
         "docs/workflow.md",
         "docs/sop.md",
         "docs/llm-wiki-framework.md",
+        "docs/obsidian-setup.md",
         "docs/public-safety.md",
         "docs/fresh-start.md",
         "templates/target.md",
@@ -63,6 +64,7 @@ def test_public_docs_define_generic_architecture_and_flow():
     architecture = read("docs/architecture.md")
     workflow = read("docs/workflow.md")
     llm_wiki = read("docs/llm-wiki-framework.md")
+    obsidian_setup = read("docs/obsidian-setup.md")
 
     for required in (
         "architecture-only",
@@ -99,6 +101,30 @@ def test_public_docs_define_generic_architecture_and_flow():
         "source of truth",
     ):
         assert required in llm_wiki
+
+    for required in (
+        "Recommended core plugins",
+        "Recommended community plugins",
+        "Dataview",
+        "Templater",
+        "QuickAdd",
+        "Git",
+        "Bases",
+        "Canvas",
+    ):
+        assert required in obsidian_setup
+
+
+def test_readme_links_usage_and_obsidian_setup():
+    readme = read("README.md")
+
+    for required in (
+        "How to Use This Framework",
+        "Obsidian Setup",
+        "docs/fresh-start.md",
+        "docs/obsidian-setup.md",
+    ):
+        assert required in readme
 
 
 def test_templates_are_placeholders_not_real_reports():

@@ -18,6 +18,7 @@ required_files = [
     "docs/workflow.md",
     "docs/sop.md",
     "docs/llm-wiki-framework.md",
+    "docs/obsidian-setup.md",
     "docs/public-safety.md",
     "docs/fresh-start.md",
     "templates/target.md",
