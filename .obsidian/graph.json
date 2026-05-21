@@ -1,0 +1,25 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "path:01-targets",
+      "color": {
+        "a": 1,
+        "rgb": 14839564
+      }
+    },
+    {
+      "query": "path:09-knowledge",
+      "color": {
+        "a": 1,
+        "rgb": 6737001
+      }
+    }
+  ]
+}

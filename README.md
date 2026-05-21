@@ -55,7 +55,7 @@ Then copy the templates into a private vault and keep operational data in a sepa
 
 ## Obsidian Setup
 
-Open the private vault folder in Obsidian after you copy the templates. Recommended core and community plugins are listed in `docs/obsidian-setup.md`.
+Open the private vault folder in Obsidian after you copy the templates. This repository includes a generic `.obsidian/` preset with core plugin settings and community plugin IDs. Recommended core and community plugins are listed in `docs/obsidian-setup.md`.
 
 ## Core Principle
 

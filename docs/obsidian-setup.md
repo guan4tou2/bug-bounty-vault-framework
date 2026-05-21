@@ -1,6 +1,8 @@
 # Obsidian Setup
 
-This framework treats Obsidian as the human-facing interface for the private vault. The public repository does not include a `.obsidian/` configuration folder because plugin state is personal, machine-specific, and easy to overfit to one workflow.
+This framework treats Obsidian as the human-facing interface for the private vault. The public repository includes a minimal `.obsidian/` preset with generic core plugin settings, community plugin IDs, graph defaults, and template folder configuration.
+
+The preset does not include downloaded plugin code, workspace state, sync settings, credentials, or personal UI history.
 
 ## Recommended Core Plugins
 
@@ -23,7 +25,7 @@ Enable these from Obsidian Settings -> Core plugins:
 
 Recommended community plugins add automation, dashboards, and search once the private vault structure is stable.
 
-Install community plugins only in the private vault, not in this public skeleton.
+The community plugin IDs are committed in `.obsidian/community-plugins.json`, but the plugin binaries are not vendored. Install community plugins through Obsidian's Community Plugins browser after opening your private vault.
 
 | Plugin | Priority | Role in this framework |
 |---|---:|---|
@@ -58,6 +60,18 @@ This layout is intentionally generic. Rename folders to match your own conventio
 5. Create a first placeholder target using `templates/target.md`.
 6. Create one recon note and one finding draft to test properties, backlinks, and dashboard queries.
 7. Commit the private vault only after confirming no raw artifacts or secrets are present.
+
+## Included Preset Files
+
+| File | Purpose |
+|---|---|
+| `.obsidian/app.json` | Generic editor and file behavior. |
+| `.obsidian/appearance.json` | Default theme and no custom snippets. |
+| `.obsidian/core-plugins.json` | Core plugin enablement baseline. |
+| `.obsidian/community-plugins.json` | Recommended community plugin IDs. |
+| `.obsidian/templates.json` | Points Obsidian's Templates core plugin at `templates/`. |
+| `.obsidian/graph.json` | Generic graph defaults for target and knowledge folders. |
+| `.obsidian/plugins/README.md` | Explains why plugin binaries are not committed. |
 
 ## Plugin Safety Rules
 

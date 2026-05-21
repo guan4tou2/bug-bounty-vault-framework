@@ -1,0 +1,10 @@
+{
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "workspace/attachments",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "00-dashboard",
+  "showLineNumber": false,
+  "livePreview": true,
+  "promptDelete": true,
+  "showUnsupportedFiles": false
+}

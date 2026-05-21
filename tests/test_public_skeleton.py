@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 
@@ -22,6 +23,13 @@ def test_required_public_framework_files_exist():
         "README.md",
         "LICENSE",
         ".gitignore",
+        ".obsidian/app.json",
+        ".obsidian/appearance.json",
+        ".obsidian/community-plugins.json",
+        ".obsidian/core-plugins.json",
+        ".obsidian/graph.json",
+        ".obsidian/plugins/README.md",
+        ".obsidian/templates.json",
         "docs/architecture.md",
         "docs/workflow.md",
         "docs/sop.md",
@@ -125,6 +133,41 @@ def test_readme_links_usage_and_obsidian_setup():
         "docs/obsidian-setup.md",
     ):
         assert required in readme
+
+
+def test_obsidian_preset_is_committed_without_plugin_binaries():
+    community_plugins = json.loads(read(".obsidian/community-plugins.json"))
+    core_plugins = json.loads(read(".obsidian/core-plugins.json"))
+    templates_config = json.loads(read(".obsidian/templates.json"))
+    plugin_readme = read(".obsidian/plugins/README.md")
+
+    for plugin_id in (
+        "dataview",
+        "templater-obsidian",
+        "quickadd",
+        "obsidian-git",
+        "obsidian-tasks-plugin",
+        "omnisearch",
+        "obsidian-linter",
+        "table-editor-obsidian",
+    ):
+        assert plugin_id in community_plugins
+
+    for core_id in (
+        "bases",
+        "canvas",
+        "graph",
+        "backlink",
+        "properties",
+        "templates",
+        "switcher",
+        "global-search",
+    ):
+        assert core_id in core_plugins
+
+    assert templates_config["folder"] == "templates"
+    assert "plugin binaries are not vendored" in plugin_readme
+    assert "Install plugins from Obsidian Community Plugins" in plugin_readme
 
 
 def test_templates_are_placeholders_not_real_reports():
