@@ -1,0 +1,12 @@
+program: <program>
+target: <target>
+assets:
+  include:
+    - example.com
+  exclude:
+    - <out-of-scope asset>
+testing:
+  active_scan: <allowed | disallowed | requires-approval>
+  destructive_actions: disallowed
+notes:
+  - <scope note>

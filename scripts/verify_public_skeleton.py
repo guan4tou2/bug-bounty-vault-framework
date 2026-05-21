@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Verify this architecture-only public skeleton contains no operational data."""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+required_files = [
+    "README.md",
+    "LICENSE",
+    ".gitignore",
+    "docs/architecture.md",
+    "docs/workflow.md",
+    "docs/sop.md",
+    "docs/llm-wiki-framework.md",
+    "docs/public-safety.md",
+    "docs/fresh-start.md",
+    "templates/target.md",
+    "templates/recon-note.md",
+    "templates/finding.md",
+    "templates/submission.md",
+    "templates/form.md",
+    "templates/scope.yaml",
+]
+
+forbidden_dirs = [
+    "targets",
+    "workspace",
+    ".workspace",
+    ".vault-workspace",
+    "reports",
+    "scan_results",
+    "poc",
+    "evidence",
+    "rootfs",
+    "firmware_analysis",
+    "extractions",
+    "logs",
+    "memory",
+    "graphify-out",
+]
+
+forbidden_strings = [
+    "BEGIN PRIVATE KEY",
+    "PRIVATE KEY-----",
+    "api_key",
+    "access_token",
+    "sessionid",
+    "No target data",
+]
+
+forbidden_patterns = [
+    re.compile(r"/Users/[^/\s]+"),
+    re.compile(r"(?i)cookie\s*:"),
+    re.compile(r"(?i)authorization\s*:"),
+    re.compile(r"(?i)bearer\s+[A-Za-z0-9._-]+"),
+]
+
+
+def iter_public_files():
+    ignored = {".git", ".pytest_cache", "__pycache__", "tests"}
+    for path in ROOT.rglob("*"):
+        if path == Path(__file__).resolve():
+            continue
+        if path.is_file() and not ignored.intersection(path.parts):
+            yield path
+
+
+def fail(message: str) -> None:
+    print(f"[fail] {message}", file=sys.stderr)
+    raise SystemExit(1)
+
+
+def main() -> int:
+    for rel in required_files:
+        if not (ROOT / rel).exists():
+            fail(f"missing required file: {rel}")
+
+    for rel in forbidden_dirs:
+        if (ROOT / rel).exists():
+            fail(f"forbidden operational directory present: {rel}")
+
+    for path in iter_public_files():
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for needle in forbidden_strings:
+            if needle != "No target data" and needle in text:
+                fail(f"forbidden string in {path.relative_to(ROOT)}: {needle}")
+        for pattern in forbidden_patterns:
+            if pattern.search(text):
+                fail(f"forbidden private pattern in {path.relative_to(ROOT)}: {pattern.pattern}")
+
+    print("[ok] architecture-only public skeleton verified")
+    print("[ok] No target data or operational artifact directories found")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

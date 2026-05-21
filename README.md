@@ -1,0 +1,50 @@
+# Bug Bounty Vault Framework
+
+An architecture-only public framework for organizing authorized security research work.
+
+No target data, no findings, no private knowledge base, no raw scan output, and no operational secrets are included.
+
+## Purpose
+
+This repository provides a clean starting structure for teams or individuals who want a repeatable workflow around:
+
+- Vault: canonical notes, decisions, and report-ready summaries.
+- Workspace: external scratch space for raw artifacts.
+- Automation: lightweight checks that keep the structure clean.
+- LLM Wiki: reusable process knowledge, not private target intelligence.
+
+## What This Is
+
+- A public architecture and process skeleton.
+- A documentation-first operating model.
+- A set of empty templates for targets, recon notes, findings, submissions, and forms.
+- A safety contract for keeping raw operational data out of git.
+
+## What This Is Not
+
+- It is not a vulnerability database.
+- It is not a scan toolkit.
+- It is not a collection of private bug bounty reports.
+- It is not a knowledge base with target-specific techniques or evidence.
+
+## Repository Layout
+
+```text
+docs/       Architecture, workflow, SOP, public safety, and fresh-start notes
+templates/  Empty placeholder templates for a new private vault
+scripts/    Public-safety verifier
+tests/      Contract tests for the skeleton
+```
+
+## Quick Start
+
+```bash
+python3 scripts/verify_public_skeleton.py
+python3 -m pytest tests/test_public_skeleton.py -q
+```
+
+Then copy the templates into a private vault and keep operational data in a separate ignored workspace.
+
+## Core Principle
+
+Keep this repository public and generic. Put all real program data, target data, evidence, credentials, scan output, and private knowledge in a separate private environment.

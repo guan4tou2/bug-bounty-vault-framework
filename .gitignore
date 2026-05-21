@@ -1,0 +1,36 @@
+# Local workspace / operational data
+workspace/
+.workspace/
+.vault-workspace/
+scratch/
+reports/
+scan_results/
+poc/
+evidence/
+rootfs/
+extractions/
+firmware_analysis/
+logs/
+tmp/
+
+# Tool output
+graphify-out/
+.cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Secrets / local config
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.cookie
+*.har
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
