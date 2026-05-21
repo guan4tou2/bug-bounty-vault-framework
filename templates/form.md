@@ -1,17 +1,20 @@
-# Form - <program> - <id>
+# Form - <target> - <id>
 
-## Linked Submission
+## Linked Records
 
+- Target: <target>
+- Finding: <finding link>
+- Review: <review link>
 - Submission: <submission link>
 
-## Fields
+## Generic Field Bundle
 
-- Title: <title>
-- Summary: <summary>
-- Impact: <impact>
-- Steps: <steps>
-- Remediation: <recommendation>
+- Title: <short title>
+- Summary: <short summary>
+- Impact: <impact summary>
+- Evidence: <safe evidence reference>
+- Remediation: <generic remediation>
 
-## Attachments
+## Private Extension
 
-- <sanitized screenshot or external reference>
+Add destination-specific fields only in a private vault extension.

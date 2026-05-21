@@ -3,7 +3,7 @@
 The generic lifecycle is:
 
 ```text
-Target -> Recon -> Finding -> Submission -> Triage -> Knowledge Capture
+Target -> Recon -> Finding -> Review -> Knowledge Capture
 ```
 
 ## Gates
@@ -22,7 +22,7 @@ Do not promote a candidate into a Finding until the evidence is reproducible, sc
 
 ### Knowledge capture gate
 
-Capture what can be reused: decision points, false-positive filters, stop conditions, and report lessons.
+Capture what can be reused: decision points, false-positive filters, stop conditions, and workflow lessons.
 
 ## Lifecycle
 
@@ -31,9 +31,10 @@ Capture what can be reused: decision points, false-positive filters, stop condit
 3. Run recon in an external workspace.
 4. Record a recon note with tools, scope, decisions, and outputs.
 5. Promote validated issues into findings.
-6. Convert report-ready findings into submissions or platform forms.
-7. Update triage status after platform or owner response.
-8. Feed reusable lessons back into the LLM Wiki.
+6. Review findings for evidence quality, risk, and duplicate likelihood.
+7. Record the review decision in a review note.
+8. Optionally create a platform-neutral submission or form bundle for private downstream use.
+9. Feed reusable lessons back into the LLM Wiki.
 
 ## Close-Out
 

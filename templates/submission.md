@@ -1,19 +1,25 @@
 # Submission - <target> - <id>
 
-## Linked Finding
+## Scope
 
+- Target: <target>
 - Finding: <finding link>
+- Review: <review link>
 
-## Platform
+## Destination
 
-- Program: <program>
-- Submission date: <YYYY-MM-DD>
-- Status: <draft | submitted | accepted | duplicate | not-applicable | resolved>
+- External owner or program: <program>
+- Channel-specific formatter: <private extension or n/a>
 
-## Report Body
+## Summary
 
-<platform-neutral report text>
+<platform-neutral summary for authorized disclosure or internal handoff>
 
-## Triage Updates
+## Evidence References
 
-- <YYYY-MM-DD> <status and reason>
+- Finding note: <finding link>
+- Raw artifacts: <private workspace reference>
+
+## Notes
+
+Keep destination-specific field names, screenshots, contact details, and case IDs in a private extension.

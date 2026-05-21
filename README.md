@@ -8,7 +8,7 @@ No target data, no findings, no private knowledge base, no raw scan output, and 
 
 This repository provides a clean starting structure for teams or individuals who want a repeatable workflow around:
 
-- Vault: canonical notes, decisions, and report-ready summaries.
+- Vault: canonical notes, decisions, review-ready summaries, and learning loops.
 - Workspace: external scratch space for raw artifacts.
 - Automation: lightweight checks that keep the structure clean.
 - LLM Wiki: reusable process knowledge, not private target intelligence.
@@ -17,9 +17,10 @@ This repository provides a clean starting structure for teams or individuals who
 
 - A public architecture and process skeleton.
 - A documentation-first operating model.
-- A set of empty templates for targets, recon notes, findings, submissions, and forms.
+- A set of empty templates for targets, recon notes, findings, and review notes.
 - A safety contract for keeping raw operational data out of git.
 - Public-safe prompt, agent, and skill skeletons for authorized workflows.
+- A self-learning knowledge workflow that users fill with their own sanitized lessons.
 
 ## What This Is Not
 
@@ -27,6 +28,7 @@ This repository provides a clean starting structure for teams or individuals who
 - It is not a scan toolkit.
 - It is not a collection of private bug bounty reports.
 - It is not a knowledge base with target-specific techniques or evidence.
+- It is not an external disclosure workflow template.
 
 ## Repository Layout
 

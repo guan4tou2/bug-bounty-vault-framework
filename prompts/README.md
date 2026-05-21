@@ -11,10 +11,11 @@ Use them as source material for private agents, local skills, or manual checklis
 | `authorized-security-researcher.md` | Main workflow role for scope-bound research. |
 | `recon-analyst.md` | Organizes discovery results and open questions. |
 | `triage-reviewer.md` | Reviews validity, duplicate risk, and evidence quality. |
-| `report-writer.md` | Converts verified findings into report-ready text. |
+| `report-writer.md` | Converts verified findings into platform-neutral handoff text. |
 | `knowledge-curator.md` | Captures reusable lessons into the private knowledge layer. |
 | `vault-maintainer.md` | Maintains structure, indexes, and hygiene. |
 | `automation-runner.md` | Runs approved automation only within declared scope. |
+| `workflow-coach.md` | Helps users improve their private workflow from sanitized lessons. |
 
 ## Safety Rule
 

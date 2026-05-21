@@ -12,7 +12,7 @@ Enable these from Obsidian Settings -> Core plugins:
 
 | Plugin | Role in this framework |
 |---|---|
-| Bases | Database-like views over Markdown properties for targets, findings, submissions, and review queues. |
+| Bases | Database-like views over Markdown properties for targets, findings, reviews, and learning queues. |
 | Canvas | Visual maps for attack chains, workflow diagrams, and high-level program planning. |
 | Graph view | Relationship checks between targets, findings, patterns, playbooks, and reference notes. |
 | Backlinks | Fast context recovery when moving from a report back to supporting notes. |
@@ -29,11 +29,11 @@ The community plugin IDs are committed in `.obsidian/community-plugins.json`, bu
 
 | Plugin | Priority | Role in this framework |
 |---|---:|---|
-| Dataview | Required for dashboard-style vaults | Query Markdown properties and generate live indexes for targets, findings, submissions, and knowledge notes. |
+| Dataview | Required for dashboard-style vaults | Query Markdown properties and generate live indexes for targets, findings, reviews, and knowledge notes. |
 | Templater | Required for structured capture | Create notes from templates with dates, generated IDs, and consistent frontmatter. |
 | QuickAdd | Recommended | Turn common actions into commands, such as "new target", "new recon note", or "new finding". |
 | Git | Recommended | Commit and push vault changes from inside Obsidian when a CLI is not open. |
-| Tasks | Optional | Track review, validation, and submission tasks across notes. |
+| Tasks | Optional | Track review, validation, and learning tasks across notes. |
 | Omnisearch | Optional | Improve full-text search when the vault grows. |
 | Linter | Optional | Normalize Markdown formatting and frontmatter style. |
 | Advanced Tables | Optional | Improve editing for scope tables, triage tables, and report checklists. |
@@ -89,6 +89,6 @@ Start with these views before adding complex dashboards:
 |---|---|
 | Active Targets | Target notes with `status: active` |
 | Findings Queue | Finding notes grouped by `status` and `severity` |
-| Submission Queue | Submission notes grouped by `platform` and `status` |
+| Review Queue | Review notes grouped by `status` and `risk` |
 | Knowledge Capture | Recon notes where lessons or patterns still need extraction |
-| Review Aging | Findings or submissions older than your review threshold |
+| Review Aging | Findings or reviews older than your review threshold |

@@ -6,7 +6,7 @@ This project describes a reusable, private-by-default operating model for author
 
 ```text
 Vault
-  Canonical notes, decisions, report-ready summaries, and reusable process knowledge.
+  Canonical notes, decisions, review-ready summaries, and reusable process knowledge.
 
 External workspace
   Raw artifacts, scan output, proof-of-concept files, logs, and temporary analysis.
@@ -15,14 +15,14 @@ Automation
   Local checks, initialization helpers, linting, and lifecycle validation.
 
 Optional tooling runtime
-  Scanner or recon tools that can run independently from the vault.
+  Recon or automation tools that can run independently from the vault.
 ```
 
 ## Design Principles
 
 ### Vault as canonical source
 
-The Vault stores durable, curated, report-ready information. It should contain enough context to understand what happened and why, without storing raw operational material.
+The Vault stores durable, curated, review-ready information. It should contain enough context to understand what happened and why, without storing raw operational material.
 
 ### External workspace
 
@@ -34,7 +34,7 @@ Automation should verify structure, session discipline, template shape, and publ
 
 ### Tooling as optional runtime
 
-Tooling can produce machine-readable output, but the framework does not depend on any specific scanner. Tools should be optional and replaceable.
+Tooling can produce machine-readable output, but the framework does not depend on any specific scanner or automation stack. Tools should be optional, replaceable, and filled in by the user after adoption.
 
 ## Source of Truth
 
@@ -42,7 +42,7 @@ Tooling can produce machine-readable output, but the framework does not depend o
 |---|---|
 | Canonical target summary | Private target note |
 | Raw evidence | External workspace |
-| Report-ready evidence | Finding note |
+| Review-ready evidence | Finding note |
 | Reusable generic process knowledge | LLM Wiki |
 | Current queue status | Private dashboard or board |
 

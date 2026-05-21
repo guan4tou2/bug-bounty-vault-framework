@@ -13,6 +13,8 @@ def all_text() -> str:
     chunks = []
     for path in ROOT.rglob("*"):
         ignored_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
+        if path == ROOT / "scripts/verify_public_skeleton.py":
+            continue
         if path.is_file() and not ignored_parts.intersection(path.parts):
             chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
     return "\n".join(chunks)
@@ -45,6 +47,7 @@ def test_required_public_framework_files_exist():
         "templates/target.md",
         "templates/recon-note.md",
         "templates/finding.md",
+        "templates/review-note.md",
         "templates/submission.md",
         "templates/form.md",
         "templates/scope.yaml",
@@ -56,6 +59,7 @@ def test_required_public_framework_files_exist():
         "prompts/knowledge-curator.md",
         "prompts/vault-maintainer.md",
         "prompts/automation-runner.md",
+        "prompts/workflow-coach.md",
         "scripts/verify_public_skeleton.py",
         "skills/README.md",
         "skills/authorized-workflow/SKILL.md",
@@ -109,7 +113,7 @@ def test_public_docs_define_generic_architecture_and_flow():
         assert required in architecture
 
     for required in (
-        "Target -> Recon -> Finding -> Submission -> Triage -> Knowledge Capture",
+        "Target -> Recon -> Finding -> Review -> Knowledge Capture",
         "Safety gate",
         "Dedupe gate",
         "Evidence gate",
@@ -221,6 +225,7 @@ def test_public_prompt_agent_skill_pack_is_safe_and_generic():
         "prompts/knowledge-curator.md",
         "prompts/vault-maintainer.md",
         "prompts/automation-runner.md",
+        "prompts/workflow-coach.md",
         "agents/authorized-security-researcher.md",
         "agents/recon-analyst.md",
         "agents/triage-reviewer.md",
@@ -238,6 +243,7 @@ def test_templates_are_placeholders_not_real_reports():
         "templates/target.md",
         "templates/recon-note.md",
         "templates/finding.md",
+        "templates/review-note.md",
         "templates/submission.md",
         "templates/form.md",
         "templates/scope.yaml",
@@ -259,11 +265,17 @@ def test_no_private_or_target_specific_data_is_present():
         "watsons",
         "HITCON",
         "TWCERT",
+        "Bugcrowd",
+        "HackerOne",
+        "Intigriti",
+        "YesWeHack",
+        "ZeroDay",
         "oracle-a1",
         "bug-bounty-vault",
         "cookie:",
         "Authorization:",
         "Bearer ",
+        "通報平台",
     ]
 
     for needle in forbidden:

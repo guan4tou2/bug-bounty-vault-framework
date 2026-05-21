@@ -21,14 +21,21 @@
 2. Include reproduction steps and a minimal evidence summary.
 3. Link raw artifacts by path and hash if needed.
 4. Keep sensitive material out of the Vault.
-5. Run a dedupe review before submission.
+5. Run a dedupe and evidence review before any downstream use.
 
-## Submission
+## Review Note
 
-1. Create a submission from `templates/submission.md`.
-2. Keep platform-specific wording separate from the technical finding.
-3. Store the final platform form from `templates/form.md` if needed.
-4. Update triage status when a response arrives.
+1. Create a review note from `templates/review-note.md`.
+2. Record scope status, duplicate risk, evidence quality, and open questions.
+3. Keep external disclosure or case-management details in a private extension.
+4. Feed general lessons back into the LLM Wiki.
+
+## Generic Submission and Form
+
+1. Create a neutral handoff note from `templates/submission.md` only after review.
+2. Create a generic field bundle from `templates/form.md` only when a private workflow needs one.
+3. Keep destination-specific fields, case IDs, contacts, and screenshots in a private extension.
+4. Do not add destination-specific templates to this public framework.
 
 ## Knowledge Capture
 
