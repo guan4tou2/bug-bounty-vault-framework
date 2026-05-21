@@ -30,7 +30,12 @@ def test_required_public_framework_files_exist():
         ".obsidian/graph.json",
         ".obsidian/plugins/README.md",
         ".obsidian/templates.json",
+        "agents/README.md",
+        "agents/authorized-security-researcher.md",
+        "agents/recon-analyst.md",
+        "agents/triage-reviewer.md",
         "docs/architecture.md",
+        "docs/prompting-model.md",
         "docs/workflow.md",
         "docs/sop.md",
         "docs/llm-wiki-framework.md",
@@ -43,7 +48,18 @@ def test_required_public_framework_files_exist():
         "templates/submission.md",
         "templates/form.md",
         "templates/scope.yaml",
+        "prompts/README.md",
+        "prompts/authorized-security-researcher.md",
+        "prompts/recon-analyst.md",
+        "prompts/triage-reviewer.md",
+        "prompts/report-writer.md",
+        "prompts/knowledge-curator.md",
+        "prompts/vault-maintainer.md",
+        "prompts/automation-runner.md",
         "scripts/verify_public_skeleton.py",
+        "skills/README.md",
+        "skills/authorized-workflow/SKILL.md",
+        "skills/knowledge-capture/SKILL.md",
     ]
 
     for path in required:
@@ -168,6 +184,53 @@ def test_obsidian_preset_is_committed_without_plugin_binaries():
     assert templates_config["folder"] == "templates"
     assert "plugin binaries are not vendored" in plugin_readme
     assert "Install plugins from Obsidian Community Plugins" in plugin_readme
+
+
+def test_public_prompt_agent_skill_pack_is_safe_and_generic():
+    prompting_model = read("docs/prompting-model.md")
+    agents_readme = read("agents/README.md")
+    skills_readme = read("skills/README.md")
+
+    for required in (
+        "public-safe",
+        "private implementation prompts",
+        "No exploit payloads",
+        "scope guard",
+    ):
+        assert required in prompting_model
+
+    for required in (
+        "tool-neutral",
+        "Authorized scope",
+        "Stop conditions",
+    ):
+        assert required in agents_readme
+
+    for required in (
+        "skill skeletons",
+        "allowed inputs",
+        "refuse out-of-scope",
+    ):
+        assert required in skills_readme
+
+    for path in (
+        "prompts/authorized-security-researcher.md",
+        "prompts/recon-analyst.md",
+        "prompts/triage-reviewer.md",
+        "prompts/report-writer.md",
+        "prompts/knowledge-curator.md",
+        "prompts/vault-maintainer.md",
+        "prompts/automation-runner.md",
+        "agents/authorized-security-researcher.md",
+        "agents/recon-analyst.md",
+        "agents/triage-reviewer.md",
+        "skills/authorized-workflow/SKILL.md",
+        "skills/knowledge-capture/SKILL.md",
+    ):
+        content = read(path)
+        assert "Authorized scope" in content, path
+        assert "Stop conditions" in content, path
+        assert "Output" in content, path
 
 
 def test_templates_are_placeholders_not_real_reports():

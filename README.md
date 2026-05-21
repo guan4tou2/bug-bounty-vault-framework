@@ -19,6 +19,7 @@ This repository provides a clean starting structure for teams or individuals who
 - A documentation-first operating model.
 - A set of empty templates for targets, recon notes, findings, submissions, and forms.
 - A safety contract for keeping raw operational data out of git.
+- Public-safe prompt, agent, and skill skeletons for authorized workflows.
 
 ## What This Is Not
 
@@ -32,6 +33,9 @@ This repository provides a clean starting structure for teams or individuals who
 ```text
 docs/       Architecture, workflow, SOP, public safety, and fresh-start notes
 templates/  Empty placeholder templates for a new private vault
+prompts/    Public-safe role prompts for authorized workflow steps
+agents/     Tool-neutral agent cards derived from the prompt model
+skills/     Generic skill skeletons for workflow adapters
 scripts/    Public-safety verifier
 tests/      Contract tests for the skeleton
 ```
@@ -50,8 +54,9 @@ Then copy the templates into a private vault and keep operational data in a sepa
 1. Clone this repository as a clean reference skeleton.
 2. Read `docs/fresh-start.md` to create a private working vault from the templates.
 3. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
-4. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
-5. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+4. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
+5. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
+6. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
 
 ## Obsidian Setup
 
