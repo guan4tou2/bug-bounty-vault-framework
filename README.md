@@ -12,6 +12,7 @@ This repository provides a clean starting structure for teams or individuals who
 - Workspace: external scratch space for raw artifacts.
 - Automation: lightweight checks that keep the structure clean.
 - LLM Wiki: reusable process knowledge, not private target intelligence.
+- bbflow: a simple framework layer for optional automation, not a scanner bundle.
 
 ## What This Is
 
@@ -38,6 +39,7 @@ templates/  Empty placeholder templates for a new private vault
 prompts/    Public-safe role prompts for authorized workflow steps
 agents/     Tool-neutral agent cards derived from the prompt model
 skills/     Generic skill skeletons for workflow adapters
+bbflow/     Framework-only automation flow, scope guard, and output contract
 scripts/    Public-safety verifier
 tests/      Contract tests for the skeleton
 ```

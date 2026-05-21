@@ -36,6 +36,12 @@ def test_required_public_framework_files_exist():
         "agents/authorized-security-researcher.md",
         "agents/recon-analyst.md",
         "agents/triage-reviewer.md",
+        "bbflow/README.md",
+        "bbflow/flow.md",
+        "bbflow/knowledge-capture-hook.md",
+        "bbflow/output-contract.md",
+        "bbflow/scope.example.yaml",
+        "bbflow/safety-boundary.md",
         "docs/architecture.md",
         "docs/prompting-model.md",
         "docs/workflow.md",
@@ -238,6 +244,66 @@ def test_public_prompt_agent_skill_pack_is_safe_and_generic():
         assert "Output" in content, path
 
 
+def test_public_bbflow_layer_is_framework_only():
+    readme = read("bbflow/README.md")
+    flow = read("bbflow/flow.md")
+    output_contract = read("bbflow/output-contract.md")
+    capture_hook = read("bbflow/knowledge-capture-hook.md")
+    scope_example = read("bbflow/scope.example.yaml")
+    safety_boundary = read("bbflow/safety-boundary.md")
+
+    for required in (
+        "framework-only",
+        "bring your own tools",
+        "scope guard",
+        "no hunters",
+        "no payloads",
+    ):
+        assert required in readme
+
+    for required in (
+        "Gate 0",
+        "Gate 1",
+        "Gate 2",
+        "Gate 3",
+        "Gate 4",
+        "Knowledge Capture",
+    ):
+        assert required in flow
+
+    for required in (
+        "run_manifest.json",
+        "candidates.jsonl",
+        "schema version",
+        "review_status",
+    ):
+        assert required in output_contract
+
+    for required in (
+        "Pattern",
+        "Playbook",
+        "Checklist",
+        "do not copy raw output",
+    ):
+        assert required in capture_hook
+
+    for required in (
+        "version: 1",
+        "allowed_assets:",
+        "disallowed_assets:",
+        "safety_level:",
+        "output_dir:",
+    ):
+        assert required in scope_example
+
+    for required in (
+        "No bundled scanners",
+        "No evasion guidance",
+        "No target-specific templates",
+    ):
+        assert required in safety_boundary
+
+
 def test_templates_are_placeholders_not_real_reports():
     for path in (
         "templates/target.md",
@@ -276,6 +342,9 @@ def test_no_private_or_target_specific_data_is_present():
         "Authorization:",
         "Bearer ",
         "通報平台",
+        "nuclei",
+        "osmedeus",
+        "bbot",
     ]
 
     for needle in forbidden:

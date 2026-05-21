@@ -1,0 +1,23 @@
+version: 1
+name: "<scope name>"
+owner: "<owner or program>"
+authorized_until: "<YYYY-MM-DD>"
+safety_level: "<passive | low | active>"
+
+allowed_assets:
+  - "example.com"
+  - "*.example.com"
+
+disallowed_assets:
+  - "third-party.example.net"
+
+allowed_actions:
+  - "read-only discovery"
+  - "metadata collection"
+
+disallowed_actions:
+  - "state-changing requests"
+  - "availability testing"
+
+output_dir: "<ignored workspace path>"
+notes: "<private notes path>"
