@@ -32,6 +32,7 @@ required_files = [
     "bbflow/scope.example.yaml",
     "bbflow/safety-boundary.md",
     "docs/architecture.md",
+    "docs/adoption-model.md",
     "docs/prompting-model.md",
     "docs/workflow.md",
     "docs/sop.md",

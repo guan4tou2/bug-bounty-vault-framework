@@ -43,6 +43,7 @@ def test_required_public_framework_files_exist():
         "bbflow/scope.example.yaml",
         "bbflow/safety-boundary.md",
         "docs/architecture.md",
+        "docs/adoption-model.md",
         "docs/prompting-model.md",
         "docs/workflow.md",
         "docs/sop.md",
@@ -159,6 +160,32 @@ def test_readme_links_usage_and_obsidian_setup():
         "docs/obsidian-setup.md",
     ):
         assert required in readme
+
+
+def test_public_repo_is_starter_only_not_runtime_store():
+    readme = read("README.md")
+    fresh_start = read("docs/fresh-start.md")
+    adoption_model = read("docs/adoption-model.md")
+    public_safety = read("docs/public-safety.md")
+
+    for required in (
+        "starter kit",
+        "seed framework",
+        "not a runtime workspace",
+    ):
+        assert required in readme
+
+    for required in (
+        "fork-or-copy boundary",
+        "private runtime",
+        "do not sync back",
+        "owned by the adopter",
+    ):
+        assert required in adoption_model
+
+    assert "After adoption" in fresh_start
+    assert "out of scope for this public repository" in fresh_start
+    assert "The verifier protects this public skeleton" in public_safety
 
 
 def test_obsidian_preset_is_committed_without_plugin_binaries():

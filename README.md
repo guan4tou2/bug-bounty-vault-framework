@@ -1,12 +1,12 @@
 # Bug Bounty Vault Framework
 
-An architecture-only public framework for organizing authorized security research work.
+An architecture-only public starter kit for organizing authorized security research work.
 
 No target data, no findings, no private knowledge base, no raw scan output, and no operational secrets are included.
 
 ## Purpose
 
-This repository provides a clean starting structure for teams or individuals who want a repeatable workflow around:
+This repository is a seed framework. It provides a clean starting structure for teams or individuals who want a repeatable workflow around:
 
 - Vault: canonical notes, decisions, review-ready summaries, and learning loops.
 - Workspace: external scratch space for raw artifacts.
@@ -17,6 +17,7 @@ This repository provides a clean starting structure for teams or individuals who
 ## What This Is
 
 - A public architecture and process skeleton.
+- A starter kit for creating a separate private vault.
 - A documentation-first operating model.
 - A set of empty templates for targets, recon notes, findings, and review notes.
 - A safety contract for keeping raw operational data out of git.
@@ -30,6 +31,7 @@ This repository provides a clean starting structure for teams or individuals who
 - It is not a collection of private bug bounty reports.
 - It is not a knowledge base with target-specific techniques or evidence.
 - It is not an external disclosure workflow template.
+- It is not a runtime workspace.
 
 ## Repository Layout
 
@@ -57,10 +59,11 @@ Then copy the templates into a private vault and keep operational data in a sepa
 
 1. Clone this repository as a clean reference skeleton.
 2. Read `docs/fresh-start.md` to create a private working vault from the templates.
-3. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
-4. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
-5. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
-6. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+3. Read `docs/adoption-model.md` to understand where this public repo ends and your private runtime begins.
+4. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
+5. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
+6. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
+7. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
 
 ## Obsidian Setup
 
@@ -68,4 +71,4 @@ Open the private vault folder in Obsidian after you copy the templates. This rep
 
 ## Core Principle
 
-Keep this repository public and generic. Put all real program data, target data, evidence, credentials, scan output, and private knowledge in a separate private environment.
+Keep this repository public and generic. It is a starter kit, not a runtime workspace. Put all real program data, target data, evidence, credentials, scan output, and private knowledge in a separate private environment.

@@ -10,6 +10,12 @@ Use this repository as a starting point for a private operational vault.
 4. Create an external ignored workspace for raw artifacts.
 5. Keep this public framework free of operational data.
 
+## After adoption
+
+After adoption, the private vault and external workspace are out of scope for this public repository.
+
+This framework does not need to know about future targets, notes, evidence, reports, tool output, or private knowledge. Treat this repository as the reusable starter kit, not the place where execution data returns.
+
 ## Suggested Private Layout
 
 ```text

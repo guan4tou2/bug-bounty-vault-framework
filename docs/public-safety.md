@@ -24,6 +24,8 @@ This repository is safe to publish because it contains only generic architecture
 
 ## Verification
 
+The verifier protects this public skeleton. It is not responsible for validating an adopter's private runtime, private workspace, or future execution data.
+
 Run:
 
 ```bash
