@@ -25,6 +25,11 @@ def test_required_public_framework_files_exist():
         "README.md",
         "LICENSE",
         ".gitignore",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "CODEX.md",
+        "GEMINI.md",
+        "AGENTS_QUICK.md",
         ".obsidian/app.json",
         ".obsidian/appearance.json",
         ".obsidian/community-plugins.json",
@@ -291,6 +296,49 @@ def test_public_prompt_agent_skill_pack_is_safe_and_generic():
         assert "Authorized scope" in content, path
         assert "Stop conditions" in content, path
         assert "Output" in content, path
+
+
+def test_root_llm_entrypoints_are_public_safe_and_generic():
+    for path in (
+        "AGENTS.md",
+        "CLAUDE.md",
+        "CODEX.md",
+        "GEMINI.md",
+        "AGENTS_QUICK.md",
+    ):
+        content = read(path)
+        assert "public-safe" in content, path
+        assert "Authorized scope" in content, path
+        assert "workspace/" in content, path
+        assert "bbflow/" in content, path
+        assert "Knowledge Capture" in content, path
+        assert "/Users/" not in content, path
+        assert "HITCON" not in content, path
+        assert "TWCERT" not in content, path
+        assert "HackerOne" not in content, path
+        assert "Bugcrowd" not in content, path
+
+    agents = read("AGENTS.md")
+    quick = read("AGENTS_QUICK.md")
+    claude = read("CLAUDE.md")
+
+    for required in (
+        "Read AGENTS_QUICK.md first",
+        "Do not copy private runtime data",
+        "Do not run active automation without a scope file",
+        "Use templates through scripts/new_note.py",
+    ):
+        assert required in agents
+
+    for required in (
+        "token-light",
+        "docs/workflow.md",
+        "docs/public-safety.md",
+        "scripts/verify_public_skeleton.py",
+    ):
+        assert required in quick
+
+    assert "Claude-specific" in claude
 
 
 def test_public_hook_skeletons_exist_without_runtime_commands():

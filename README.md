@@ -37,6 +37,7 @@ This repository is a seed framework. It provides a clean starting structure for 
 
 ```text
 docs/       Architecture, workflow, SOP, public safety, and fresh-start notes
+AGENTS.md   Public-safe LLM entrypoint shared by Claude, Codex, Gemini, and other agents
 templates/  Empty placeholder templates for a new private vault
 prompts/    Public-safe role prompts for authorized workflow steps
 agents/     Tool-neutral agent cards derived from the prompt model
