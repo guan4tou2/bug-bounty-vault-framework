@@ -1,22 +1,48 @@
-# Workspace Scaffold
+# workspace/ — Local Working Directory
 
-This directory is the runtime workspace scaffold for a private vault created from this public seed.
+This directory is **`.gitignored`** and exists only on your local machine. It holds all operational data that should never be committed: scan results, raw recon output, PoC files, logs, and per-target working notes.
 
-The repository is designed to be opened as an Obsidian vault root. The `workspace/` folder stays inside that vault root so notes, prompts, hooks, bbflow contracts, and temporary runtime paths share one predictable layout.
+## Directory Layout
 
-Runtime contents are not synced back to this public repository. After adoption, this area is owned by the private operator.
+```
+workspace/
+  workshop/
+    <target>/              # One directory per target
+      SCOPE.md             # Program scope, rules, URLs, domains
+      RECON_DB.md          # Recon findings, tech stack, endpoints, operation log
+      HANDOFF.md           # Context for resuming work in a new session
+      FINDINGS_QUICK_REF.md  # One-line summary of every finding (dedup gate)
+      poc/                 # Proof-of-concept scripts and payloads
+      scan_results/        # Nuclei, bbot, osmedeus output
+      screenshots/         # Evidence screenshots
+    _all/
+      targets/             # Cross-target index files
+  reports/
+    hitcon/                # HITCON ZeroDay submissions
+    h1/                    # HackerOne submissions
+    bugcrowd/              # Bugcrowd submissions
+    intigriti/             # Intigriti submissions
+    twcert/                # TWCERT submissions
+  firmware_analysis/
+    <vendor>/              # Firmware binaries, extracted filesystems, analysis notes
+  logs/                    # Session logs, audit logs
+  tmp/                     # Scratch space, auto-cleaned
+```
 
-Suggested use:
+## Setup
 
-- `workshop/` for per-target scratch notes, raw recon output, and temporary proof material.
-- `tools/` for local tool checkouts or wrappers, including a private bbflow runtime.
-- `reports/` for private working copies before final review.
-- `logs/` for local automation, hook, and session logs.
+Run the scaffold script to create all directories:
 
-Keep this scaffold generic:
+```bash
+bash automation/setup_workspace.sh
+```
 
-- Do not commit real target data.
-- Do not commit credentials, cookies, tokens, screenshots, or raw responses.
-- Do not commit scanner output or generated reports.
-- Do not sync runtime output back to the public seed.
+This creates the full directory tree and a `.workspace_root` marker file in the repo root.
 
+## Key Rules
+
+- **Never commit workspace/ contents.** It is in `.gitignore`.
+- **FINDINGS_QUICK_REF.md** must be read before creating any new Finding to prevent duplicate work.
+- **RECON_DB.md** is the single source of truth for recon data per target.
+- **HANDOFF.md** is written at session end so the next session can resume without re-reading everything.
+- **poc/** scripts must not contain hardcoded credentials or target-specific secrets.

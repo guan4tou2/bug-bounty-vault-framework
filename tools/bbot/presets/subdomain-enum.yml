@@ -1,0 +1,37 @@
+# BBOT Subdomain Enumeration Preset
+# Usage: bbot -t target.com -p tools/bbot/presets/subdomain-enum.yml
+
+description: Comprehensive subdomain enumeration
+
+flags:
+  - subdomain-enum
+
+output_modules:
+  - human
+  - csv
+  - json
+
+config:
+  modules:
+    # Passive sources
+    certspotter:
+      enabled: true
+    crt:
+      enabled: true
+    dnsdumpster:
+      enabled: true
+    hackertarget:
+      enabled: true
+    rapiddns:
+      enabled: true
+    urlscan:
+      enabled: true
+
+    # DNS brute force
+    dnsbrute:
+      enabled: true
+      wordlist: subdomains-top1million-5000.txt
+
+    # DNS resolution
+    dnsresolve:
+      enabled: true

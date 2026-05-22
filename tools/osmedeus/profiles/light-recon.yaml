@@ -1,0 +1,24 @@
+# Light Recon Profile — Quick subdomain enumeration + port scan
+# Usage: osmedeus scan -f tools/osmedeus/profiles/light-recon.yaml -t target.com
+
+name: light-recon
+desc: Quick subdomain enumeration and port scanning
+
+params:
+  - inputFormat: domain
+
+routines:
+  - modules:
+      - subdomain
+    flow:
+      - RunModule("subdomain")
+
+  - modules:
+      - portscan
+    flow:
+      - RunModule("portscan")
+
+  - modules:
+      - fingerprint
+    flow:
+      - RunModule("fingerprint")

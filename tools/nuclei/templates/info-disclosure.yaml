@@ -1,0 +1,39 @@
+id: info-disclosure-common
+
+info:
+  name: Common Information Disclosure
+  author: bug-bounty-vault
+  severity: low
+  description: Detects common information disclosure patterns in HTTP responses
+  tags: info,disclosure,recon
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/.env"
+      - "{{BaseURL}}/.git/config"
+      - "{{BaseURL}}/robots.txt"
+      - "{{BaseURL}}/sitemap.xml"
+      - "{{BaseURL}}/.well-known/security.txt"
+      - "{{BaseURL}}/server-status"
+      - "{{BaseURL}}/server-info"
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "DB_PASSWORD"
+          - "APP_KEY"
+          - "SECRET_KEY"
+        condition: or
+
+      - type: word
+        words:
+          - "[core]"
+          - "repositoryformatversion"
+        condition: and
+
+      - type: status
+        status:
+          - 200
+        negative: false

@@ -1,0 +1,52 @@
+id: security-headers-missing
+
+info:
+  name: Missing Security Headers
+  author: bug-bounty-vault
+  severity: info
+  description: Checks for missing or misconfigured security headers
+  tags: headers,misconfig,recon
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Access-Control-Allow-Origin: *"
+        name: cors-wildcard
+
+      - type: word
+        part: header
+        words:
+          - "Access-Control-Allow-Credentials: true"
+        name: cors-credentials
+
+    extractors:
+      - type: regex
+        part: header
+        name: cors-origin
+        regex:
+          - "Access-Control-Allow-Origin: (.*)"
+
+      - type: regex
+        part: header
+        name: csp
+        regex:
+          - "Content-Security-Policy: (.*)"
+
+      - type: regex
+        part: header
+        name: server
+        regex:
+          - "Server: (.*)"
+
+      - type: regex
+        part: header
+        name: x-powered-by
+        regex:
+          - "X-Powered-By: (.*)"

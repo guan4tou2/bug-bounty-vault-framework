@@ -1,40 +1,47 @@
-# Local workspace / operational data
-.workspace/
-.vault-workspace/
-scratch/
-reports/
-scan_results/
-poc/
-evidence/
-rootfs/
-extractions/
-firmware_analysis/
-logs/
-tmp/
+# Obsidian workspace state (machine-local)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/plugins/obsidian-git/data.json
+.DS_Store
+.trash/
 
-# Vault-root workspace scaffold is tracked, runtime contents are ignored.
-workspace/*
-!workspace/README.md
-!workspace/.gitignore
-!workspace/workshop/
-workspace/workshop/*
-!workspace/workshop/.gitkeep
-!workspace/tools/
-workspace/tools/*
-!workspace/tools/.gitkeep
-!workspace/reports/
-workspace/reports/*
-!workspace/reports/.gitkeep
-!workspace/logs/
-workspace/logs/*
-!workspace/logs/.gitkeep
+# Smart Connections AI cache (rebuildable)
+.smart-env/
 
-# Tool output
+# Graphify output (rebuildable, graph.json can reach hundreds of MB)
+09 - Knowledge Base/graphify-out/
 graphify-out/
-.cache/
-.pytest_cache/
+
+# Workspace — local only, never goes to GitHub
+# Contains: workshop/ reports/ firmware_analysis/ logs/ tmp/
+# Structure documented in workspace/README.md
+workspace/workshop/
+workspace/reports/
+workspace/firmware_analysis/
+workspace/logs/
+workspace/tmp/
+.workspace_root
+
+# Keep workspace README and scaffold tracked
+!workspace/README.md
+!workspace/workshop/_all/.gitkeep
+!workspace/workshop/_example/
+
+# Automation runtime state (machine-local)
+automation/active_sessions/*.lock
+automation/active_sessions/_expired/*.lock*
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+
+# Local audit logs
+logs/
+
+# LLM memory (machine-local)
+memory/
 
 # Secrets / local config
 .env
@@ -46,7 +53,5 @@ __pycache__/
 *.cookie
 *.har
 
-# OS/editor
-.DS_Store
-.idea/
-.vscode/
+# Claude local settings
+.claude/settings.local.json

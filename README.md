@@ -1,98 +1,149 @@
 # Bug Bounty Vault Framework
 
-An architecture-only public starter kit for organizing authorized security research work.
+An Obsidian-based vault system for organizing authorized security research — from recon through disclosure.
 
-No target data, no findings, no private knowledge base, no raw scan output, and no operational secrets are included.
-
-## Purpose
-
-This repository is a seed framework. It provides a clean starting structure for teams or individuals who want a repeatable workflow around:
-
-- Vault: canonical notes, decisions, review-ready summaries, and learning loops.
-- Workspace: external scratch space for raw artifacts.
-- Automation: lightweight checks that keep the structure clean.
-- LLM Wiki: reusable process knowledge, not private target intelligence.
-- bbflow: a simple framework layer for optional automation, not a scanner bundle.
+Clone, open in Obsidian, and start hunting. No target data, no findings, no secrets included.
 
 ## What This Is
 
-- A public architecture and process skeleton.
-- A starter kit for creating a separate private vault.
-- A documentation-first operating model.
-- A set of empty templates for targets, recon notes, findings, and review notes.
-- A safety contract for keeping raw operational data out of git.
-- Public-safe prompt, agent, and skill skeletons for authorized workflows.
-- A self-learning knowledge workflow that users fill with their own sanitized lessons.
+- An **Obsidian vault as the top-level control plane** — not a flat file tree
+- A complete **Finding → Submission → FORM** pipeline with templates and frontmatter schema
+- **Session lifecycle management** with claim/release concurrency control
+- **LLM agent integration** for Claude Code, Codex CLI, and Gemini CLI
+- **Scanner config seeds** for Nuclei, Osmedeus, and BBOT (bring your own tools)
+- A **Knowledge Base** framework for cross-target pattern capture
+- A **workspace scaffold** for local-only operational data (.gitignored)
 
 ## What This Is Not
 
-- It is not a vulnerability database.
-- It is not a scan toolkit.
-- It is not a collection of private bug bounty reports.
-- It is not a knowledge base with target-specific techniques or evidence.
-- It is not an external disclosure workflow template.
-- It is not a runtime workspace.
+- Not a vulnerability database or scan toolkit
+- Not a collection of private bug bounty reports
+- Not a runtime workspace — real data stays local and .gitignored
 
 ## Repository Layout
 
-```text
-docs/       Architecture, workflow, SOP, public safety, and fresh-start notes
-AGENTS.md   Public-safe LLM entrypoint shared by Claude, Codex, Gemini, and other agents
-templates/  Empty placeholder templates for a new private vault
-prompts/    Public-safe role prompts for authorized workflow steps
-agents/     Tool-neutral agent cards derived from the prompt model
-skills/     Generic skill skeletons for workflow adapters
-hooks/      Public-safe hook skeletons for private runtime guardrails
-bbflow/     Framework-only automation flow, scope guard, and output contract
-scripts/    Generic bootstrap, note generation, scope validation, and public-safety verifier
-workspace/  Vault-root runtime scaffold; contents stay ignored after adoption
-tests/      Contract tests for the skeleton
+```
+bug-bounty-vault/                     ← Obsidian Vault root + Git repo
+│
+├── 00 - Dashboard/                   ← Dataview dashboards, Kanban boards
+├── 01 - Targets/                     ← One subfolder per target
+│   └── _example/                     ← Example target structure
+├── 01 - Dorks/                       ← Google dork collections
+├── 07 - Templates/                   ← Obsidian templates (Templater)
+├── 09 - Knowledge Base/              ← Patterns, Playbooks, Lessons Learned
+├── 10 - Meta/                        ← Workspace meta notes
+│
+├── .claude/agents/                   ← Specialized Claude Code agents
+├── .claude/skills/                   ← Claude Code skills (source of truth)
+├── .codex/skills/                    ← Codex CLI skill mirrors
+├── .gemini/skills/                   ← Gemini CLI skill mirrors
+│
+├── automation/                       ← Session lifecycle scripts
+├── _automation/                      ← Pre-commit hooks
+├── tools/                            ← Scanner configs (Nuclei, Osmedeus, BBOT)
+├── bbflow/                           ← Automation framework contract
+├── docs/                             ← Workflow documentation
+├── templates/                        ← Non-Obsidian templates (handoff, op-log)
+│
+├── workspace/                        ← .gitignored local scratch
+│   ├── workshop/<target>/            ← Per-target: SCOPE, RECON_DB, HANDOFF, poc/
+│   ├── reports/<platform>/           ← Platform submission copies
+│   ├── firmware_analysis/            ← Firmware unpacking workspace
+│   └── logs/                         ← Audit logs
+│
+├── AGENTS.md                         ← Full workflow specification
+├── AGENTS_QUICK.md                   ← Token-light quick reference
+├── STRUCTURE.md                      ← Directory tree + naming + frontmatter schema
+├── CLAUDE.md                         ← Claude Code entrypoint
+├── CODEX.md                          ← Codex CLI entrypoint
+└── GEMINI.md                         ← Gemini CLI entrypoint
 ```
 
 ## Quick Start
 
 ```bash
-python3 scripts/verify_public_skeleton.py
-python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
-python3 scripts/check_vault.py
-python3 -m pytest tests/test_public_skeleton.py -q
+# 1. Clone
+git clone https://github.com/guan4tou2/bug-bounty-vault-framework.git
+cd bug-bounty-vault-framework
+
+# 2. Set up workspace (creates .gitignored local dirs)
+bash automation/setup_workspace.sh
+
+# 3. Initialize a target
+bash automation/init_target.sh my-target
+
+# 4. Open in Obsidian — point Obsidian at the repo root
 ```
 
-Then bootstrap a private vault, or use this repository as a template:
+## Session Lifecycle
 
 ```bash
-python3 scripts/bootstrap_private_vault.py ../my-private-vault
-python3 scripts/new_note.py --type target --target sample-target --program sample-program
+# Start session — claim scope to prevent parallel conflicts
+python3 automation/start_session.py my-target
+
+# ... do your work ...
+
+# End session — checklist + release
+python3 automation/end_session.py my-target
 ```
 
-The private vault is an Obsidian vault root. Its `workspace/` folder is the ignored runtime workspace where bbflow, logs, reports, and temporary artifacts can live.
+See [docs/session-lifecycle.md](docs/session-lifecycle.md) for the full protocol.
 
-In an adopted private vault, a minimal session can be started and closed with:
+## Finding Pipeline
 
-```bash
-python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
-python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
-python3 scripts/check_private_vault.py --path .
+Every confirmed vulnerability follows:
+
+```
+Finding → Submission → FORM
 ```
 
-These commands create runtime files under `workspace/workshop/<target>/`. That is correct for a private vault, but those files must not be published back to the public seed.
+All three share the same `finding_id`. Templates in `07 - Templates/` provide the frontmatter schema. See AGENTS.md §3 for the full specification.
 
-## How to Use This Framework
+## LLM Integration
 
-1. Clone this repository as a clean reference skeleton.
-2. Read `docs/fresh-start.md` to create a private working vault from the templates or run `scripts/bootstrap_private_vault.py`.
-3. Read `docs/adoption-model.md` to understand where this public repo ends and your private runtime begins.
-4. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
-5. Read `docs/session-lifecycle.md` before using `start_session.py` and `end_session.py`.
-6. Read `docs/preflight-checks.md` and `docs/evidence-model.md` before promoting candidates into findings.
-7. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
-8. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
-9. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+This vault works with three LLM CLI tools out of the box:
 
-## Obsidian Setup
+| Tool | Entrypoint | Skills |
+|------|-----------|--------|
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 7 skills + 5 agents |
+| **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
+| **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
-Open the private vault folder in Obsidian after you copy the templates. This repository includes a generic `.obsidian/` preset with core plugin settings and community plugin IDs. Recommended core and community plugins are listed in `docs/obsidian-setup.md`.
+Skills: version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response.
 
-## Core Principle
+Agents: bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync.
 
-Keep this repository public and generic. It is a starter kit, not a runtime workspace. Put all real program data, target data, evidence, credentials, scan output, and private knowledge in a separate private environment.
+## Knowledge Base
+
+The `09 - Knowledge Base/` folder holds cross-target reusable knowledge:
+
+- **Pattern** — Attack techniques (IDOR, CORS, OAuth, etc.)
+- **Playbook** — Step-by-step workflows
+- **Checklist** — Verification checklists
+- **Lessons Learned** — What worked, what didn't
+
+Three seed patterns are included. Add your own as you learn.
+
+## Scanner Configs
+
+Basic configurations in `tools/`:
+
+- `tools/nuclei/templates/` — Custom Nuclei templates
+- `tools/osmedeus/profiles/` — Osmedeus scan profiles
+- `tools/bbot/presets/` — BBOT presets
+
+These are starting points — customize for your workflow.
+
+## Core Principles
+
+| Principle | Summary |
+|-----------|---------|
+| **GET-first** | Never send POST/PUT/DELETE without understanding consequences |
+| **Anti-exaggeration** | Theoretical chains must not be written as accomplished facts |
+| **Dedup gate** | Read FINDINGS_QUICK_REF before creating any new Finding |
+| **VPS boundary** | Run aggressive scanning on VPS, not locally |
+| **KB capture** | Promote reusable lessons after every session |
+
+## License
+
+MIT — see [LICENSE](LICENSE).

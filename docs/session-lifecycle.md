@@ -1,98 +1,196 @@
 # Session Lifecycle
 
-This public-safe lifecycle describes how an adopted private vault can track work without copying private runtime data into the public seed.
+A bug bounty session has three phases: **claim**, **work**, and **closeout**. Every phase has mandatory checkpoints that prevent data loss, duplicate work, and stale handoffs.
 
-The lifecycle is intentionally abstract. It gives users the same operating rhythm as the framework without shipping private lock files, live target data, scanning logic, or platform-specific workflows.
+This document describes the abstract workflow. The reference implementation lives in `automation/` (bash scripts) and can be replaced with any language that follows the same protocol.
 
-## Lifecycle
+---
+
+## Phase 1: Claim (Session Start)
+
+**Goal:** Declare your working scope so parallel sessions (human or LLM) don't collide.
+
+### 1.1 Check for active sessions
+
+Before touching any target, check if another session already holds a lock on the same scope:
 
 ```
-Claim -> Work -> Handoff -> Closeout -> Knowledge Capture -> Check
+check_active_sessions → list of { scope, owner, claimed_at, expected_release }
 ```
 
-## Claim
+If a conflicting lock exists:
+- **Same scope or parent/child overlap** → blocked; wait or negotiate takeover
+- **Sibling scope (different target or unrelated sub-service)** → safe to proceed
 
-Claim means declaring the target, program, scope source, and intended work before creating notes or running automation.
-Authorized scope must be explicit before active work starts.
+### 1.2 Acquire a lock
 
-Minimum claim record:
-
-- target name
-- program or owner
-- scope file or scope note
-- safety level
-- session status
-- planned next action
-
-Use:
-
-```bash
-python3 scripts/start_session.py --target <target> --program <program> --scope-file bbflow/scope.example.yaml
+```
+claim(scope, owner, eta_minutes) → lock_file
 ```
 
-The script creates a target workspace folder under `workspace/workshop/<target>/` and writes:
+**Scope hierarchy** uses `/` separators:
 
-- `HANDOFF.md`
-- `OPERATION_LOG.md`
-- `SESSION_STATE.json`
+| Scope | Meaning |
+|-------|---------|
+| `_meta` | Non-target work (docs, automation, architecture) |
+| `target` | Entire target locked |
+| `target/sub-service` | Sub-service within a target |
+| `target/sub-service/vuln-class` | Narrow vuln-class within a sub-service |
 
-## Handoff
+**Conflict rules:**
+1. Exact match → conflict
+2. New scope is prefix of existing → conflict (claiming parent while child is locked)
+3. Existing scope is prefix of new → conflict (claiming child while parent is locked)
+4. Different branches → no conflict
 
-Handoff means recording enough state for a later operator or LLM agent to continue without reading raw logs.
+Lock files are JSON with: `session_id`, `owner`, `scope`, `target`, `claimed_at`, `last_heartbeat`, `expected_release`, `host`.
 
-The handoff should contain:
+### 1.3 Read session-start brief
 
-- current status
-- scope source
-- active questions
-- next action
-- blockers
-- links to review-ready notes
+Load the target's handoff state from the previous session:
 
-Do not paste raw scan output, secrets, tokens, screenshots, or private report bodies into the handoff.
-
-## Closeout
-
-Closeout means ending a session by writing a concise summary and deciding whether any reusable lesson should enter the LLM Wiki.
-
-Use:
-
-```bash
-python3 scripts/end_session.py --target <target> --summary "<what changed>" --knowledge-capture "<generic lesson or none>"
+```
+session_start_brief(target, keyword?, host?) → summary of:
+  - HANDOFF.md (what was in progress, next steps, blockers)
+  - FINDINGS_QUICK_REF.md (existing findings — dedup gate)
+  - RECON_DB.md (credentials, paths, infra, operation log)
 ```
 
-Closeout updates `SESSION_STATE.json`, appends `OPERATION_LOG.md`, and marks `HANDOFF.md` as closed.
+Only the high-signal sections are surfaced. Deep-read full files only when the brief points to a relevant section.
 
-## Knowledge Capture
+### 1.4 Dedup gate
 
-Knowledge Capture is the only path from runtime work back into durable process knowledge.
+Before opening any new Finding, check:
+1. `FINDINGS_QUICK_REF.md` — does the root cause already have a Finding?
+2. `RECON_DB.md` Known Artifacts — is this specific endpoint/parameter already documented?
 
-Allowed promoted forms:
+If likely duplicate → open an **Attempt** (with `result_reason: duplicate_likely`), not a Finding.
 
-- Pattern
-- Playbook
-- Checklist
-- Reference Card
+---
 
-Do not promote target names, account data, raw output, copied responses, or platform text.
+## Phase 2: Work
 
-## Check
+### 2.1 Recording conventions
 
-Use `check_vault.py` before publishing or sharing a framework copy:
+During the session, maintain three living documents:
 
-```bash
-python3 scripts/check_vault.py
+| Document | What goes in | When to update |
+|----------|-------------|----------------|
+| **RECON_DB.md** | Credentials, paths, endpoints, infra, tech stack, operation log | Every new discovery, immediately |
+| **FINDINGS_QUICK_REF.md** | One-line per Finding (ID, title, severity, status) | Auto-regenerated; manual only if script unavailable |
+| **HANDOFF.md** | Session narrative: what you tried, what you learned, next steps | End of session (or mid-session at natural breakpoints) |
+
+### 2.2 Operation log
+
+**Before** executing any manual HTTP request (POST/PUT/PATCH/DELETE, or exploratory GET):
+
+```markdown
+| Local Time | UTC Time | Source IP | Method | Target URL | Intent | Result |
+|---|---|---|---|---|---|---|
+| 2026-05-22 14:30 | 2026-05-22 06:30 | 1.2.3.4 | POST | https://api.target.com/v1/users | Test IDOR on user endpoint | pending |
 ```
 
-This delegates to the public verifier and confirms the public skeleton still has only scaffold files under `workspace/`.
+Update the `Result` column immediately after execution.
 
-## Public Boundary
+### 2.3 Finding creation flow
 
-The public repository may include lifecycle docs, templates, and minimal scripts. It must not include:
+```
+Discovery → Finding → Submission → FORM
+```
 
-- real session state
-- active target queues
-- private lock files
-- raw tool output
-- credentials
-- platform-specific disclosure material
+| Artifact | When created | By whom |
+|----------|-------------|---------|
+| **Finding** | Immediately on confirmed vuln | LLM auto-creates (no waiting, no batching) |
+| **Submission** | LLM proposes, user approves | LLM drafts, user confirms |
+| **FORM** | User explicitly requests | LLM generates on user trigger only |
+
+**Granularity rule:** Same endpoint + same vuln type but different parameters or resources = separate Findings.
+
+### 2.4 Safety boundaries
+
+| Action | Policy |
+|--------|--------|
+| GET / HEAD / OPTIONS | Execute freely |
+| POST (read-only query) | Confirm no side effects, then execute |
+| POST (write) / PUT / PATCH | Confirm consequences first; execute on VPS |
+| DELETE (not self-created data) | Never execute |
+| Bulk automated scanning | VPS only (bbflow, nuclei, ffuf, sqlmap, osmedeus) |
+
+---
+
+## Phase 3: Closeout (Session End)
+
+### 3.1 End-of-session brief
+
+Generate a machine-readable summary of what changed this session:
+
+```
+session_end_brief(scope) → diff summary:
+  - New/modified findings
+  - RECON_DB changes
+  - Uncommitted files
+  - Knowledge capture status
+```
+
+### 3.2 Checklist
+
+Run through mandatory checks before releasing the lock:
+
+| # | Check | Pass condition |
+|---|-------|---------------|
+| 1 | RECON_DB.md freshness | Updated within this session |
+| 2 | Vault Recon note sections | Required sections filled (if Recon note exists) |
+| 3 | Knowledge capture | New learnings recorded (Lessons Learned / Pattern / Playbook) |
+| 4 | Kanban / Dashboard sync | Board reflects current Finding statuses |
+| 5 | Uncommitted changes | All session work committed (or explicitly deferred) |
+| 6 | FINDINGS_QUICK_REF regenerated | Reflects any new Findings created this session |
+| 7 | HANDOFF.md updated | Next session can cold-start from this document |
+
+### 3.3 Update HANDOFF.md
+
+Fill in all sections:
+- **What you were doing** (one sentence)
+- **Immediate next step** (copy-pasteable command)
+- **Blockers** (if any)
+- **In-progress leads** (not yet Finding-worthy)
+- **What you learned** (architecture insights, not findings)
+- **Context notes** (anything the next session needs but won't find in git log)
+
+### 3.4 Release lock
+
+```
+release(scope) → lock moved to expired/
+```
+
+The lock file is moved (not deleted) to an `_expired/` directory for audit trail.
+
+---
+
+## Concurrency Model
+
+Multiple LLM sessions (or human + LLM) can work the same vault simultaneously if their scopes don't overlap:
+
+```
+Session A: claim("gitlab/oauth")     ← locks gitlab/oauth
+Session B: claim("gitlab/graphql")   ← OK, sibling scope
+Session C: claim("gitlab")           ← BLOCKED, parent of A and B
+Session D: claim("zoom")             ← OK, different target
+```
+
+Locks have a `last_heartbeat` and `expected_release`. Stale locks (heartbeat > 2x ETA) can be force-claimed with `--force` or `--takeover`.
+
+---
+
+## Script Reference
+
+| Script | Phase | Purpose |
+|--------|-------|---------|
+| `check_active_sessions.sh` | Claim | List all active locks |
+| `claim.sh <scope>` | Claim | Acquire scope lock |
+| `session_start_brief.sh <target>` | Claim | Token-efficient handoff summary |
+| `init_target.sh <target>` | Claim | Bootstrap new target workspace |
+| `session_end_brief.sh <scope>` | Closeout | Summarize session changes |
+| `session_end_checklist.sh <target>` | Closeout | Mandatory pre-release checks |
+| `release.sh <scope>` | Closeout | Release scope lock |
+
+Minimal Python equivalents: `start_session.py`, `end_session.py`, `check_vault.py` (see `automation/`).

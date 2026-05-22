@@ -1,47 +1,72 @@
-# Agents Quick Path
+# Agents Quick Reference
 
-This is the token-light entrypoint for public-safe LLM work in this framework.
+Token-light entrypoint for Claude agents working in this vault. Read this first; dive into `AGENTS.md` only when a specific section is needed.
 
-## Read First
+---
 
-1. `README.md`
-2. `docs/workflow.md`
-3. `docs/public-safety.md`
-4. `docs/architecture.md`
-
-Read deeper files only when the task requires them:
-
-- New private vault: `docs/fresh-start.md`
-- Session lifecycle: `docs/session-lifecycle.md`
-- Preflight gates: `docs/preflight-checks.md`
-- Evidence gates: `docs/evidence-model.md`
-- Obsidian setup: `docs/obsidian-setup.md`
-- LLM Wiki rules: `docs/llm-wiki-framework.md`
-- Prompt, agent, and skill model: `docs/prompting-model.md`
-- bbflow contract: `bbflow/README.md`
-
-## Public-Safe Rules
-
-- Authorized scope is mandatory before any security research workflow.
-- Keep `workspace/` for runtime artifacts, but do not commit runtime contents.
-- Use `bbflow/` as a framework contract, not as an installed scanner runtime.
-- Keep Knowledge Capture generic: Pattern, Playbook, Checklist, Reference Card.
-- Do not copy private runtime data, target data, secrets, screenshots, logs, or raw tool output into this public seed.
-
-## Useful Commands
+## Always Start
 
 ```bash
-python3 scripts/verify_public_skeleton.py
-python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
-python3 scripts/check_vault.py
-python3 scripts/new_note.py --type target --target sample-target --program sample-program
-python3 scripts/bootstrap_private_vault.py ../my-private-vault
+bash automation/check_active_sessions.sh      # prevent parallel conflicts
+bash automation/claim.sh <scope> [--eta-minutes=N]  # claim your scope
 ```
 
-Session lifecycle commands are for an adopted private vault:
+Scope values: `_meta` (workspace files), `<target>`, `<target>/<sub-service>`.
+
+## Portable Layout
 
 ```bash
-python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
-python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
-python3 scripts/check_private_vault.py --path .
+source automation/workspace_layout.sh
 ```
+
+This resolves `$WORKSPACE_ROOT`, `$WORKSHOP`, `$REPORTS`, and other path variables so scripts work regardless of where the repo is cloned.
+
+## Target Start
+
+New target:
+```bash
+bash automation/init_target.sh <target>
+```
+
+Resuming existing target:
+```bash
+bash automation/session_start_brief.sh <target> "<keyword>" "<host>"
+```
+
+This prints a summary of HANDOFF.md, FINDINGS_QUICK_REF.md, and RECON_DB.md high-signal sections. Only deep-read files the brief points you to.
+
+## Pre-flight (Mandatory)
+
+Before analyzing any software, firmware, or SaaS target:
+
+1. Confirm the vendor's **latest stable version** -- do not analyze outdated versions
+2. Search for **existing CVEs and advisories** for the target
+3. If the version is old or CVEs already cover your findings, **stop and document why**
+
+See AGENTS.md section 0g for the full protocol.
+
+## During Work
+
+- **Dedup gate**: Read `FINDINGS_QUICK_REF.md` before creating any new Finding
+- **GET-first**: Never send POST/PUT/PATCH/DELETE without understanding the consequences; when unsure, document but do not trigger
+- **KB lookup**: Query the Knowledge Base before researching a topic, during hunting, and before writing reports
+- **VPS for risky ops**: Run bbflow, osmedeus, and any aggressive scanning on the VPS, not locally
+- **Operation log**: Record manual curl/POST operations in RECON_DB.md under `## Operation Log`
+
+## Session End
+
+```bash
+bash automation/session_end_brief.sh <scope>
+bash automation/session_end_checklist.sh <target>   # for target work
+bash automation/release.sh <scope>                  # release your claim
+```
+
+The checklist verifies: HANDOFF.md updated, FINDINGS_QUICK_REF.md current, KB capture gate reviewed, no uncommitted vault changes.
+
+## Key Principles
+
+- **Anti-exaggeration**: Theoretical attack chains must not be written as confirmed exploits
+- **Finding pipeline**: Finding + Submission + FORM, linked by `finding_id`
+- **No internal IDs in reports**: Strip internal references (e.g., ACME-001) from submission text
+- **Discovery Log format**: `timestamp [src_IP > dst_IP] [audit:ref] action > result`
+- **Subagent injection**: Subagents do not inherit CLAUDE.md; inject relevant conventions into their prompts based on task tier (recon / analysis / output)

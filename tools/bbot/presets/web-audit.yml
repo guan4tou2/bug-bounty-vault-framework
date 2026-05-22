@@ -1,0 +1,31 @@
+# BBOT Web Application Audit Preset
+# Usage: bbot -t target.com -p tools/bbot/presets/web-audit.yml
+
+description: Web application security audit (spider + tech detect + basic vuln scan)
+
+flags:
+  - web-basic
+
+output_modules:
+  - human
+  - csv
+  - json
+
+config:
+  modules:
+    # Web crawling
+    httpx:
+      enabled: true
+
+    # Technology detection
+    wappalyzer:
+      enabled: true
+
+    # Basic vulnerability scanning
+    nuclei:
+      enabled: true
+      severity: "medium,high,critical"
+
+    # Screenshot
+    gowitness:
+      enabled: true

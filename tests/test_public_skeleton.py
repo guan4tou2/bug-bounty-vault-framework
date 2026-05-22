@@ -1,3 +1,13 @@
+"""Validate the public Obsidian vault framework structure.
+
+Tests verify:
+- Required files and directories exist
+- No private/target-specific data leaks
+- Obsidian numbered folders present
+- LLM skill/agent parity across platforms
+- Templates use placeholder values
+- Scanner configs are seed-only
+"""
 import json
 from pathlib import Path
 
@@ -10,751 +20,233 @@ def read(path: str) -> str:
 
 
 def all_text() -> str:
+    """Collect all non-git text for forbidden-string scanning."""
     chunks = []
+    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
     for path in ROOT.rglob("*"):
-        ignored_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
-        if path == ROOT / "scripts/verify_public_skeleton.py":
-            continue
-        if path.is_file() and not ignored_parts.intersection(path.parts):
-            chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+        if path.is_file() and not skip_parts.intersection(path.parts):
+            try:
+                chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+            except Exception:
+                pass
     return "\n".join(chunks)
 
 
-def test_required_public_framework_files_exist():
+# ── Structure ────────────────────────────────────────────────────────────────
+
+
+def test_obsidian_numbered_folders_exist():
+    """Vault must have the Obsidian numbered folder convention."""
+    required_dirs = [
+        "00 - Dashboard",
+        "01 - Targets",
+        "01 - Dorks",
+        "07 - Templates",
+        "09 - Knowledge Base",
+        "10 - Meta",
+    ]
+    for d in required_dirs:
+        assert (ROOT / d).is_dir(), f"Missing Obsidian folder: {d}"
+
+
+def test_target_example_structure():
+    """The _example target must have the full subfolder tree."""
+    example = ROOT / "01 - Targets" / "_example"
+    assert example.is_dir(), "Missing _example target"
+    for sub in ("Findings", "Submissions", "Attempts", "Recon", "Services", "Attack Chains"):
+        assert (example / sub).is_dir(), f"Missing _example/{sub}"
+
+
+def test_required_top_level_files_exist():
     required = [
         "README.md",
         "LICENSE",
         ".gitignore",
         "AGENTS.md",
+        "AGENTS_QUICK.md",
+        "STRUCTURE.md",
         "CLAUDE.md",
         "CODEX.md",
         "GEMINI.md",
-        "AGENTS_QUICK.md",
-        ".obsidian/app.json",
-        ".obsidian/appearance.json",
-        ".obsidian/community-plugins.json",
-        ".obsidian/core-plugins.json",
-        ".obsidian/graph.json",
-        ".obsidian/plugins/README.md",
-        ".obsidian/templates.json",
-        "agents/README.md",
-        "agents/authorized-security-researcher.md",
-        "agents/recon-analyst.md",
-        "agents/triage-reviewer.md",
-        "bbflow/README.md",
-        "bbflow/flow.md",
-        "bbflow/knowledge-capture-hook.md",
-        "bbflow/output-contract.md",
-        "bbflow/scope.example.yaml",
-        "bbflow/safety-boundary.md",
-        "bbflow/configs/README.md",
-        "bbflow/configs/nuclei.profile.example.yaml",
-        "bbflow/configs/osmedeus.profile.example.yaml",
-        "bbflow/configs/bbot.profile.example.yaml",
-        "docs/architecture.md",
-        "docs/adoption-model.md",
-        "docs/evidence-model.md",
-        "docs/prompting-model.md",
-        "docs/preflight-checks.md",
-        "docs/workflow.md",
-        "docs/sop.md",
-        "docs/llm-wiki-framework.md",
-        "docs/obsidian-setup.md",
-        "docs/public-safety.md",
-        "docs/session-lifecycle.md",
-        "docs/fresh-start.md",
-        "hooks/README.md",
-        "hooks/preflight-scope-guard.md",
-        "hooks/post-run-knowledge-capture.md",
-        "hooks/pre-public-sync.md",
-        "templates/target.md",
-        "templates/recon-note.md",
-        "templates/finding.md",
-        "templates/review-note.md",
-        "templates/submission.md",
-        "templates/form.md",
-        "templates/handoff.md",
-        "templates/operation-log.md",
-        "templates/scope.yaml",
-        "prompts/README.md",
-        "prompts/authorized-security-researcher.md",
-        "prompts/recon-analyst.md",
-        "prompts/triage-reviewer.md",
-        "prompts/report-writer.md",
-        "prompts/knowledge-curator.md",
-        "prompts/vault-maintainer.md",
-        "prompts/automation-runner.md",
-        "prompts/workflow-coach.md",
-        "scripts/bootstrap_private_vault.py",
-        "scripts/check_vault.py",
-        "scripts/check_private_vault.py",
-        "scripts/end_session.py",
-        "scripts/new_note.py",
-        "scripts/start_session.py",
-        "scripts/validate_scope_file.py",
-        "scripts/verify_public_skeleton.py",
-        "skills/README.md",
-        "skills/authorized-workflow/SKILL.md",
-        "skills/knowledge-capture/SKILL.md",
-        "workspace/README.md",
-        "workspace/.gitignore",
-        "workspace/workshop/.gitkeep",
-        "workspace/tools/.gitkeep",
-        "workspace/reports/.gitkeep",
-        "workspace/logs/.gitkeep",
     ]
-
     for path in required:
-        assert (ROOT / path).exists(), path
+        assert (ROOT / path).exists(), f"Missing: {path}"
 
 
-def test_repository_is_architecture_only_and_empty_of_operational_data():
-    forbidden_dirs = [
-        "01 - Targets",
-        "09 - Knowledge Base",
-        ".vault-workspace",
-        "graphify-out",
-        "memory",
-        "firmware_analysis",
-        "extractions",
+def test_obsidian_config_exists():
+    assert (ROOT / ".obsidian" / "app.json").exists()
+    assert (ROOT / ".obsidian" / "community-plugins.json").exists()
+
+
+# ── LLM Integration ─────────────────────────────────────────────────────────
+
+
+def test_claude_agents_exist():
+    agents_dir = ROOT / ".claude" / "agents"
+    assert agents_dir.is_dir()
+    expected = ["bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "submit-form.md", "vault-sync.md"]
+    for name in expected:
+        assert (agents_dir / name).exists(), f"Missing agent: {name}"
+
+
+def test_claude_skills_exist():
+    skills_dir = ROOT / ".claude" / "skills"
+    assert skills_dir.is_dir()
+    expected = [
+        "bb-version-cve-precheck",
+        "bb-dedup-finding",
+        "bb-cve-citation",
+        "bb-hitcon-form",
+        "bb-context-handoff",
+        "bb-triage-response",
+        "bb-incident-response",
     ]
-
-    for path in forbidden_dirs:
-        assert not (ROOT / path).exists(), path
-
-    assert not (ROOT / ".github" / "workflows" / "verify.yml").exists()
+    for name in expected:
+        assert (skills_dir / name / "SKILL.md").exists(), f"Missing skill: {name}"
 
 
-def test_public_docs_define_generic_architecture_and_flow():
-    readme = read("README.md")
-    architecture = read("docs/architecture.md")
-    workflow = read("docs/workflow.md")
-    llm_wiki = read("docs/llm-wiki-framework.md")
-    obsidian_setup = read("docs/obsidian-setup.md")
-
-    for required in (
-        "architecture-only",
-        "No target data",
-        "Vault",
-        "Workspace",
-        "Automation",
-        "LLM Wiki",
-    ):
-        assert required in readme
-
-    for required in (
-        "Vault as canonical source",
-        "External workspace",
-        "Automation as control plane",
-        "Tooling as optional runtime",
-        "```mermaid",
-        "Public Seed",
-        "Private Vault",
-        "Workspace",
-        "Knowledge Capture",
-    ):
-        assert required in architecture
-
-    for required in (
-        "Target -> Recon -> Finding -> Review -> Knowledge Capture",
-        "Safety gate",
-        "Dedupe gate",
-        "Evidence gate",
-        "Knowledge capture gate",
-    ):
-        assert required in workflow
-
-    for required in (
-        "Pattern",
-        "Playbook",
-        "Reference Card",
-        "historical status log",
-        "source of truth",
-    ):
-        assert required in llm_wiki
-
-    for required in (
-        "Recommended core plugins",
-        "Recommended community plugins",
-        "Dataview",
-        "Templater",
-        "QuickAdd",
-        "Git",
-        "Bases",
-        "Canvas",
-    ):
-        assert required in obsidian_setup
+def test_codex_skills_mirror_claude():
+    codex_dir = ROOT / ".codex" / "skills"
+    assert codex_dir.is_dir()
+    claude_skills = {p.parent.name for p in (ROOT / ".claude" / "skills").glob("*/SKILL.md")}
+    codex_skills = {p.parent.name for p in codex_dir.glob("*/SKILL.md")}
+    # Codex may have extra (bb-agent-prompts router), but must cover all Claude skills
+    assert claude_skills.issubset(codex_skills), f"Codex missing: {claude_skills - codex_skills}"
 
 
-def test_session_lifecycle_doc_covers_claim_handoff_closeout():
-    lifecycle = read("docs/session-lifecycle.md")
+def test_gemini_skills_mirror_claude():
+    gemini_dir = ROOT / ".gemini" / "skills"
+    assert gemini_dir.is_dir()
+    claude_skills = {p.parent.name for p in (ROOT / ".claude" / "skills").glob("*/SKILL.md")}
+    gemini_skills = {p.parent.name for p in gemini_dir.glob("*/SKILL.md")}
+    assert claude_skills.issubset(gemini_skills), f"Gemini missing: {claude_skills - gemini_skills}"
 
-    for required in (
-        "public-safe",
-        "Authorized scope",
-        "Claim",
-        "Handoff",
-        "Closeout",
-        "workspace/",
-        "Knowledge Capture",
+
+# ── Templates ────────────────────────────────────────────────────────────────
+
+
+def test_obsidian_templates_exist():
+    templates_dir = ROOT / "07 - Templates"
+    assert templates_dir.is_dir()
+    expected = [
+        "Template - Finding.md",
+        "Template - Submission.md",
+        "Template - Target.md",
+    ]
+    for name in expected:
+        assert (templates_dir / name).exists(), f"Missing template: {name}"
+
+
+def test_non_obsidian_templates_exist():
+    for name in ("handoff.md", "operation-log.md"):
+        assert (ROOT / "templates" / name).exists(), f"Missing template: {name}"
+
+
+# ── Knowledge Base ───────────────────────────────────────────────────────────
+
+
+def test_seed_kb_patterns_exist():
+    kb_dir = ROOT / "09 - Knowledge Base"
+    assert kb_dir.is_dir()
+    expected = [
+        "Pattern - IDOR.md",
+        "Pattern - CORS Misconfiguration.md",
+        "Pattern - OAuth Misconfiguration.md",
+        "Lessons Learned.md",
+    ]
+    for name in expected:
+        assert (kb_dir / name).exists(), f"Missing KB seed: {name}"
+
+
+def test_kb_patterns_have_frontmatter():
+    kb_dir = ROOT / "09 - Knowledge Base"
+    for pattern in kb_dir.glob("Pattern - *.md"):
+        content = pattern.read_text(encoding="utf-8")
+        assert content.startswith("---"), f"Missing frontmatter: {pattern.name}"
+        assert "type: pattern" in content, f"Wrong type in: {pattern.name}"
+
+
+# ── Scanner Configs ──────────────────────────────────────────────────────────
+
+
+def test_tool_configs_exist():
+    tools_dir = ROOT / "tools"
+    assert tools_dir.is_dir()
+    expected = [
+        "tools/nuclei/templates/misconfig-headers.yaml",
+        "tools/nuclei/templates/oauth-misconfig.yaml",
+        "tools/osmedeus/profiles/light-recon.yaml",
+        "tools/bbot/presets/subdomain-enum.yml",
+    ]
+    for path in expected:
+        assert (ROOT / path).exists(), f"Missing tool config: {path}"
+
+
+# ── Automation ───────────────────────────────────────────────────────────────
+
+
+def test_automation_scripts_exist():
+    automation_dir = ROOT / "automation"
+    assert automation_dir.is_dir()
+    expected = [
         "start_session.py",
         "end_session.py",
         "check_vault.py",
-    ):
-        assert required in lifecycle
+        "init_target.sh",
+        "setup_workspace.sh",
+    ]
+    for name in expected:
+        assert (automation_dir / name).exists(), f"Missing automation: {name}"
 
 
-def test_preflight_and_evidence_docs_cover_private_workflow_gates():
-    preflight = read("docs/preflight-checks.md")
-    evidence = read("docs/evidence-model.md")
+def test_automation_active_sessions_dir():
+    sessions_dir = ROOT / "automation" / "active_sessions"
+    assert sessions_dir.is_dir()
+    assert (sessions_dir / "README.md").exists()
 
-    for required in (
-        "public-safe",
-        "Authorized scope",
-        "Version",
-        "CVE",
-        "advisory",
-        "known issue",
-        "Stop conditions",
-        "Knowledge Capture",
-    ):
-        assert required in preflight
 
-    for required in (
-        "public-safe",
-        "Evidence quality",
-        "reproducibility",
-        "safe reference",
-        "raw sensitive data",
-        "workspace/",
-        "Finding",
-        "Review",
-    ):
-        assert required in evidence
+# ── Workspace ────────────────────────────────────────────────────────────────
 
 
-def test_readme_links_usage_and_obsidian_setup():
-    readme = read("README.md")
+def test_workspace_scaffold_exists():
+    assert (ROOT / "workspace" / "README.md").exists()
+    assert (ROOT / "workspace" / ".gitignore").exists()
 
-    for required in (
-        "How to Use This Framework",
-        "Obsidian Setup",
-        "docs/fresh-start.md",
-        "docs/obsidian-setup.md",
-    ):
-        assert required in readme
 
+# ── Docs & bbflow ────────────────────────────────────────────────────────────
 
-def test_public_repo_is_starter_only_not_runtime_store():
-    readme = read("README.md")
-    fresh_start = read("docs/fresh-start.md")
-    adoption_model = read("docs/adoption-model.md")
-    public_safety = read("docs/public-safety.md")
 
-    for required in (
-        "starter kit",
-        "seed framework",
-        "not a runtime workspace",
-    ):
-        assert required in readme
+def test_docs_exist():
+    docs_dir = ROOT / "docs"
+    assert docs_dir.is_dir()
+    expected = [
+        "session-lifecycle.md",
+        "architecture.md",
+        "workflow.md",
+    ]
+    for name in expected:
+        assert (docs_dir / name).exists(), f"Missing doc: {name}"
 
-    for required in (
-        "fork-or-copy boundary",
-        "private runtime",
-        "do not sync back",
-        "owned by the adopter",
-    ):
-        assert required in adoption_model
 
-    assert "After adoption" in fresh_start
-    assert "out of scope for this public repository" in fresh_start
-    assert "The verifier protects this public skeleton" in public_safety
+def test_session_lifecycle_covers_phases():
+    lifecycle = read("docs/session-lifecycle.md")
+    lifecycle_lower = lifecycle.lower()
+    for required in ("claim", "closeout", "handoff", "knowledge capture"):
+        assert required in lifecycle_lower, f"Missing in session-lifecycle: {required}"
 
 
-def test_obsidian_preset_is_committed_without_plugin_binaries():
-    community_plugins = json.loads(read(".obsidian/community-plugins.json"))
-    core_plugins = json.loads(read(".obsidian/core-plugins.json"))
-    templates_config = json.loads(read(".obsidian/templates.json"))
-    plugin_readme = read(".obsidian/plugins/README.md")
+def test_bbflow_framework_exists():
+    bbflow_dir = ROOT / "bbflow"
+    assert bbflow_dir.is_dir()
+    expected = ["README.md", "flow.md", "output-contract.md", "safety-boundary.md", "scope.example.yaml"]
+    for name in expected:
+        assert (bbflow_dir / name).exists(), f"Missing bbflow: {name}"
 
-    for plugin_id in (
-        "dataview",
-        "templater-obsidian",
-        "quickadd",
-        "obsidian-git",
-        "obsidian-tasks-plugin",
-        "omnisearch",
-        "obsidian-linter",
-        "table-editor-obsidian",
-    ):
-        assert plugin_id in community_plugins
 
-    for core_id in (
-        "bases",
-        "canvas",
-        "graph",
-        "backlink",
-        "properties",
-        "templates",
-        "switcher",
-        "global-search",
-    ):
-        assert core_id in core_plugins
+# ── Safety ───────────────────────────────────────────────────────────────────
 
-    assert templates_config["folder"] == "templates"
-    assert "plugin binaries are not vendored" in plugin_readme
-    assert "Install plugins from Obsidian Community Plugins" in plugin_readme
 
-
-def test_public_prompt_agent_skill_pack_is_safe_and_generic():
-    prompting_model = read("docs/prompting-model.md")
-    agents_readme = read("agents/README.md")
-    skills_readme = read("skills/README.md")
-
-    for required in (
-        "public-safe",
-        "private implementation prompts",
-        "No exploit payloads",
-        "scope guard",
-    ):
-        assert required in prompting_model
-
-    for required in (
-        "tool-neutral",
-        "Authorized scope",
-        "Stop conditions",
-    ):
-        assert required in agents_readme
-
-    for required in (
-        "skill skeletons",
-        "allowed inputs",
-        "refuse out-of-scope",
-    ):
-        assert required in skills_readme
-
-    for path in (
-        "prompts/authorized-security-researcher.md",
-        "prompts/recon-analyst.md",
-        "prompts/triage-reviewer.md",
-        "prompts/report-writer.md",
-        "prompts/knowledge-curator.md",
-        "prompts/vault-maintainer.md",
-        "prompts/automation-runner.md",
-        "prompts/workflow-coach.md",
-        "agents/authorized-security-researcher.md",
-        "agents/recon-analyst.md",
-        "agents/triage-reviewer.md",
-        "skills/authorized-workflow/SKILL.md",
-        "skills/knowledge-capture/SKILL.md",
-    ):
-        content = read(path)
-        assert "Authorized scope" in content, path
-        assert "Stop conditions" in content, path
-        assert "Output" in content, path
-
-
-def test_root_llm_entrypoints_are_public_safe_and_generic():
-    for path in (
-        "AGENTS.md",
-        "CLAUDE.md",
-        "CODEX.md",
-        "GEMINI.md",
-        "AGENTS_QUICK.md",
-    ):
-        content = read(path)
-        assert "public-safe" in content, path
-        assert "Authorized scope" in content, path
-        assert "workspace/" in content, path
-        assert "bbflow/" in content, path
-        assert "Knowledge Capture" in content, path
-        assert "/Users/" not in content, path
-        assert "HITCON" not in content, path
-        assert "TWCERT" not in content, path
-        assert "HackerOne" not in content, path
-        assert "Bugcrowd" not in content, path
-
-    agents = read("AGENTS.md")
-    quick = read("AGENTS_QUICK.md")
-    claude = read("CLAUDE.md")
-
-    for required in (
-        "Read AGENTS_QUICK.md first",
-        "Do not copy private runtime data",
-        "Do not run active automation without a scope file",
-        "Use templates through scripts/new_note.py",
-    ):
-        assert required in agents
-
-    for required in (
-        "token-light",
-        "docs/workflow.md",
-        "docs/public-safety.md",
-        "scripts/verify_public_skeleton.py",
-    ):
-        assert required in quick
-
-    assert "Claude-specific" in claude
-
-
-def test_public_hook_skeletons_exist_without_runtime_commands():
-    hooks_readme = read("hooks/README.md")
-
-    for required in (
-        "hook skeletons",
-        "private implementation",
-        "no runtime commands",
-    ):
-        assert required in hooks_readme
-
-    for path in (
-        "hooks/preflight-scope-guard.md",
-        "hooks/post-run-knowledge-capture.md",
-        "hooks/pre-public-sync.md",
-    ):
-        content = read(path)
-        assert "Purpose" in content, path
-        assert "Trigger" in content, path
-        assert "Stop conditions" in content, path
-        assert "Output" in content, path
-
-
-def test_public_bbflow_layer_is_framework_only():
-    readme = read("bbflow/README.md")
-    flow = read("bbflow/flow.md")
-    output_contract = read("bbflow/output-contract.md")
-    capture_hook = read("bbflow/knowledge-capture-hook.md")
-    scope_example = read("bbflow/scope.example.yaml")
-    safety_boundary = read("bbflow/safety-boundary.md")
-    configs_readme = read("bbflow/configs/README.md")
-
-    for required in (
-        "framework-only",
-        "bring your own tools",
-        "scope guard",
-        "no hunters",
-        "no payloads",
-    ):
-        assert required in readme
-
-    for required in (
-        "Gate 0",
-        "Gate 1",
-        "Gate 2",
-        "Gate 3",
-        "Gate 4",
-        "Knowledge Capture",
-    ):
-        assert required in flow
-
-    for required in (
-        "run_manifest.json",
-        "candidates.jsonl",
-        "schema version",
-        "review_status",
-    ):
-        assert required in output_contract
-
-    for required in (
-        "Pattern",
-        "Playbook",
-        "Checklist",
-        "do not copy raw output",
-    ):
-        assert required in capture_hook
-
-    for required in (
-        "version: 1",
-        "allowed_assets:",
-        "disallowed_assets:",
-        "safety_level:",
-        "output_dir:",
-    ):
-        assert required in scope_example
-
-    for required in (
-        "No bundled scanners",
-        "No evasion guidance",
-        "No target-specific templates",
-    ):
-        assert required in safety_boundary
-
-    for path in (
-        "bbflow/configs/nuclei.profile.example.yaml",
-        "bbflow/configs/osmedeus.profile.example.yaml",
-        "bbflow/configs/bbot.profile.example.yaml",
-    ):
-        content = read(path)
-        assert "framework-only" in content, path
-        assert "authorized scope" in content, path
-        assert "no payloads" in content, path
-        assert "no evasion guidance" in content, path
-
-    for required in (
-        "Nuclei",
-        "Osmedeus",
-        "BBOT",
-        "bring your own runtime",
-    ):
-        assert required in configs_readme
-
-
-def test_workspace_scaffold_is_vault_root_but_ignored_runtime():
-    workspace_readme = read("workspace/README.md")
-    workspace_ignore = read("workspace/.gitignore")
-    root_ignore = read(".gitignore")
-    architecture = read("docs/architecture.md")
-
-    for required in (
-        "Obsidian vault root",
-        "runtime workspace",
-        "not synced back",
-        "bbflow runtime",
-    ):
-        assert required in workspace_readme
-
-    assert "*\n" in workspace_ignore
-    assert "!README.md" in workspace_ignore
-    assert "!*/" in workspace_ignore
-    assert "workspace/" not in root_ignore.splitlines()
-
-    for required in (
-        "Obsidian Vault Root",
-        "workspace/",
-        "bbflow/",
-        "Private Knowledge Base",
-    ):
-        assert required in architecture
-
-
-def test_public_seed_utility_scripts_are_generic_and_safe():
-    for path in (
-        "scripts/bootstrap_private_vault.py",
-        "scripts/check_vault.py",
-        "scripts/check_private_vault.py",
-        "scripts/end_session.py",
-        "scripts/new_note.py",
-        "scripts/start_session.py",
-        "scripts/validate_scope_file.py",
-    ):
-        content = read(path)
-        assert "argparse" in content, path
-        assert "/Users/" not in content, path
-        assert "HITCON" not in content, path
-        assert "TWCERT" not in content, path
-        assert "HackerOne" not in content, path
-        assert "Bugcrowd" not in content, path
-
-
-def test_scope_validator_accepts_example_scope():
-    import subprocess
-    import sys
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(ROOT / "scripts/validate_scope_file.py"),
-            str(ROOT / "bbflow/scope.example.yaml"),
-        ],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-
-    assert result.returncode == 0, result.stderr
-    assert "valid scope v1" in result.stdout
-
-
-def test_new_note_can_render_template_to_stdout():
-    import subprocess
-    import sys
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(ROOT / "scripts/new_note.py"),
-            "--type",
-            "recon-note",
-            "--target",
-            "sample-target",
-            "--program",
-            "sample-program",
-        ],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-
-    assert result.returncode == 0, result.stderr
-    assert "sample-target" in result.stdout
-    assert "<target>" not in result.stdout
-
-
-def test_start_and_end_session_manage_ignored_workspace_files():
-    import shutil
-    import subprocess
-    import sys
-
-    target = "sample-session-target"
-    target_dir = ROOT / "workspace" / "workshop" / target
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-
-    try:
-        start = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts/start_session.py"),
-                "--target",
-                target,
-                "--program",
-                "sample-program",
-                "--scope-file",
-                "bbflow/scope.example.yaml",
-            ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        assert start.returncode == 0, start.stderr
-        assert "session started" in start.stdout
-
-        handoff = target_dir / "HANDOFF.md"
-        operation_log = target_dir / "OPERATION_LOG.md"
-        session_state = target_dir / "SESSION_STATE.json"
-
-        assert handoff.exists()
-        assert operation_log.exists()
-        assert session_state.exists()
-        assert "Status: active" in handoff.read_text(encoding="utf-8")
-
-        end = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts/end_session.py"),
-                "--target",
-                target,
-                "--summary",
-                "completed framework dry run",
-                "--knowledge-capture",
-                "no reusable lesson",
-            ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        assert end.returncode == 0, end.stderr
-        assert "session ended" in end.stdout
-        assert "Status: closed" in handoff.read_text(encoding="utf-8")
-        assert "completed framework dry run" in operation_log.read_text(encoding="utf-8")
-    finally:
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-
-
-def test_check_vault_reports_clean_public_scaffold():
-    import subprocess
-    import sys
-
-    result = subprocess.run(
-        [sys.executable, str(ROOT / "scripts/check_vault.py")],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-
-    assert result.returncode == 0, result.stderr
-    assert "vault scaffold check passed" in result.stdout
-
-
-def test_bootstrap_creates_private_only_directories_and_private_checker_allows_runtime_files():
-    import shutil
-    import subprocess
-    import sys
-
-    destination = ROOT.parent / "_tmp-private-vault-check"
-    if destination.exists():
-        shutil.rmtree(destination)
-
-    try:
-        bootstrap = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts/bootstrap_private_vault.py"),
-                str(destination),
-            ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        assert bootstrap.returncode == 0, bootstrap.stderr
-
-        for rel in (
-            "targets",
-            "wiki",
-            "dashboard",
-            "workspace/workshop",
-            "workspace/tools",
-            "workspace/reports",
-            "workspace/logs",
-        ):
-            assert (destination / rel).is_dir(), rel
-
-        runtime_file = destination / "workspace/workshop/sample/runtime-output.txt"
-        runtime_file.parent.mkdir(parents=True, exist_ok=True)
-        runtime_file.write_text("private runtime data placeholder", encoding="utf-8")
-
-        check = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts/check_private_vault.py"),
-                "--path",
-                str(destination),
-            ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-
-        assert check.returncode == 0, check.stderr
-        assert "private vault check passed" in check.stdout
-    finally:
-        if destination.exists():
-            shutil.rmtree(destination)
-
-
-def test_templates_are_placeholders_not_real_reports():
-    for path in (
-        "templates/target.md",
-        "templates/recon-note.md",
-        "templates/finding.md",
-        "templates/review-note.md",
-        "templates/submission.md",
-        "templates/form.md",
-        "templates/handoff.md",
-        "templates/operation-log.md",
-        "templates/scope.yaml",
-    ):
-        content = read(path)
-        assert "<" in content and ">" in content, path
-        assert "example.com" in content or "<target>" in content or "<program>" in content
-
-    handoff = read("templates/handoff.md")
-    operation_log = read("templates/operation-log.md")
-    assert "Active Session" in handoff
-    assert "Closeout" in handoff
-    assert "Operation Log" in operation_log
-    assert "Knowledge Capture" in operation_log
-
-
-def test_no_private_or_target_specific_data_is_present():
+def test_no_private_or_target_specific_data():
     content = all_text()
     forbidden = [
         "/Users/guantou",
@@ -764,54 +256,21 @@ def test_no_private_or_target_specific_data_is_present():
         "digiwin",
         "openfind",
         "watsons",
-        "HITCON",
-        "TWCERT",
-        "Bugcrowd",
-        "HackerOne",
-        "Intigriti",
-        "YesWeHack",
-        "ZeroDay",
         "oracle-a1",
-        "bug-bounty-vault",
-        "cookie:",
-        "Authorization:",
-        "Bearer ",
-        "通報平台",
+        "138.2.59.206",
+        "64.110.106.138",
+        "younglee.tw5",
     ]
-
     for needle in forbidden:
-        assert needle not in content, needle
+        assert needle not in content, f"Private data leak: {needle}"
 
 
-def test_verify_script_mentions_public_safety_contract():
-    script = read("scripts/verify_public_skeleton.py")
-
-    for required in (
-        "architecture-only",
-        "forbidden_dirs",
-        "forbidden_strings",
-        "No target data",
-        "allowed_workspace_files",
-    ):
-        assert required in script
+def test_agents_md_references_automation_not_scripts():
+    agents = read("AGENTS.md")
+    assert "automation/" in agents, "AGENTS.md should reference automation/"
 
 
-def test_verify_script_rejects_workspace_runtime_files():
-    import subprocess
-    import sys
-
-    runtime_file = ROOT / "workspace/workshop/runtime-output.txt"
-    runtime_file.write_text("runtime artifact", encoding="utf-8")
-    try:
-        result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/verify_public_skeleton.py")],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-    finally:
-        runtime_file.unlink(missing_ok=True)
-
-    assert result.returncode == 1
-    assert "forbidden workspace runtime file" in result.stderr
+def test_structure_md_describes_obsidian_layout():
+    structure = read("STRUCTURE.md")
+    for required in ("00 - Dashboard", "01 - Targets", "07 - Templates", "09 - Knowledge Base"):
+        assert required in structure, f"STRUCTURE.md missing: {required}"

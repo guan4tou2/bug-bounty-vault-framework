@@ -1,0 +1,39 @@
+# Full Recon Profile — Complete recon chain
+# Usage: osmedeus scan -f tools/osmedeus/profiles/full-recon.yaml -t target.com
+
+name: full-recon
+desc: Full recon chain with subdomain enumeration, port scanning, technology detection, and vulnerability scanning
+
+params:
+  - inputFormat: domain
+
+routines:
+  - modules:
+      - subdomain
+    flow:
+      - RunModule("subdomain")
+
+  - modules:
+      - portscan
+    flow:
+      - RunModule("portscan")
+
+  - modules:
+      - fingerprint
+    flow:
+      - RunModule("fingerprint")
+
+  - modules:
+      - screenshot
+    flow:
+      - RunModule("screenshot")
+
+  - modules:
+      - spider
+    flow:
+      - RunModule("spider")
+
+  - modules:
+      - vulnscan
+    flow:
+      - RunModule("vulnscan")

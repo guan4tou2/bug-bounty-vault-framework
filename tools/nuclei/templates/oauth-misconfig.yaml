@@ -1,0 +1,46 @@
+id: oauth-redirect-validation
+
+info:
+  name: OAuth Redirect URI Validation Check
+  author: bug-bounty-vault
+  severity: medium
+  description: Tests for weak redirect_uri validation in OAuth flows (prefix matching, subdomain bypass)
+  tags: oauth,redirect,misconfig
+  reference:
+    - https://datatracker.ietf.org/doc/html/rfc6749#section-10.6
+
+# Usage: Set variables for the target OAuth endpoint
+# nuclei -t oauth-misconfig.yaml -var client_id=YOUR_CLIENT_ID -var redirect_base=https://app.example.com/callback
+
+http:
+  - method: GET
+    path:
+      # Exact match (baseline)
+      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}"
+      # Path addition bypass
+      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}/evil"
+      # Query injection bypass
+      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}?next=https://evil.com"
+      # String prefix bypass (no path boundary)
+      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}evil"
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 302
+
+      - type: word
+        part: header
+        words:
+          - "authorize"
+          - "consent"
+          - "allow"
+        condition: or
+
+    extractors:
+      - type: regex
+        part: header
+        regex:
+          - "Location: (.*)"

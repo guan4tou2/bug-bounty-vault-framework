@@ -1,10 +1,6 @@
 {
-  "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "workspace/attachments",
+  "userIgnoreFilters": ["workspace/", "node_modules/", "__pycache__/"],
+  "attachmentFolderPath": "01 - Targets",
   "newFileLocation": "folder",
-  "newFileFolderPath": "00-dashboard",
-  "showLineNumber": false,
-  "livePreview": true,
-  "promptDelete": true,
-  "showUnsupportedFiles": false
+  "newFileFolderPath": "10 - Meta"
 }

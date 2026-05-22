@@ -1,10 +1,1 @@
-[
-  "dataview",
-  "templater-obsidian",
-  "quickadd",
-  "obsidian-git",
-  "obsidian-tasks-plugin",
-  "omnisearch",
-  "obsidian-linter",
-  "table-editor-obsidian"
-]
+["templater-obsidian", "dataview", "obsidian-kanban", "quickadd", "metadata-menu", "table-editor-obsidian", "obsidian-git", "obsidian-excalidraw-plugin", "excalibrain", "omnisearch", "obsidian-linter"]
