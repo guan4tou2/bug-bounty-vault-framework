@@ -13,6 +13,8 @@ Read deeper files only when the task requires them:
 
 - New private vault: `docs/fresh-start.md`
 - Session lifecycle: `docs/session-lifecycle.md`
+- Preflight gates: `docs/preflight-checks.md`
+- Evidence gates: `docs/evidence-model.md`
 - Obsidian setup: `docs/obsidian-setup.md`
 - LLM Wiki rules: `docs/llm-wiki-framework.md`
 - Prompt, agent, and skill model: `docs/prompting-model.md`
@@ -41,4 +43,5 @@ Session lifecycle commands are for an adopted private vault:
 ```bash
 python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
 python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
+python3 scripts/check_private_vault.py --path .
 ```

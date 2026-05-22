@@ -23,11 +23,22 @@ SEED_PATHS = [
     "templates",
     "workspace",
     ".gitignore",
+    "AGENTS.md",
+    "AGENTS_QUICK.md",
+    "CLAUDE.md",
+    "CODEX.md",
+    "GEMINI.md",
     "LICENSE",
     "README.md",
 ]
 
 SKIP_PARTS = {".git", ".pytest_cache", "__pycache__"}
+
+PRIVATE_DIRS = [
+    "targets",
+    "wiki",
+    "dashboard",
+]
 
 
 def should_skip(path: Path) -> bool:
@@ -79,6 +90,9 @@ def bootstrap(destination: Path, overwrite: bool) -> tuple[int, int]:
             result = copy_file(src, dst, overwrite)
             copied += result == "copied"
             skipped += result == "skipped"
+
+    for rel in PRIVATE_DIRS:
+        (destination / rel).mkdir(parents=True, exist_ok=True)
 
     return copied, skipped
 

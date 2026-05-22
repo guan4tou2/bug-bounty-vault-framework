@@ -53,7 +53,9 @@ def test_required_public_framework_files_exist():
         "bbflow/configs/bbot.profile.example.yaml",
         "docs/architecture.md",
         "docs/adoption-model.md",
+        "docs/evidence-model.md",
         "docs/prompting-model.md",
+        "docs/preflight-checks.md",
         "docs/workflow.md",
         "docs/sop.md",
         "docs/llm-wiki-framework.md",
@@ -85,6 +87,7 @@ def test_required_public_framework_files_exist():
         "prompts/workflow-coach.md",
         "scripts/bootstrap_private_vault.py",
         "scripts/check_vault.py",
+        "scripts/check_private_vault.py",
         "scripts/end_session.py",
         "scripts/new_note.py",
         "scripts/start_session.py",
@@ -199,6 +202,35 @@ def test_session_lifecycle_doc_covers_claim_handoff_closeout():
         "check_vault.py",
     ):
         assert required in lifecycle
+
+
+def test_preflight_and_evidence_docs_cover_private_workflow_gates():
+    preflight = read("docs/preflight-checks.md")
+    evidence = read("docs/evidence-model.md")
+
+    for required in (
+        "public-safe",
+        "Authorized scope",
+        "Version",
+        "CVE",
+        "advisory",
+        "known issue",
+        "Stop conditions",
+        "Knowledge Capture",
+    ):
+        assert required in preflight
+
+    for required in (
+        "public-safe",
+        "Evidence quality",
+        "reproducibility",
+        "safe reference",
+        "raw sensitive data",
+        "workspace/",
+        "Finding",
+        "Review",
+    ):
+        assert required in evidence
 
 
 def test_readme_links_usage_and_obsidian_setup():
@@ -499,6 +531,7 @@ def test_public_seed_utility_scripts_are_generic_and_safe():
     for path in (
         "scripts/bootstrap_private_vault.py",
         "scripts/check_vault.py",
+        "scripts/check_private_vault.py",
         "scripts/end_session.py",
         "scripts/new_note.py",
         "scripts/start_session.py",
@@ -637,6 +670,64 @@ def test_check_vault_reports_clean_public_scaffold():
 
     assert result.returncode == 0, result.stderr
     assert "vault scaffold check passed" in result.stdout
+
+
+def test_bootstrap_creates_private_only_directories_and_private_checker_allows_runtime_files():
+    import shutil
+    import subprocess
+    import sys
+
+    destination = ROOT.parent / "_tmp-private-vault-check"
+    if destination.exists():
+        shutil.rmtree(destination)
+
+    try:
+        bootstrap = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/bootstrap_private_vault.py"),
+                str(destination),
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert bootstrap.returncode == 0, bootstrap.stderr
+
+        for rel in (
+            "targets",
+            "wiki",
+            "dashboard",
+            "workspace/workshop",
+            "workspace/tools",
+            "workspace/reports",
+            "workspace/logs",
+        ):
+            assert (destination / rel).is_dir(), rel
+
+        runtime_file = destination / "workspace/workshop/sample/runtime-output.txt"
+        runtime_file.parent.mkdir(parents=True, exist_ok=True)
+        runtime_file.write_text("private runtime data placeholder", encoding="utf-8")
+
+        check = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/check_private_vault.py"),
+                "--path",
+                str(destination),
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        assert check.returncode == 0, check.stderr
+        assert "private vault check passed" in check.stdout
+    finally:
+        if destination.exists():
+            shutil.rmtree(destination)
 
 
 def test_templates_are_placeholders_not_real_reports():

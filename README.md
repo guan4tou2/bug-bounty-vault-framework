@@ -72,6 +72,7 @@ In an adopted private vault, a minimal session can be started and closed with:
 ```bash
 python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
 python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
+python3 scripts/check_private_vault.py --path .
 ```
 
 These commands create runtime files under `workspace/workshop/<target>/`. That is correct for a private vault, but those files must not be published back to the public seed.
@@ -83,9 +84,10 @@ These commands create runtime files under `workspace/workshop/<target>/`. That i
 3. Read `docs/adoption-model.md` to understand where this public repo ends and your private runtime begins.
 4. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
 5. Read `docs/session-lifecycle.md` before using `start_session.py` and `end_session.py`.
-6. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
-7. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
-8. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+6. Read `docs/preflight-checks.md` and `docs/evidence-model.md` before promoting candidates into findings.
+7. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
+8. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
+9. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
 
 ## Obsidian Setup
 
