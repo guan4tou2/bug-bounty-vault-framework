@@ -19,6 +19,8 @@ TEMPLATES = {
     "review-note": "templates/review-note.md",
     "submission": "templates/submission.md",
     "form": "templates/form.md",
+    "handoff": "templates/handoff.md",
+    "operation-log": "templates/operation-log.md",
     "scope": "templates/scope.yaml",
 }
 
@@ -38,6 +40,8 @@ def default_filename(note_type: str, target: str, topic: str) -> str:
         "review-note": f"Review - {safe_target} - {safe_topic}.md",
         "submission": f"Submission - {safe_target} - {safe_topic}.md",
         "form": f"FORM - {safe_target} - {safe_topic}.md",
+        "handoff": "HANDOFF.md",
+        "operation-log": "OPERATION_LOG.md",
         "scope": f"scope-{safe_target}.yaml",
     }
     return names[note_type]
@@ -76,6 +80,12 @@ def main(argv: list[str] | None = None) -> int:
         "owner or program": args.program,
         "ignored workspace path": f"workspace/workshop/{slug(args.target)}",
         "private notes path": f"targets/{slug(args.target)}",
+        "session_id": f"{slug(args.target)}-{slug(args.topic)}",
+        "status": "draft",
+        "timestamp": today,
+        "scope_file": "bbflow/scope.example.yaml",
+        "summary": "session summary placeholder",
+        "knowledge_capture": "generic lesson placeholder",
     }
     rendered = render_template(args.type, replacements)
 
@@ -98,4 +108,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

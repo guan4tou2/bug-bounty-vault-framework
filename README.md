@@ -54,6 +54,9 @@ tests/      Contract tests for the skeleton
 ```bash
 python3 scripts/verify_public_skeleton.py
 python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
+python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
+python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
+python3 scripts/check_vault.py
 python3 -m pytest tests/test_public_skeleton.py -q
 ```
 
@@ -72,9 +75,10 @@ The private vault is an Obsidian vault root. Its `workspace/` folder is the igno
 2. Read `docs/fresh-start.md` to create a private working vault from the templates or run `scripts/bootstrap_private_vault.py`.
 3. Read `docs/adoption-model.md` to understand where this public repo ends and your private runtime begins.
 4. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
-5. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
-6. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
-7. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
+5. Read `docs/session-lifecycle.md` before using `start_session.py` and `end_session.py`.
+6. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.
+7. Keep real target data, evidence, logs, screenshots, credentials, and scan output outside this public repository.
+8. Run `python3 scripts/verify_public_skeleton.py` before publishing any fork or derivative skeleton.
 
 ## Obsidian Setup
 

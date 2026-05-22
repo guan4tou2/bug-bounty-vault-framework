@@ -59,6 +59,7 @@ def test_required_public_framework_files_exist():
         "docs/llm-wiki-framework.md",
         "docs/obsidian-setup.md",
         "docs/public-safety.md",
+        "docs/session-lifecycle.md",
         "docs/fresh-start.md",
         "hooks/README.md",
         "hooks/preflight-scope-guard.md",
@@ -70,6 +71,8 @@ def test_required_public_framework_files_exist():
         "templates/review-note.md",
         "templates/submission.md",
         "templates/form.md",
+        "templates/handoff.md",
+        "templates/operation-log.md",
         "templates/scope.yaml",
         "prompts/README.md",
         "prompts/authorized-security-researcher.md",
@@ -81,7 +84,10 @@ def test_required_public_framework_files_exist():
         "prompts/automation-runner.md",
         "prompts/workflow-coach.md",
         "scripts/bootstrap_private_vault.py",
+        "scripts/check_vault.py",
+        "scripts/end_session.py",
         "scripts/new_note.py",
+        "scripts/start_session.py",
         "scripts/validate_scope_file.py",
         "scripts/verify_public_skeleton.py",
         "skills/README.md",
@@ -175,6 +181,24 @@ def test_public_docs_define_generic_architecture_and_flow():
         "Canvas",
     ):
         assert required in obsidian_setup
+
+
+def test_session_lifecycle_doc_covers_claim_handoff_closeout():
+    lifecycle = read("docs/session-lifecycle.md")
+
+    for required in (
+        "public-safe",
+        "Authorized scope",
+        "Claim",
+        "Handoff",
+        "Closeout",
+        "workspace/",
+        "Knowledge Capture",
+        "start_session.py",
+        "end_session.py",
+        "check_vault.py",
+    ):
+        assert required in lifecycle
 
 
 def test_readme_links_usage_and_obsidian_setup():
@@ -474,7 +498,10 @@ def test_workspace_scaffold_is_vault_root_but_ignored_runtime():
 def test_public_seed_utility_scripts_are_generic_and_safe():
     for path in (
         "scripts/bootstrap_private_vault.py",
+        "scripts/check_vault.py",
+        "scripts/end_session.py",
         "scripts/new_note.py",
+        "scripts/start_session.py",
         "scripts/validate_scope_file.py",
     ):
         content = read(path)
@@ -532,6 +559,86 @@ def test_new_note_can_render_template_to_stdout():
     assert "<target>" not in result.stdout
 
 
+def test_start_and_end_session_manage_ignored_workspace_files():
+    import shutil
+    import subprocess
+    import sys
+
+    target = "sample-session-target"
+    target_dir = ROOT / "workspace" / "workshop" / target
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
+
+    try:
+        start = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/start_session.py"),
+                "--target",
+                target,
+                "--program",
+                "sample-program",
+                "--scope-file",
+                "bbflow/scope.example.yaml",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert start.returncode == 0, start.stderr
+        assert "session started" in start.stdout
+
+        handoff = target_dir / "HANDOFF.md"
+        operation_log = target_dir / "OPERATION_LOG.md"
+        session_state = target_dir / "SESSION_STATE.json"
+
+        assert handoff.exists()
+        assert operation_log.exists()
+        assert session_state.exists()
+        assert "Status: active" in handoff.read_text(encoding="utf-8")
+
+        end = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/end_session.py"),
+                "--target",
+                target,
+                "--summary",
+                "completed framework dry run",
+                "--knowledge-capture",
+                "no reusable lesson",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert end.returncode == 0, end.stderr
+        assert "session ended" in end.stdout
+        assert "Status: closed" in handoff.read_text(encoding="utf-8")
+        assert "completed framework dry run" in operation_log.read_text(encoding="utf-8")
+    finally:
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+
+
+def test_check_vault_reports_clean_public_scaffold():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/check_vault.py")],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "vault scaffold check passed" in result.stdout
+
+
 def test_templates_are_placeholders_not_real_reports():
     for path in (
         "templates/target.md",
@@ -540,11 +647,20 @@ def test_templates_are_placeholders_not_real_reports():
         "templates/review-note.md",
         "templates/submission.md",
         "templates/form.md",
+        "templates/handoff.md",
+        "templates/operation-log.md",
         "templates/scope.yaml",
     ):
         content = read(path)
         assert "<" in content and ">" in content, path
         assert "example.com" in content or "<target>" in content or "<program>" in content
+
+    handoff = read("templates/handoff.md")
+    operation_log = read("templates/operation-log.md")
+    assert "Active Session" in handoff
+    assert "Closeout" in handoff
+    assert "Operation Log" in operation_log
+    assert "Knowledge Capture" in operation_log
 
 
 def test_no_private_or_target_specific_data_is_present():
