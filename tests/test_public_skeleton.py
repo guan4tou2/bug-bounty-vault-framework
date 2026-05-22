@@ -166,6 +166,35 @@ def test_kb_patterns_have_frontmatter():
         assert "type: pattern" in content, f"Wrong type in: {pattern.name}"
 
 
+def test_llm_wiki_framework_maps_to_full_obsidian_vault_layers():
+    framework = read("docs/llm-wiki-framework.md")
+    architecture = read("docs/architecture.md")
+
+    for required in (
+        "Obsidian Vault",
+        "LLM Wiki is not the whole Obsidian vault",
+        "00 - Dashboard",
+        "01 - Targets",
+        "07 - Templates",
+        "09 - Knowledge Base",
+        "10 - Meta",
+        "Current state",
+        "Templates",
+        "Meta",
+    ):
+        assert required in framework, f"LLM Wiki framework missing layer: {required}"
+
+    for required in (
+        "00 - Dashboard",
+        "01 - Targets",
+        "07 - Templates",
+        "09 - Knowledge Base",
+        "10 - Meta",
+        "LLM Wiki",
+    ):
+        assert required in architecture, f"Architecture doc missing layer: {required}"
+
+
 # ── Scanner Configs ──────────────────────────────────────────────────────────
 
 
@@ -401,20 +430,33 @@ def test_bbflow_framework_exists():
 
 def test_no_private_or_target_specific_data():
     content = all_text()
-    forbidden = [
-        "/Users/guantou",
+    content_lower = content.lower()
+    # Case-insensitive checks (private target names, usernames)
+    ci_forbidden = [
         "guantou",
-        "TeamPlus",
-        "Juiker",
+        "teamplus",
+        "juiker",
         "digiwin",
         "openfind",
         "watsons",
+        "every8d",
+        "e8d.tw",
+        "safesay",
+    ]
+    for needle in ci_forbidden:
+        assert needle not in content_lower, f"Private data leak (ci): {needle}"
+    # Case-sensitive checks (IPs, hostnames, paths)
+    cs_forbidden = [
+        "/Users/guantou",
         "oracle-a1",
+        "oracle-e2",
         "138.2.59.206",
+        "138.2.37.19",
         "64.110.106.138",
         "younglee.tw5",
+        "t112c53033",
     ]
-    for needle in forbidden:
+    for needle in cs_forbidden:
         assert needle not in content, f"Private data leak: {needle}"
 
 

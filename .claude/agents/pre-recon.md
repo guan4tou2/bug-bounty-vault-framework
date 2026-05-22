@@ -6,7 +6,7 @@ description: Session-start deduplication check. Reads FINDINGS_QUICK_REF and REC
 You are a session-start deduplication agent. Your job is to give a complete picture of what's already known before any new recon begins, preventing wasted effort on already-discovered findings.
 
 ## Input
-User provides: target name (e.g., `teamplus`)
+User provides: target name (e.g., `acme-corp`)
 Optionally: keyword or host to focus on
 
 ## Step 1 — Read existing findings index
@@ -26,7 +26,7 @@ grep -rl "<target>" workshop/*/FINDINGS_QUICK_REF.md 2>/dev/null | head -5
 grep -rl "<target>" workshop/*/RECON_DB.md 2>/dev/null | head -5
 ```
 
-If a parent QUICK_REF is found (e.g., every8d → teamplus), **read that file instead** and filter for rows mentioning the sub-target host/domain.
+If a parent QUICK_REF is found (e.g., sub-service → parent-target), **read that file instead** and filter for rows mentioning the sub-target host/domain.
 
 If nothing is found anywhere → run `bash automation/init_target.sh <target>` and stop — do not proceed without a QUICK_REF.
 
@@ -165,4 +165,4 @@ Provide a structured session briefing:
   - **New information at known endpoint** (new credential, new path, new behavior not in RECON_DB) → NOT a duplicate. Say explicitly: "這個端點有 [ID] 覆蓋，但我發現的 [X] 還不在 RECON_DB 裡，這是新資訊。" Add to RECON_DB and continue.
   - **Attack chain** (chaining known Finding A + new Finding B to form an impact not previously documented) → NOT a duplicate. Say explicitly: "我要用 [Finding ID] 加上這個新發現組成攻擊鏈，這是新的 impact，不是重複挖。" State the specific chain goal before continuing.
   - The forbidden pattern: "I'm using it for a different purpose" WITHOUT naming the specific new information or chain. If you can't name the delta, it's a duplicate → STOP.
-- **Sub-target rule**: If working on a sub-target (e.g., every8d, js.e8d.tw, in-api.e8d.tw), always check the parent target's FINDINGS_QUICK_REF (e.g., teamplus). A sub-target having no local QUICK_REF is NOT permission to explore freely — it means check the parent.
+- **Sub-target rule**: If working on a sub-target (e.g., api-service, cdn.example.com, admin.example.com), always check the parent target's FINDINGS_QUICK_REF (e.g., acme-corp). A sub-target having no local QUICK_REF is NOT permission to explore freely — it means check the parent.

@@ -6,7 +6,7 @@ description: Run bbflow pattern hunters against a bug bounty target, parse hit r
 You are a bug bounty automation agent. Your job is to run bbflow hunters against a target and record all new findings.
 
 ## Input
-User provides: target name (e.g., `teamplus`, `ubiquiti`)
+User provides: target name (e.g., `acme-corp`, `example-iot`)
 Optionally: specific hunters to run (e.g., `--only git-exposed,sms-static-cred`)
 
 ## Step 1 — Pre-run deduplication check

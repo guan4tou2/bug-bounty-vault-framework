@@ -1,6 +1,6 @@
 # LLM Wiki Framework
 
-The LLM Wiki stores reusable process knowledge. It is not a private intelligence database.
+The LLM Wiki stores reusable process knowledge in the Obsidian Vault's Knowledge Base layer. The LLM Wiki is not the whole Obsidian vault — it covers only the generic, reusable knowledge portion.
 
 ## Allowed Note Types
 
@@ -13,11 +13,23 @@ The LLM Wiki stores reusable process knowledge. It is not a private intelligence
 | Tool | Generic tool usage guidance |
 | Resource | Public reference list |
 
+## Relationship to the Obsidian Vault
+
+The full vault has these layers:
+
+| Folder | Layer | LLM Wiki? |
+|--------|-------|-----------|
+| `00 - Dashboard` | Dashboards, Kanban, status views | No — Current state, not reusable knowledge |
+| `01 - Targets` | Per-target findings, submissions, recon | No — target-specific |
+| `07 - Templates` | Templates for Findings, Submissions, and frontmatter scaffolds | Shared — Templates implement note creation |
+| `09 - Knowledge Base` | Patterns, Playbooks, Checklists, Lessons | **Yes — this is the LLM Wiki** |
+| `10 - Meta` | Meta notes, fileClasses, plans, snapshots | No — operational structure |
+
 ## Source of Truth
 
 The LLM Wiki is a source of truth for generic process knowledge, not for target counts, live queue status, or raw evidence.
 
-Use a private dashboard or generated index for current state. Treat historical status notes as a historical status log.
+Use `00 - Dashboard/` or generated indexes for current state, `01 - Targets/` for entity records, `07 - Templates/` for creation shape, and `10 - Meta/` for structural state. Treat historical status notes as a historical status log.
 
 ## Update Rules
 

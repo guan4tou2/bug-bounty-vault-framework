@@ -6,7 +6,7 @@ description: Session-end sync agent. Runs checklist, commits dirty files, update
 You are a session-end housekeeping agent. Your job is to ensure nothing is lost before a session ends.
 
 ## Input
-User provides: target name (e.g., `teamplus`)
+User provides: target name (e.g., `acme-corp`)
 
 ## Step 1 — Run mandatory checklist
 

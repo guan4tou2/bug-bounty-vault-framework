@@ -7,6 +7,12 @@ This project describes a reusable, private-by-default operating model for author
 ```text
 Obsidian Vault Root
   Canonical notes, decisions, review-ready summaries, and reusable process knowledge.
+  Main folders:
+    00 - Dashboard/       Current state, Kanban, Dataview dashboards.
+    01 - Targets/         Target, Finding, Submission, FORM, Recon, Attempt records.
+    07 - Templates/       Obsidian templates and frontmatter scaffolds.
+    09 - Knowledge Base/  LLM Wiki: reusable Patterns, Playbooks, Lessons, Reference Cards.
+    10 - Meta/            Plans, fileClasses, snapshots, environment notes.
 
 workspace/
   Ignored runtime workspace for raw artifacts, tool output, logs, proof-of-concept files, and temporary analysis.
@@ -23,19 +29,37 @@ Optional tooling runtime
   Recon or automation tools that can run independently from the vault.
 ```
 
+## Vault Folders
+
+The Obsidian vault root contains numbered folders following Obsidian conventions:
+
+| Folder | Purpose |
+|--------|---------|
+| `00 - Dashboard` | Dataview dashboards, Kanban boards, priority views |
+| `01 - Targets` | One subfolder per target (Findings, Submissions, Recon, etc.) |
+| `01 - Dorks` | Google dork collections |
+| `07 - Templates` | Obsidian templates (Templater) for Findings, Submissions, etc. |
+| `09 - Knowledge Base` | Patterns, Playbooks, Checklists, Lessons — the LLM Wiki layer |
+| `10 - Meta` | Workspace meta notes |
+
 ## Architecture Map
 
 ```mermaid
 flowchart LR
   A["Public Seed"] -->|"clone or use template"| B["Private Vault"]
   B -->|"opens as"| C["Obsidian Vault Root"]
-  C -->|"stores canonical notes"| D["Private Knowledge Base"]
+  C --> D0["00 - Dashboard\nCurrent state"]
+  C --> D1["01 - Targets\nEntity records"]
+  C --> D7["07 - Templates\nNote creation"]
+  C --> D9["09 - Knowledge Base\nLLM Wiki"]
+  C --> D10["10 - Meta\nGovernance state"]
   C -->|"contains ignored runtime area"| E["workspace/"]
   C -->|"defines automation contract"| F["bbflow/"]
   G["Optional Automation Runtime"] -->|"writes raw output"| E
   E -->|"reviewed candidates only"| C
-  C -->|"Knowledge Capture"| D
-  D -->|"improves prompts, templates, checklists"| C
+  D1 -->|"Knowledge Capture"| D9
+  D9 -->|"improves prompts, templates, checklists"| D7
+  D10 -->|"keeps schema and plans aligned"| C
 ```
 
 ## Design Principles
@@ -64,11 +88,13 @@ Tooling can produce machine-readable output, but the framework does not depend o
 
 | Need | Source |
 |---|---|
-| Canonical target summary | Private target note |
+| Current queue status | `00 - Dashboard/` |
+| Canonical target summary | `01 - Targets/<target>/Target - <target>.md` |
+| Note creation shape | `07 - Templates/` |
+| Reusable generic process knowledge | `09 - Knowledge Base/` LLM Wiki |
+| Structural state | `10 - Meta/` |
 | Raw evidence | `workspace/` runtime directory |
 | Review-ready evidence | Finding note |
-| Reusable generic process knowledge | LLM Wiki |
-| Current queue status | Private dashboard or board |
 
 ## Public Boundary
 
