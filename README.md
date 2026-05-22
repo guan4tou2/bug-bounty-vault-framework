@@ -54,8 +54,6 @@ tests/      Contract tests for the skeleton
 ```bash
 python3 scripts/verify_public_skeleton.py
 python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
-python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
-python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
 python3 scripts/check_vault.py
 python3 -m pytest tests/test_public_skeleton.py -q
 ```
@@ -68,6 +66,15 @@ python3 scripts/new_note.py --type target --target sample-target --program sampl
 ```
 
 The private vault is an Obsidian vault root. Its `workspace/` folder is the ignored runtime workspace where bbflow, logs, reports, and temporary artifacts can live.
+
+In an adopted private vault, a minimal session can be started and closed with:
+
+```bash
+python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
+python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
+```
+
+These commands create runtime files under `workspace/workshop/<target>/`. That is correct for a private vault, but those files must not be published back to the public seed.
 
 ## How to Use This Framework
 

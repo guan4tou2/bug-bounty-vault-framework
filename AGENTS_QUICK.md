@@ -31,9 +31,14 @@ Read deeper files only when the task requires them:
 ```bash
 python3 scripts/verify_public_skeleton.py
 python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
-python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
-python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
 python3 scripts/check_vault.py
 python3 scripts/new_note.py --type target --target sample-target --program sample-program
 python3 scripts/bootstrap_private_vault.py ../my-private-vault
+```
+
+Session lifecycle commands are for an adopted private vault:
+
+```bash
+python3 scripts/start_session.py --target sample-target --program sample-program --scope-file bbflow/scope.example.yaml
+python3 scripts/end_session.py --target sample-target --summary "framework dry run" --knowledge-capture "none"
 ```
