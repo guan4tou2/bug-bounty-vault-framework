@@ -18,6 +18,19 @@ Optional tooling runtime
   Recon or automation tools that can run independently from the vault.
 ```
 
+## Architecture Map
+
+```mermaid
+flowchart LR
+  A["Public Seed"] -->|"clone or use template"| B["Private Vault"]
+  B -->|"stores canonical notes"| C["Private Knowledge Base"]
+  B -->|"keeps raw artifacts out"| D["Workspace"]
+  E["Optional Automation"] -->|"writes raw output"| D
+  D -->|"reviewed candidates"| B
+  B -->|"Knowledge Capture"| C
+  C -->|"improves prompts, templates, and checklists"| B
+```
+
 ## Design Principles
 
 ### Vault as canonical source

@@ -51,6 +51,10 @@ def test_required_public_framework_files_exist():
         "docs/obsidian-setup.md",
         "docs/public-safety.md",
         "docs/fresh-start.md",
+        "hooks/README.md",
+        "hooks/preflight-scope-guard.md",
+        "hooks/post-run-knowledge-capture.md",
+        "hooks/pre-public-sync.md",
         "templates/target.md",
         "templates/recon-note.md",
         "templates/finding.md",
@@ -116,6 +120,11 @@ def test_public_docs_define_generic_architecture_and_flow():
         "External workspace",
         "Automation as control plane",
         "Tooling as optional runtime",
+        "```mermaid",
+        "Public Seed",
+        "Private Vault",
+        "Workspace",
+        "Knowledge Capture",
     ):
         assert required in architecture
 
@@ -267,6 +276,28 @@ def test_public_prompt_agent_skill_pack_is_safe_and_generic():
     ):
         content = read(path)
         assert "Authorized scope" in content, path
+        assert "Stop conditions" in content, path
+        assert "Output" in content, path
+
+
+def test_public_hook_skeletons_exist_without_runtime_commands():
+    hooks_readme = read("hooks/README.md")
+
+    for required in (
+        "hook skeletons",
+        "private implementation",
+        "no runtime commands",
+    ):
+        assert required in hooks_readme
+
+    for path in (
+        "hooks/preflight-scope-guard.md",
+        "hooks/post-run-knowledge-capture.md",
+        "hooks/pre-public-sync.md",
+    ):
+        content = read(path)
+        assert "Purpose" in content, path
+        assert "Trigger" in content, path
         assert "Stop conditions" in content, path
         assert "Output" in content, path
 

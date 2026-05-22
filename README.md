@@ -41,6 +41,7 @@ templates/  Empty placeholder templates for a new private vault
 prompts/    Public-safe role prompts for authorized workflow steps
 agents/     Tool-neutral agent cards derived from the prompt model
 skills/     Generic skill skeletons for workflow adapters
+hooks/      Public-safe hook skeletons for private runtime guardrails
 bbflow/     Framework-only automation flow, scope guard, and output contract
 scripts/    Public-safety verifier
 tests/      Contract tests for the skeleton
