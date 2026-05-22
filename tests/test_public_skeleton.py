@@ -270,6 +270,13 @@ def test_agents_md_references_automation_not_scripts():
     assert "automation/" in agents, "AGENTS.md should reference automation/"
 
 
+def test_docs_do_not_reference_removed_scripts_directory():
+    content = all_text()
+    assert "scripts/" not in content
+    assert "verify_public_skeleton.py" not in content
+    assert "bootstrap_private_vault.py" not in content
+
+
 def test_structure_md_describes_obsidian_layout():
     structure = read("STRUCTURE.md")
     for required in ("00 - Dashboard", "01 - Targets", "07 - Templates", "09 - Knowledge Base"):

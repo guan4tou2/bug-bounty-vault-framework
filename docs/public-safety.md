@@ -31,7 +31,7 @@ It does, however, reject runtime files accidentally left under the public `works
 Run:
 
 ```bash
-python3 scripts/verify_public_skeleton.py
+python3 automation/check_vault.py
 python3 -m pytest tests/test_public_skeleton.py -q
 ```
 

@@ -6,9 +6,10 @@ Use this repository as a starting point for a private operational vault.
 
 1. Clone this public framework.
 2. Create a separate private repository or local private vault.
-3. Run `python3 scripts/bootstrap_private_vault.py <private-vault-path>` or copy the framework files manually.
-4. Use the included `workspace/` scaffold for raw artifacts; it is ignored by default.
-5. Keep this public framework free of operational data.
+3. Run `bash automation/setup_workspace.sh` to create ignored local runtime directories.
+4. Run `bash automation/init_target.sh <target>` when starting the first private target.
+5. Use the included `workspace/` scaffold for raw artifacts; it is ignored by default.
+6. Keep this public framework free of operational data.
 
 ## After adoption
 
