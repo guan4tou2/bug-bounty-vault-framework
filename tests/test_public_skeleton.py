@@ -308,6 +308,51 @@ def test_public_safety_documents_local_cleaner_exclusions():
         assert required in safety, f"public-safety missing cleaner guidance: {required}"
 
 
+def test_public_workflow_forbids_auto_deleting_canonical_target_data():
+    agents = read("AGENTS.md")
+    vault_sync = read(".claude/agents/vault-sync.md")
+
+    for required in (
+        "Never auto-delete Vault target directories",
+        "01 - Targets/<target>/",
+        "canonical",
+        "quarantine/manual-review",
+        "explicit user confirmation",
+    ):
+        assert required in agents, f"AGENTS.md missing no-auto-delete rule: {required}"
+
+    for required in (
+        "Never auto-delete Vault target directories",
+        "orphan",
+        "empty shell",
+        "explicit user confirmation",
+    ):
+        assert required in vault_sync, f"vault-sync missing no-auto-delete rule: {required}"
+
+
+def test_protect_critical_writes_hook_covers_workflow_control_files():
+    hook = read("automation/protect_critical_writes.sh")
+    settings = read(".claude/settings.json")
+
+    for required in (
+        "AGENTS.md",
+        "CLAUDE.md",
+        "CODEX.md",
+        "GEMINI.md",
+        "STRUCTURE.md",
+        "RECON_DB.md",
+        "FINDINGS_QUICK_REF.md",
+        "SCOPE.md",
+        "HANDOFF.md",
+    ):
+        assert required in hook, f"protect hook missing: {required}"
+
+    assert '"PreToolUse"' in settings
+    assert "protect_critical_writes.sh" in settings
+    assert '"PostToolUse"' in settings
+    assert "audit_workspace.sh" in settings
+
+
 def test_public_docs_do_not_force_specific_llm_or_vps():
     content = "\n".join(
         read(path)

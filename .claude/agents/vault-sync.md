@@ -34,6 +34,11 @@ This catches issues NOT in the target-specific checklist:
 - 缺 SCOPE/RECON_DB → `bash automation/init_target.sh <target>` 補
 - 缺 Discovery Log → 提示用戶該 Finding 需補時間軸（§3b）
 
+Canonical data safety:
+- Never auto-delete Vault target directories. `01 - Targets/<target>/`, Findings, Submissions, FORMs, Recon notes, Attack Chains, Services, screenshots, and other evidence are canonical records.
+- If audit reports an orphan, empty shell, or suspected accidental target scaffold, do **not** delete it. Recommend `quarantine/manual-review` in the final status, or ask for explicit user confirmation before any filesystem removal.
+- Audit findings are evidence for review, not permission to delete canonical records.
+
 ⚠️ Warn（122 個 legacy Finding 缺 Discovery Log）按 §3b Migration 政策 touched-time 修，不批量改。
 
 ## Step 2 — Handle FAIL items

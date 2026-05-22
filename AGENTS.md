@@ -59,6 +59,20 @@ Every target gets:
 
 **Rule:** Vault stores canonical knowledge. Workspace stores process artifacts.
 
+### §1a Canonical Data Is Never Auto-Deleted
+
+Never auto-delete Vault target directories. `01 - Targets/<target>/` is canonical research history, even when a target looks empty, orphaned, stale, or accidentally scaffolded.
+
+Allowed actions:
+- Report the issue in the session summary.
+- Mark it for `quarantine/manual-review`.
+- Ask for explicit user confirmation before any filesystem removal.
+
+Forbidden actions:
+- Agent-initiated `rm -rf` on `01 - Targets/<target>/`.
+- Cleanup tasks that delete Findings, Submissions, FORMs, Recon notes, Attack Chains, Services, screenshots, or evidence.
+- Treating audit or orphan detection as permission to delete canonical records.
+
 ---
 
 ## §3 Finding Pipeline
