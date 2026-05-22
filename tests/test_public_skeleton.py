@@ -192,11 +192,44 @@ def test_automation_scripts_exist():
         "start_session.py",
         "end_session.py",
         "check_vault.py",
+        "audit_workspace.sh",
         "init_target.sh",
         "setup_workspace.sh",
+        "workspace_layout.sh",
+        "check_active_sessions.sh",
+        "claim.sh",
+        "release.sh",
+        "session_start_brief.sh",
+        "session_end_checklist.sh",
+        "session_end_brief.sh",
+        "vault_precheck.sh",
     ]
     for name in expected:
         assert (automation_dir / name).exists(), f"Missing automation: {name}"
+
+
+def test_documented_automation_commands_have_scripts():
+    content = "\n".join(
+        read(path)
+        for path in (
+            "AGENTS.md",
+            "AGENTS_QUICK.md",
+            "CODEX.md",
+            "CLAUDE.md",
+            "GEMINI.md",
+            "docs/session-lifecycle.md",
+        )
+    )
+    for match in __import__("re").finditer(r"automation/([A-Za-z0-9_.-]+\.(?:sh|py))", content):
+        assert (ROOT / "automation" / match.group(1)).exists(), f"Documented missing script: {match.group(1)}"
+
+
+def test_session_start_brief_wrapper_is_brief_only():
+    wrapper = read("automation/session_start_brief.sh")
+    start = read("automation/start_session.py")
+
+    assert "--brief-only" in wrapper
+    assert "--brief-only" in start
 
 
 def test_automation_active_sessions_dir():

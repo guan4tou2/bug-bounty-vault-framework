@@ -3,7 +3,7 @@ name: bb-hitcon-form
 description: Use when creating or editing HITCON ZeroDay forms, FORM - HITCON - <ID>.md, ZD submissions, HITCON field formatting, HITCON vulnerability type values, or HITCON screenshot requirements.
 ---
 
-# Bug Bounty — HITCON ZeroDay 表單格式（complete guide）
+# Bug Bounty — HITCON ZeroDay Form Guide
 
 This is a Gemini CLI compatibility wrapper. The canonical workspace skill remains:
 

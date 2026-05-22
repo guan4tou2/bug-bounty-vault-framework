@@ -1,9 +1,9 @@
 ---
 name: bb-incident-response
-description: Use when testing may have caused service impact, target returns sustained 502/503/504 after an action, vendor reports downtime, or user says 服務中斷/down 了/事故/unintended impact/我把它弄壞了.
+description: Use when testing may have caused service impact, target returns sustained 502/503/504 after an action, vendor reports downtime, or user reports unintended impact.
 ---
 
-# Bug Bounty — 意外服務中斷事故處理 SOP（§6e 規則）
+# Bug Bounty — Accidental Service Disruption Response SOP
 
 This is a Gemini CLI compatibility wrapper. The canonical workspace skill remains:
 

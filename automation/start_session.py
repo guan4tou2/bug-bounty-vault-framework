@@ -159,7 +159,12 @@ def main() -> int:
     parser.add_argument("scope", help="Scope to claim (e.g., 'gitlab', 'gitlab/oauth', '_meta')")
     parser.add_argument("--owner", default=os.environ.get("CLAUDE_MODEL", "claude"), help="Session owner name")
     parser.add_argument("--eta-minutes", type=int, default=120, help="Expected session duration in minutes")
+    parser.add_argument("--brief-only", action="store_true", help="Only print the handoff brief; do not claim a lock")
     args = parser.parse_args()
+
+    if args.brief_only:
+        print_brief(args.scope.split("/")[0])
+        return 0
 
     if not claim(args.scope, args.owner, args.eta_minutes):
         return 1
