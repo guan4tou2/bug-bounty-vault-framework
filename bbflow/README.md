@@ -11,6 +11,7 @@ It is intentionally bring your own tools. It defines the shape of the workflow, 
 - A machine-readable output contract.
 - A knowledge capture hook.
 - A public safety boundary.
+- Example configuration shapes for Nuclei, Osmedeus, and BBOT.
 
 ## What Is Not Included
 
@@ -27,3 +28,5 @@ It is intentionally bring your own tools. It defines the shape of the workflow, 
 2. Replace the examples with your own allowed scope and tools.
 3. Keep raw output in an ignored workspace.
 4. Promote only reviewed, sanitized lessons back to the vault.
+
+See `configs/` for public-safe examples. They describe how to connect tools to the workflow without shipping scanners, hunters, payloads, evasion logic, or target-specific rules.

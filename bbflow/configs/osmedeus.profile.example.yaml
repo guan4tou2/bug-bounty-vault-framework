@@ -1,0 +1,38 @@
+# framework-only Osmedeus profile shape
+# This file documents stage boundaries for a private runtime. It includes no
+# payloads and no evasion guidance.
+# no payloads are provided by this public configuration shape
+
+tool: "osmedeus"
+profile_version: 1
+purpose: "authorized recon workflow orchestration"
+# authorized scope is required before any private runtime execution
+
+scope_source: "bbflow/scope.example.yaml"
+authorized_scope_required: true
+
+stages:
+  passive_recon:
+    enabled: true
+    output_contract: "bbflow/output-contract.md"
+  active_recon:
+    enabled: "<operator decision>"
+    requires_explicit_scope: true
+  exploitation:
+    enabled: false
+
+execution:
+  safety_level: "passive-to-low"
+  no_payloads: true
+  no_evasion_guidance: true
+  stop_on_scope_error: true
+
+output:
+  raw_dir: "workspace/workshop/<target>/tool-output/osmedeus/"
+  run_manifest: "workspace/workshop/<target>/run_manifest.json"
+  candidates_jsonl: "workspace/workshop/<target>/candidates/osmedeus.candidates.jsonl"
+  require_manual_review: true
+
+knowledge_capture:
+  promote_only_sanitized_lessons: true
+  never_promote_raw_output: true

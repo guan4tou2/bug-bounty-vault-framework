@@ -1,5 +1,4 @@
 # Local workspace / operational data
-workspace/
 .workspace/
 .vault-workspace/
 scratch/
@@ -12,6 +11,23 @@ extractions/
 firmware_analysis/
 logs/
 tmp/
+
+# Vault-root workspace scaffold is tracked, runtime contents are ignored.
+workspace/*
+!workspace/README.md
+!workspace/.gitignore
+!workspace/workshop/
+workspace/workshop/*
+!workspace/workshop/.gitkeep
+!workspace/tools/
+workspace/tools/*
+!workspace/tools/.gitkeep
+!workspace/reports/
+workspace/reports/*
+!workspace/reports/.gitkeep
+!workspace/logs/
+workspace/logs/*
+!workspace/logs/.gitkeep
 
 # Tool output
 graphify-out/

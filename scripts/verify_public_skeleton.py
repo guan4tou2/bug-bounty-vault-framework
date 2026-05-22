@@ -31,6 +31,10 @@ required_files = [
     "bbflow/output-contract.md",
     "bbflow/scope.example.yaml",
     "bbflow/safety-boundary.md",
+    "bbflow/configs/README.md",
+    "bbflow/configs/nuclei.profile.example.yaml",
+    "bbflow/configs/osmedeus.profile.example.yaml",
+    "bbflow/configs/bbot.profile.example.yaml",
     "docs/architecture.md",
     "docs/adoption-model.md",
     "docs/prompting-model.md",
@@ -60,14 +64,22 @@ required_files = [
     "prompts/vault-maintainer.md",
     "prompts/automation-runner.md",
     "prompts/workflow-coach.md",
+    "scripts/bootstrap_private_vault.py",
+    "scripts/new_note.py",
+    "scripts/validate_scope_file.py",
     "skills/README.md",
     "skills/authorized-workflow/SKILL.md",
     "skills/knowledge-capture/SKILL.md",
+    "workspace/README.md",
+    "workspace/.gitignore",
+    "workspace/workshop/.gitkeep",
+    "workspace/tools/.gitkeep",
+    "workspace/reports/.gitkeep",
+    "workspace/logs/.gitkeep",
 ]
 
 forbidden_dirs = [
     "targets",
-    "workspace",
     ".workspace",
     ".vault-workspace",
     "reports",
@@ -105,6 +117,15 @@ forbidden_patterns = [
     re.compile(r"(?i)bearer\s+[A-Za-z0-9._-]+"),
 ]
 
+allowed_workspace_files = {
+    "workspace/README.md",
+    "workspace/.gitignore",
+    "workspace/workshop/.gitkeep",
+    "workspace/tools/.gitkeep",
+    "workspace/reports/.gitkeep",
+    "workspace/logs/.gitkeep",
+}
+
 
 def iter_public_files():
     ignored = {".git", ".pytest_cache", "__pycache__", "tests"}
@@ -120,6 +141,19 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
+def verify_workspace_scaffold() -> None:
+    workspace_root = ROOT / "workspace"
+    if not workspace_root.exists():
+        return
+
+    for path in workspace_root.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(ROOT).as_posix()
+        if rel not in allowed_workspace_files:
+            fail(f"forbidden workspace runtime file: {rel}")
+
+
 def main() -> int:
     for rel in required_files:
         if not (ROOT / rel).exists():
@@ -128,6 +162,8 @@ def main() -> int:
     for rel in forbidden_dirs:
         if (ROOT / rel).exists():
             fail(f"forbidden operational directory present: {rel}")
+
+    verify_workspace_scaffold()
 
     for path in iter_public_files():
         text = path.read_text(encoding="utf-8", errors="ignore")

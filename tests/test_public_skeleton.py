@@ -42,6 +42,10 @@ def test_required_public_framework_files_exist():
         "bbflow/output-contract.md",
         "bbflow/scope.example.yaml",
         "bbflow/safety-boundary.md",
+        "bbflow/configs/README.md",
+        "bbflow/configs/nuclei.profile.example.yaml",
+        "bbflow/configs/osmedeus.profile.example.yaml",
+        "bbflow/configs/bbot.profile.example.yaml",
         "docs/architecture.md",
         "docs/adoption-model.md",
         "docs/prompting-model.md",
@@ -71,10 +75,19 @@ def test_required_public_framework_files_exist():
         "prompts/vault-maintainer.md",
         "prompts/automation-runner.md",
         "prompts/workflow-coach.md",
+        "scripts/bootstrap_private_vault.py",
+        "scripts/new_note.py",
+        "scripts/validate_scope_file.py",
         "scripts/verify_public_skeleton.py",
         "skills/README.md",
         "skills/authorized-workflow/SKILL.md",
         "skills/knowledge-capture/SKILL.md",
+        "workspace/README.md",
+        "workspace/.gitignore",
+        "workspace/workshop/.gitkeep",
+        "workspace/tools/.gitkeep",
+        "workspace/reports/.gitkeep",
+        "workspace/logs/.gitkeep",
     ]
 
     for path in required:
@@ -85,17 +98,17 @@ def test_repository_is_architecture_only_and_empty_of_operational_data():
     forbidden_dirs = [
         "01 - Targets",
         "09 - Knowledge Base",
-        "workspace",
         ".vault-workspace",
         "graphify-out",
         "memory",
-        "reports",
         "firmware_analysis",
         "extractions",
     ]
 
     for path in forbidden_dirs:
         assert not (ROOT / path).exists(), path
+
+    assert not (ROOT / ".github" / "workflows" / "verify.yml").exists()
 
 
 def test_public_docs_define_generic_architecture_and_flow():
@@ -309,6 +322,7 @@ def test_public_bbflow_layer_is_framework_only():
     capture_hook = read("bbflow/knowledge-capture-hook.md")
     scope_example = read("bbflow/scope.example.yaml")
     safety_boundary = read("bbflow/safety-boundary.md")
+    configs_readme = read("bbflow/configs/README.md")
 
     for required in (
         "framework-only",
@@ -361,6 +375,114 @@ def test_public_bbflow_layer_is_framework_only():
     ):
         assert required in safety_boundary
 
+    for path in (
+        "bbflow/configs/nuclei.profile.example.yaml",
+        "bbflow/configs/osmedeus.profile.example.yaml",
+        "bbflow/configs/bbot.profile.example.yaml",
+    ):
+        content = read(path)
+        assert "framework-only" in content, path
+        assert "authorized scope" in content, path
+        assert "no payloads" in content, path
+        assert "no evasion guidance" in content, path
+
+    for required in (
+        "Nuclei",
+        "Osmedeus",
+        "BBOT",
+        "bring your own runtime",
+    ):
+        assert required in configs_readme
+
+
+def test_workspace_scaffold_is_vault_root_but_ignored_runtime():
+    workspace_readme = read("workspace/README.md")
+    workspace_ignore = read("workspace/.gitignore")
+    root_ignore = read(".gitignore")
+    architecture = read("docs/architecture.md")
+
+    for required in (
+        "Obsidian vault root",
+        "runtime workspace",
+        "not synced back",
+        "bbflow runtime",
+    ):
+        assert required in workspace_readme
+
+    assert "*\n" in workspace_ignore
+    assert "!README.md" in workspace_ignore
+    assert "!*/" in workspace_ignore
+    assert "workspace/" not in root_ignore.splitlines()
+
+    for required in (
+        "Obsidian Vault Root",
+        "workspace/",
+        "bbflow/",
+        "Private Knowledge Base",
+    ):
+        assert required in architecture
+
+
+def test_public_seed_utility_scripts_are_generic_and_safe():
+    for path in (
+        "scripts/bootstrap_private_vault.py",
+        "scripts/new_note.py",
+        "scripts/validate_scope_file.py",
+    ):
+        content = read(path)
+        assert "argparse" in content, path
+        assert "/Users/" not in content, path
+        assert "HITCON" not in content, path
+        assert "TWCERT" not in content, path
+        assert "HackerOne" not in content, path
+        assert "Bugcrowd" not in content, path
+
+
+def test_scope_validator_accepts_example_scope():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/validate_scope_file.py"),
+            str(ROOT / "bbflow/scope.example.yaml"),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "valid scope v1" in result.stdout
+
+
+def test_new_note_can_render_template_to_stdout():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/new_note.py"),
+            "--type",
+            "recon-note",
+            "--target",
+            "sample-target",
+            "--program",
+            "sample-program",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "sample-target" in result.stdout
+    assert "<target>" not in result.stdout
+
 
 def test_templates_are_placeholders_not_real_reports():
     for path in (
@@ -400,9 +522,6 @@ def test_no_private_or_target_specific_data_is_present():
         "Authorization:",
         "Bearer ",
         "通報平台",
-        "nuclei",
-        "osmedeus",
-        "bbot",
     ]
 
     for needle in forbidden:
@@ -417,5 +536,27 @@ def test_verify_script_mentions_public_safety_contract():
         "forbidden_dirs",
         "forbidden_strings",
         "No target data",
+        "allowed_workspace_files",
     ):
         assert required in script
+
+
+def test_verify_script_rejects_workspace_runtime_files():
+    import subprocess
+    import sys
+
+    runtime_file = ROOT / "workspace/workshop/runtime-output.txt"
+    runtime_file.write_text("runtime artifact", encoding="utf-8")
+    try:
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/verify_public_skeleton.py")],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    finally:
+        runtime_file.unlink(missing_ok=True)
+
+    assert result.returncode == 1
+    assert "forbidden workspace runtime file" in result.stderr

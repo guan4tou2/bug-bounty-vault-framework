@@ -1,0 +1,38 @@
+# framework-only BBOT profile shape
+# This file documents module boundaries for a private runtime. It includes no
+# payloads and no evasion guidance.
+# no payloads are provided by this public configuration shape
+
+tool: "bbot"
+profile_version: 1
+purpose: "authorized asset discovery and enrichment"
+# authorized scope is required before any private runtime execution
+
+scope_source: "bbflow/scope.example.yaml"
+authorized_scope_required: true
+
+modules:
+  discovery:
+    enabled: true
+    module_policy: "operator-defined"
+  enrichment:
+    enabled: true
+    module_policy: "operator-defined"
+  intrusive:
+    enabled: false
+
+execution:
+  safety_level: "passive"
+  no_payloads: true
+  no_evasion_guidance: true
+  stop_on_scope_error: true
+
+output:
+  raw_dir: "workspace/workshop/<target>/tool-output/bbot/"
+  assets_jsonl: "workspace/workshop/<target>/assets/bbot.assets.jsonl"
+  candidates_jsonl: "workspace/workshop/<target>/candidates/bbot.candidates.jsonl"
+  require_manual_review: true
+
+knowledge_capture:
+  promote_only_sanitized_lessons: true
+  never_promote_raw_output: true

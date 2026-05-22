@@ -43,7 +43,8 @@ agents/     Tool-neutral agent cards derived from the prompt model
 skills/     Generic skill skeletons for workflow adapters
 hooks/      Public-safe hook skeletons for private runtime guardrails
 bbflow/     Framework-only automation flow, scope guard, and output contract
-scripts/    Public-safety verifier
+scripts/    Generic bootstrap, note generation, scope validation, and public-safety verifier
+workspace/  Vault-root runtime scaffold; contents stay ignored after adoption
 tests/      Contract tests for the skeleton
 ```
 
@@ -51,15 +52,23 @@ tests/      Contract tests for the skeleton
 
 ```bash
 python3 scripts/verify_public_skeleton.py
+python3 scripts/validate_scope_file.py bbflow/scope.example.yaml
 python3 -m pytest tests/test_public_skeleton.py -q
 ```
 
-Then copy the templates into a private vault and keep operational data in a separate ignored workspace.
+Then bootstrap a private vault, or use this repository as a template:
+
+```bash
+python3 scripts/bootstrap_private_vault.py ../my-private-vault
+python3 scripts/new_note.py --type target --target sample-target --program sample-program
+```
+
+The private vault is an Obsidian vault root. Its `workspace/` folder is the ignored runtime workspace where bbflow, logs, reports, and temporary artifacts can live.
 
 ## How to Use This Framework
 
 1. Clone this repository as a clean reference skeleton.
-2. Read `docs/fresh-start.md` to create a private working vault from the templates.
+2. Read `docs/fresh-start.md` to create a private working vault from the templates or run `scripts/bootstrap_private_vault.py`.
 3. Read `docs/adoption-model.md` to understand where this public repo ends and your private runtime begins.
 4. Read `docs/architecture.md` and `docs/workflow.md` before adding real program notes.
 5. Read `docs/prompting-model.md` before copying prompt, agent, or skill skeletons into a private runtime.

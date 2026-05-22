@@ -1,0 +1,35 @@
+# framework-only Nuclei profile shape
+# This file documents boundaries for a private runtime. It includes no payloads
+# and no evasion guidance.
+
+tool: "nuclei"
+profile_version: 1
+purpose: "known-issue screening within authorized scope"
+
+scope_source: "bbflow/scope.example.yaml"
+authorized_scope_required: true
+
+templates:
+  mode: "bring-your-own"
+  include_tags:
+    - "exposure"
+    - "misconfig"
+  exclude_tags:
+    - "dos"
+    - "intrusive"
+
+execution:
+  safety_level: "low"
+  rate_limit: "<operator-defined>"
+  no_payloads: true
+  no_evasion_guidance: true
+
+output:
+  raw_dir: "workspace/workshop/<target>/tool-output/nuclei/"
+  candidates_jsonl: "workspace/workshop/<target>/candidates/nuclei.candidates.jsonl"
+  require_manual_review: true
+
+knowledge_capture:
+  promote_only_sanitized_lessons: true
+  never_promote_raw_output: true
+

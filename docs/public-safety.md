@@ -21,10 +21,12 @@ This repository is safe to publish because it contains only generic architecture
 - empty templates
 - validation scripts
 - public-safe terminology
+- empty `workspace/` scaffold files
 
 ## Verification
 
 The verifier protects this public skeleton. It is not responsible for validating an adopter's private runtime, private workspace, or future execution data.
+It does, however, reject runtime files accidentally left under the public `workspace/` scaffold.
 
 Run:
 
