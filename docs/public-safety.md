@@ -23,6 +23,19 @@ This repository is safe to publish because it contains only generic architecture
 - public-safe terminology
 - empty `workspace/` scaffold files
 
+## Local Cleaner Exclusions
+
+Add the vault root, `workspace/`, and `01 - Targets/` to Pearclean / AppCleaner / CleanMyMac exclusion lists.
+
+Cleaner tools can match directory names that look like app names or product names. If they are allowed to scan the vault, they may remove a target folder, screenshots, or local workspace evidence by mistake.
+
+Recommended exclusions:
+
+- repository root
+- `workspace/`
+- `01 - Targets/`
+- any external folder where you store screenshots, captures, or exported reports
+
 ## Verification
 
 The verifier protects this public skeleton. It is not responsible for validating an adopter's private runtime, private workspace, or future execution data.

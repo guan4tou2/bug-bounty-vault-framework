@@ -4,6 +4,8 @@ An Obsidian-based vault system for organizing authorized security research — f
 
 Clone, open in Obsidian, and start hunting. No target data, no findings, no secrets included.
 
+This repository is a **public seed** for building your own private vault: start from the framework, collect your own target notes and lessons, and let it become a **self-updating private vault** over time.
+
 ## What This Is
 
 - An **Obsidian vault as the top-level control plane** — not a flat file tree
@@ -75,6 +77,8 @@ bash automation/init_target.sh my-target
 # 4. Open in Obsidian — point Obsidian at the repo root
 ```
 
+For optional setup choices after cloning, see [docs/post-clone-checklist.md](docs/post-clone-checklist.md).
+
 ## Session Lifecycle
 
 ```bash
@@ -101,13 +105,15 @@ All three share the same `finding_id`. Templates in `07 - Templates/` provide th
 
 ## LLM Integration
 
-This vault works with three LLM CLI tools out of the box:
+LLM use is optional. The vault works as plain Markdown + Obsidian, and also includes optional entrypoints for three LLM CLI tools:
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
 | **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 7 skills + 5 agents |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
+
+Choose Claude Code, Codex, Gemini, another assistant, or no LLM. The workflow documents are written so the vault can still be operated manually.
 
 Skills: version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response.
 
@@ -141,7 +147,7 @@ These are starting points — customize for your workflow.
 | **GET-first** | Never send POST/PUT/DELETE without understanding consequences |
 | **Anti-exaggeration** | Theoretical chains must not be written as accomplished facts |
 | **Dedup gate** | Read FINDINGS_QUICK_REF before creating any new Finding |
-| **VPS boundary** | Run aggressive scanning on VPS, not locally |
+| **Isolated runner** | VPS or another isolated runner is recommended for aggressive or long-running scans |
 | **KB capture** | Promote reusable lessons after every session |
 
 ## License

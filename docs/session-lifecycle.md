@@ -112,9 +112,9 @@ Discovery → Finding → Submission → FORM
 |--------|--------|
 | GET / HEAD / OPTIONS | Execute freely |
 | POST (read-only query) | Confirm no side effects, then execute |
-| POST (write) / PUT / PATCH | Confirm consequences first; execute on VPS |
+| POST (write) / PUT / PATCH | Confirm consequences first; use an isolated runner when risk is non-trivial |
 | DELETE (not self-created data) | Never execute |
-| Bulk automated scanning | VPS only (bbflow, nuclei, ffuf, sqlmap, osmedeus) |
+| Bulk automated scanning | Isolated runner/VPS recommended (bbflow, nuclei, ffuf, sqlmap, osmedeus) |
 
 ---
 

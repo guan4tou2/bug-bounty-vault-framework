@@ -373,7 +373,7 @@ reports/<platform>/
 
 ```bash
 # Vault health check
-bash automation/check_vault.py
+python3 automation/check_vault.py
 
 # Frontmatter validation
 python3 _automation/lint_frontmatter.py --all

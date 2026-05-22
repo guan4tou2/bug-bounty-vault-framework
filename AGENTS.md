@@ -112,7 +112,7 @@ Check before creating: `FINDINGS_QUICK_REF.md` + `RECON_DB.md` Known Artifacts.
 |-------------|--------|
 | `GET` / `HEAD` / `OPTIONS` | Execute freely |
 | `POST` (read-only query) | Confirm no side effects first |
-| `POST` (write) / `PUT` / `PATCH` | Confirm consequences; use VPS |
+| `POST` (write) / `PUT` / `PATCH` | Confirm consequences; use an isolated runner when risk is non-trivial |
 | `DELETE` (not self-created) | **Never execute** |
 
 ### §6b Never-Execute List
@@ -121,9 +121,9 @@ Check before creating: `FINDINGS_QUICK_REF.md` + `RECON_DB.md` Known Artifacts.
 - Bulk delete / truncate / drop
 - Endpoints that trigger Email / SMS notifications
 
-### §6c VPS Boundary
+### §6c Isolated Runner Boundary
 
-**VPS only:** bbflow, nuclei, ffuf, sqlmap, osmedeus, bbot, any automated scanning.
+**Recommended isolated runner/VPS:** bbflow, nuclei, ffuf, sqlmap, osmedeus, bbot, and automated scanning.
 **Local OK:** single GET, reading tool output, writing reports.
 
 ### §6d Operation Log

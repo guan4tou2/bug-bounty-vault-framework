@@ -88,7 +88,7 @@ If it matches an existing Finding/Submission, create an Attempt first, then deci
 - After creating/modifying KB: run validation
 
 ```bash
-bash automation/check_vault.py
+python3 automation/check_vault.py
 ```
 
 ---
@@ -98,7 +98,7 @@ bash automation/check_vault.py
 | Rule | Details |
 |------|---------|
 | **GET-first** | POST/PUT/PATCH/DELETE requires known consequence; uncertain = do not execute |
-| **VPS for dangerous ops** | Scanning, fuzzing, payload testing, any production writes = VPS only |
+| **Isolated runner for risky ops** | VPS or another isolated runner is recommended for scanning, fuzzing, payload testing, and production writes |
 | **Never-execute list** | stop/destroy/shutdown/kill/restart ops; bulk delete; email/SMS triggers |
 | **Operation log** | Log non-scan commands to RECON_DB before executing |
 | **Anti-exaggeration** | Theoretical chains are not facts; severity matches evidence level |
@@ -125,7 +125,7 @@ Before starting any task, read:
 
 | Tool | Path |
 |------|------|
-| Vault health check | `bash automation/check_vault.py` |
+| Vault health check | `python3 automation/check_vault.py` |
 | KB Index | `09 - Knowledge Base/` directory listing |
 | Dashboard | `00 - Dashboard/Dashboard.md` |
 
@@ -138,4 +138,4 @@ Before starting any task, read:
 | Full workflow rules | [AGENTS.md](AGENTS.md) |
 | Directory tree / naming / templates | [STRUCTURE.md](STRUCTURE.md) |
 | Session lifecycle | [docs/session-lifecycle.md](docs/session-lifecycle.md) |
-| Workspace audit | `bash automation/check_vault.py` |
+| Workspace audit | `python3 automation/check_vault.py` |

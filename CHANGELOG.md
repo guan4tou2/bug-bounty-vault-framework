@@ -1,13 +1,12 @@
 # Changelog
 
-## 2.0.0 — 2026-05-22
+## v0.1.0 — 2026-05-22
 
-### Breaking: Obsidian Vault-as-Top-Level Architecture
+### Public Seed Release
 
-Complete restructuring from flat skeleton layout to production Obsidian vault structure.
+Initial public seed for an Obsidian vault-as-top-level bug bounty workflow framework.
 
-**Removed:**
-- `agents/`, `prompts/`, `skills/`, `hooks/`, `scripts/` (flat layout directories)
+This release contains architecture, workflow, SOP, templates, optional LLM entrypoints, and seed scanner configuration. It intentionally excludes private targets, findings, report drafts, screenshots, scan output, credentials, and personal knowledge-base content.
 
 **Added:**
 - Obsidian numbered folders: `00 - Dashboard/`, `01 - Targets/`, `01 - Dorks/`, `07 - Templates/`, `09 - Knowledge Base/`, `10 - Meta/`
@@ -22,27 +21,10 @@ Complete restructuring from flat skeleton layout to production Obsidian vault st
 - `01 - Targets/_example/` — full target subfolder tree
 - `STRUCTURE.md` — directory tree + naming conventions + frontmatter schema
 - `VAULT_QUICK.md` — vault-level quick reference
+- `docs/post-clone-checklist.md` — optional setup checklist after cloning
 
-**Changed:**
-- `AGENTS.md` — rewritten as full workflow specification (§0-§9)
-- `AGENTS_QUICK.md` — rewritten with session lifecycle commands
-- `CLAUDE.md` — rewritten with skill trigger table + subagent injection rules
-- `CODEX.md` / `GEMINI.md` — rewritten with platform-specific guides
-- `README.md` — updated for vault-as-top-level architecture
-- `.gitignore` — updated for Obsidian + workspace + automation runtime
-- `workspace/` — restructured with reports/{platform}/, firmware_analysis/, workshop/
-- `docs/session-lifecycle.md` — full claim/work/closeout protocol
-
-### Migration from 1.x
-
-The 1.x flat layout (`scripts/`, `agents/`, `prompts/`) is no longer used. If you adopted 1.x:
-1. Back up your private vault
-2. Clone the new 2.0 structure
-3. Copy your target data into `01 - Targets/` and `workspace/workshop/`
-4. Move any custom skills to `.claude/skills/`
-
----
-
-## 1.x — 2026-05-22 (prior commits)
-
-Initial public skeleton with flat layout: `scripts/`, `agents/`, `prompts/`, `skills/`, `hooks/`, `bbflow/`, `docs/`, `templates/`, `workspace/`, `tests/`.
+**Positioning:**
+- Obsidian is the primary vault interface.
+- LLM use is optional; Claude Code, Codex, and Gemini entrypoints are included for users who want them.
+- VPS or another isolated runner is recommended for aggressive scanning, but not required for note-taking, templates, or low-risk local validation.
+- Users are expected to grow their own private vault from this public seed.

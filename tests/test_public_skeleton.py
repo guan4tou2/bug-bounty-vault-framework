@@ -224,6 +224,12 @@ def test_documented_automation_commands_have_scripts():
         assert (ROOT / "automation" / match.group(1)).exists(), f"Documented missing script: {match.group(1)}"
 
 
+def test_python_automation_commands_are_not_documented_as_bash():
+    content = all_text()
+
+    assert not __import__("re").search(r"bash\s+automation/[A-Za-z0-9_.-]+\.py", content)
+
+
 def test_session_start_brief_wrapper_is_brief_only():
     wrapper = read("automation/session_start_brief.sh")
     start = read("automation/start_session.py")
@@ -256,9 +262,78 @@ def test_docs_exist():
         "session-lifecycle.md",
         "architecture.md",
         "workflow.md",
+        "post-clone-checklist.md",
     ]
     for name in expected:
         assert (docs_dir / name).exists(), f"Missing doc: {name}"
+
+
+def test_public_seed_positioning_and_post_clone_checklist():
+    readme = read("README.md")
+    checklist = read("docs/post-clone-checklist.md")
+
+    for required in (
+        "public seed",
+        "private vault",
+        "self-updating",
+        "docs/post-clone-checklist.md",
+    ):
+        assert required in readme, f"README missing public positioning: {required}"
+
+    for required in (
+        "Optional LLM setup",
+        "Claude Code",
+        "Codex",
+        "Gemini",
+        "No LLM",
+        "Optional scanner setup",
+        "VPS is recommended",
+        "not required",
+        "Pearclean / AppCleaner / CleanMyMac",
+        "bash automation/setup_workspace.sh",
+        "bash automation/init_target.sh <target>",
+    ):
+        assert required in checklist, f"Post-clone checklist missing: {required}"
+
+
+def test_public_safety_documents_local_cleaner_exclusions():
+    safety = read("docs/public-safety.md")
+
+    for required in (
+        "Pearclean / AppCleaner / CleanMyMac",
+        "exclusion",
+        "workspace/",
+        "01 - Targets/",
+    ):
+        assert required in safety, f"public-safety missing cleaner guidance: {required}"
+
+
+def test_public_docs_do_not_force_specific_llm_or_vps():
+    content = "\n".join(
+        read(path)
+        for path in (
+            "README.md",
+            "AGENTS.md",
+            "AGENTS_QUICK.md",
+            "CODEX.md",
+            "CLAUDE.md",
+            "GEMINI.md",
+            "docs/session-lifecycle.md",
+            "docs/post-clone-checklist.md",
+        )
+    )
+
+    assert "VPS only" not in content
+    assert "VPS required" not in content
+    assert "must use claude" not in content.lower()
+    assert "must use codex" not in content.lower()
+
+
+def test_changelog_tracks_public_seed_release():
+    changelog = read("CHANGELOG.md")
+
+    assert "## v0.1.0" in changelog
+    assert "public seed" in changelog
 
 
 def test_session_lifecycle_covers_phases():

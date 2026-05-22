@@ -84,7 +84,7 @@ Subagents **do not inherit** CLAUDE.md / AGENTS.md. When spawning a subagent, in
 | Tier | Task Type | Must Inject |
 |------|-----------|-------------|
 | **Recon** | Scope pulling, subdomain enum, fingerprint, disclosed report research | GET-first principle, operation log format |
-| **Analysis** | Vuln verification, PoC development, dynamic testing | + read FINDINGS_QUICK_REF before dedup, anti-exaggeration, dangerous ops via VPS |
+| **Analysis** | Vuln verification, PoC development, dynamic testing | + read FINDINGS_QUICK_REF before dedup, anti-exaggeration, isolated runner recommended for risky ops |
 | **Output** | Creating Finding / Submission / FORM | + unified Finding-style (Finding->Submission->FORM), Discovery Log 5 columns, severity rules, no internal IDs in reports |
 
 ### Quick Injection Template (analysis + output tier)
@@ -98,7 +98,7 @@ Paste at the end of subagent prompts:
 - Finding format: Finding -> Submission -> FORM, see AGENTS.md section 3e
 - Discovery Log 5 columns: time [IP->IP] [audit:ref] action->result
 - POST/PUT/DELETE requires known consequence first (GET-first)
-- Dangerous operations via VPS only
+- Use an isolated runner/VPS for risky operations when practical
 - No internal IDs (XX-001 etc.) in platform submissions
 ```
 
@@ -117,7 +117,7 @@ Paste at the end of subagent prompts:
 ## After Any Changes
 
 ```bash
-bash automation/check_vault.py
+python3 automation/check_vault.py
 ```
 
 ---
@@ -129,4 +129,4 @@ bash automation/check_vault.py
 | Full workflow rules | [AGENTS.md](AGENTS.md) |
 | Directory tree / naming / templates | [STRUCTURE.md](STRUCTURE.md) |
 | Session lifecycle | [docs/session-lifecycle.md](docs/session-lifecycle.md) |
-| Workspace audit | `bash automation/check_vault.py` |
+| Workspace audit | `python3 automation/check_vault.py` |
