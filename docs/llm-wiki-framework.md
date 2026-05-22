@@ -21,6 +21,7 @@ The full vault has these layers:
 |--------|-------|-----------|
 | `00 - Dashboard` | Dashboards, Kanban, status views | No — Current state, not reusable knowledge |
 | `01 - Targets` | Per-target findings, submissions, recon | No — target-specific |
+| `05 - Tools` | Vault-level tool notes and configuration rationale | Shared — Tool-specific learning, not runtime output |
 | `07 - Templates` | Templates for Findings, Submissions, and frontmatter scaffolds | Shared — Templates implement note creation |
 | `09 - Knowledge Base` | Patterns, Playbooks, Checklists, Lessons | **Yes — this is the LLM Wiki** |
 | `10 - Meta` | Meta notes, fileClasses, plans, snapshots | No — operational structure |
@@ -29,7 +30,7 @@ The full vault has these layers:
 
 The LLM Wiki is a source of truth for generic process knowledge, not for target counts, live queue status, or raw evidence.
 
-Use `00 - Dashboard/` or generated indexes for current state, `01 - Targets/` for entity records, `07 - Templates/` for creation shape, and `10 - Meta/` for structural state. Treat historical status notes as a historical status log.
+Use `00 - Dashboard/` or generated indexes for current state, `01 - Targets/` for entity records, `05 - Tools/` for durable tool notes, `07 - Templates/` for creation shape, and `10 - Meta/` for structural state. Runtime scanner output stays in ignored workspace paths. Treat historical status notes as a historical status log.
 
 ## Update Rules
 

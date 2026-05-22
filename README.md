@@ -31,6 +31,7 @@ bug-bounty-vault/                     ← Obsidian Vault root + Git repo
 ├── 01 - Targets/                     ← One subfolder per target
 │   └── _example/                     ← Example target structure
 ├── 01 - Dorks/                       ← Google dork collections
+├── 05 - Tools/                       ← Vault-level tool notes, not runtime tooling
 ├── 07 - Templates/                   ← Obsidian templates (Templater)
 ├── 09 - Knowledge Base/              ← Patterns, Playbooks, Lessons Learned
 ├── 10 - Meta/                        ← Workspace meta notes

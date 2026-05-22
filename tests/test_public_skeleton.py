@@ -41,6 +41,7 @@ def test_obsidian_numbered_folders_exist():
         "00 - Dashboard",
         "01 - Targets",
         "01 - Dorks",
+        "05 - Tools",
         "07 - Templates",
         "09 - Knowledge Base",
         "10 - Meta",
@@ -485,5 +486,13 @@ def test_docs_do_not_reference_removed_scripts_directory():
 
 def test_structure_md_describes_obsidian_layout():
     structure = read("STRUCTURE.md")
-    for required in ("00 - Dashboard", "01 - Targets", "07 - Templates", "09 - Knowledge Base"):
+    for required in ("00 - Dashboard", "01 - Targets", "05 - Tools", "07 - Templates", "09 - Knowledge Base"):
         assert required in structure, f"STRUCTURE.md missing: {required}"
+
+
+def test_public_docs_define_05_tools_as_vault_layer_not_runtime_toolchain():
+    """Public framework should match the private vault's active Obsidian layers."""
+    for path in ("README.md", "STRUCTURE.md", "docs/architecture.md", "docs/llm-wiki-framework.md"):
+        doc = read(path)
+        assert "05 - Tools" in doc, f"{path} missing 05 - Tools layer"
+        assert "runtime" in doc.lower(), f"{path} should separate vault notes from runtime tooling"

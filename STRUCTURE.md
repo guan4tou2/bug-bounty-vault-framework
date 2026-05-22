@@ -36,6 +36,9 @@ bug-bounty-vault/                      <- Obsidian Vault + Git repo + control pl
 |
 +-- 01 - Dorks/                        <- Google dork collections and search queries
 |
++-- 05 - Tools/                        <- Vault-level tool notes; runtime tooling stays in workspace/
+|   +-- README.md                      <- Boundary between durable notes and runtime toolchain
+|
 +-- 07 - Templates/                    <- Obsidian templates (Templater + QuickAdd)
 |   +-- Template - Finding.md
 |   +-- Template - Submission.md

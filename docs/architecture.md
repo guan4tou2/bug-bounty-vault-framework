@@ -38,6 +38,7 @@ The Obsidian vault root contains numbered folders following Obsidian conventions
 | `00 - Dashboard` | Dataview dashboards, Kanban boards, priority views |
 | `01 - Targets` | One subfolder per target (Findings, Submissions, Recon, etc.) |
 | `01 - Dorks` | Google dork collections |
+| `05 - Tools` | Vault-level tool notes and configuration rationale; runtime toolchains stay outside the synced notes |
 | `07 - Templates` | Obsidian templates (Templater) for Findings, Submissions, etc. |
 | `09 - Knowledge Base` | Patterns, Playbooks, Checklists, Lessons — the LLM Wiki layer |
 | `10 - Meta` | Workspace meta notes |
@@ -50,6 +51,7 @@ flowchart LR
   B -->|"opens as"| C["Obsidian Vault Root"]
   C --> D0["00 - Dashboard\nCurrent state"]
   C --> D1["01 - Targets\nEntity records"]
+  C --> D5["05 - Tools\nTool notes"]
   C --> D7["07 - Templates\nNote creation"]
   C --> D9["09 - Knowledge Base\nLLM Wiki"]
   C --> D10["10 - Meta\nGovernance state"]
@@ -90,6 +92,7 @@ Tooling can produce machine-readable output, but the framework does not depend o
 |---|---|
 | Current queue status | `00 - Dashboard/` |
 | Canonical target summary | `01 - Targets/<target>/Target - <target>.md` |
+| Tool usage notes | `05 - Tools/` |
 | Note creation shape | `07 - Templates/` |
 | Reusable generic process knowledge | `09 - Knowledge Base/` LLM Wiki |
 | Structural state | `10 - Meta/` |
