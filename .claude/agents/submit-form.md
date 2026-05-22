@@ -37,7 +37,7 @@ FNDFILE="Bug Bounty Vault/01 - Targets/$TARGET/Findings/Finding - $TARGET - $FID
 if [ ! -f "$FNDFILE" ]; then
   echo "❌ Finding 不存在：$FNDFILE"
   echo "→ 先建 Finding 再產 FORM。建 Finding 步驟："
-  echo "  1. 若已有 Submission，跑 backfill：bash automation/backfill_finding_stubs.sh $TARGET"
+  echo "  1. 若已有 Submission，手動從 07 - Templates/Template - Finding.md 補建 Finding"
   echo "  2. 若這是全新 discovery，請主 session 先用 Template - Finding 建 Finding"
   exit 1
 fi

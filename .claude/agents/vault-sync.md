@@ -29,7 +29,7 @@ This catches issues NOT in the target-specific checklist:
 - 新 Finding 缺 ## Discovery Log
 
 對每個 ❌：
-- Orphan → `bash automation/backfill_finding_stubs.sh <target>` 補
+- Orphan → 手動從 `07 - Templates/Template - Finding.md` 補建對應 Finding
 - Audit log hook 故障 → 檢查 `.claude/settings.local.json` PostToolUse
 - 缺 SCOPE/RECON_DB → `bash automation/init_target.sh <target>` 補
 - 缺 Discovery Log → 提示用戶該 Finding 需補時間軸（§3b）

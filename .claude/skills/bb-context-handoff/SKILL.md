@@ -20,13 +20,21 @@ description: Use when session context is low, work needs checkpointing, takeover
 
 ## Handoff 流程（current session，context 快滿時）
 
-### Step 1：heartbeat lock
+### Step 1：verify lock is alive
 
 ```bash
-bash automation/heartbeat.sh <target>
+jq . automation/active_sessions/<scope>.lock
+# Check last_heartbeat is recent; update if needed:
+python3 -c "
+import json, datetime, pathlib
+p = pathlib.Path('automation/active_sessions/<scope>.lock')
+d = json.loads(p.read_text())
+d['last_heartbeat'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+p.write_text(json.dumps(d, indent=2))
+"
 ```
 
-確保 lock 還活著（30 min sweep 不會把你清掉）。
+確保 lock 還活著（stale lock 可能被其他 session 用 `--force` 搶走）。
 
 ### Step 2：**不釋放 lock**
 
@@ -105,7 +113,7 @@ bash automation/claim.sh <scope> --takeover --owner=<new model>
 
 ### Step 4：工作中隨時 update
 
-工作中可隨時 update `## In-Progress` 段（perl marker 替換或 LLM Edit），不會被 regen_handoff_active.sh 動到（marker 隔離）。
+工作中可隨時 update `## In-Progress` 段（perl marker 替換或 LLM Edit）。BEGIN/END marker 隔離此區塊，其他 automation 不會動到。
 
 ### Step 5：完成所有 In-Progress 後
 
@@ -125,7 +133,7 @@ bash automation/claim.sh <scope> --takeover --owner=<new model>
 | Session 結束但忘了跑 session_end_checklist.sh | `bash automation/release.sh <scope>` 手動釋放 |
 | Lock 過期 30min+ 仍在 active_sessions/（sweep 沒生效）| `bash automation/release.sh --all` 全清 + 通報維護 |
 | 想看最近 history | `git log --oneline --grep "<target>:" -20`（HANDOFF.md 不存 Recent Activity，避免被 git add -A 夾帶） |
-| Vault Dashboard 沒同步 | `VERBOSE=1 bash automation/regen_dashboard_active.sh` |
+| Vault Dashboard 沒同步 | 手動更新 `00 - Dashboard/Dashboard.md`（或實作 regen script） |
 
 ## 查詢命令備忘
 
@@ -143,10 +151,9 @@ jq . automation/active_sessions/<scope>.lock
 ## Cross-reference
 
 - AGENTS.md §0f（已 promote 到本 skill）
-- automation/heartbeat.sh
-- automation/claim.sh（`--takeover` / `--force`）
-- automation/release.sh
-- automation/check_active_sessions.sh
-- automation/regen_handoff_active.sh / regen_dashboard_active.sh
-- automation/templates/HANDOFF_template.md（含 audit log 檔名）
+- automation/start_session.py（claim + brief）
+- automation/end_session.py（checklist + release）
+- automation/check_vault.py（health check）
+- automation/claim.sh / release.sh（bash wrappers）
+- automation/templates/HANDOFF_template.md
 - skill bb-triage-response（若 handoff 同時要處理 triage 回覆）

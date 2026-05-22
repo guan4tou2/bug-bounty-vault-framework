@@ -304,7 +304,18 @@ def test_agents_md_references_automation_not_scripts():
 
 
 def test_docs_do_not_reference_removed_scripts_directory():
-    content = all_text()
+    """Active docs should not reference old flat-layout scripts/ directory.
+    CHANGELOG is excluded since it documents the migration history."""
+    chunks = []
+    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
+    skip_files = {"CHANGELOG.md"}
+    for path in ROOT.rglob("*"):
+        if path.is_file() and not skip_parts.intersection(path.parts) and path.name not in skip_files:
+            try:
+                chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+            except Exception:
+                pass
+    content = "\n".join(chunks)
     assert "scripts/" not in content
     assert "verify_public_skeleton.py" not in content
     assert "bootstrap_private_vault.py" not in content

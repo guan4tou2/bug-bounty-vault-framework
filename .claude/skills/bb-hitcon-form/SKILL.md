@@ -129,8 +129,8 @@ curl -s <target-url> -H 'Cookie: ...'   # Expected vs actual response
 # 2. At least 1 screenshot
 ls "01 - Targets/<target>/Screenshots/" | grep "<FindingID>"
 
-# 3. Run HITCON FORM lint (if available)
-python3 automation/lint_hitcon_form_types.py
+# 3. Manual check: verify type field matches the mapping table
+# (implement lint_hitcon_form_types.py in your private vault for automation)
 
 # 4. Verify frontmatter completeness
 grep -E "^(finding_id|severity|host|vuln_type|verified_date):" \
