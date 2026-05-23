@@ -11,6 +11,12 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-context-handoff` | Context-low checkpoint, handoff, takeover, or long-session continuation | `.claude/skills/bb-context-handoff/SKILL.md` |
 | `bb-triage-response` | Accepted / Duplicate / N/A / Informative / Triaged / Resolved platform replies | `.claude/skills/bb-triage-response/SKILL.md` |
 | `bb-incident-response` | Sustained 5xx, service impact, vendor downtime notice, or unintended impact | `.claude/skills/bb-incident-response/SKILL.md` |
+| `bb-scope-safety-check` | Live verification, scan, payload, write method, bbflow / Osmedeus / Nuclei / BBOT safety gate | `.claude/skills/bb-scope-safety-check/SKILL.md` |
+| `bb-attack-chain-review` | Finding candidate or observation may chain into higher impact | `.claude/skills/bb-attack-chain-review/SKILL.md` |
+| `bb-evidence-readiness` | Finding / Submission / FORM evidence completeness and reproducibility review | `.claude/skills/bb-evidence-readiness/SKILL.md` |
+| `bb-attempt-recorder` | Failed hypothesis, false positive, blocked test, or useful negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
+| `bb-submission-readiness` | Final gate before Submission / FORM creation or ready_to_submit status | `.claude/skills/bb-submission-readiness/SKILL.md` |
+| `bb-knowledge-capture` | Reusable learning from finding candidate, attempt, chain review, tool result, or triage reply | `.claude/skills/bb-knowledge-capture/SKILL.md` |
 
 ## Maintenance
 

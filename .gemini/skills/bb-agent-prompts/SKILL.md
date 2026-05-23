@@ -1,6 +1,6 @@
 ---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync, or to mirror bug bounty agent behavior in Gemini CLI.
+description: Use when asked to use project Claude agents, attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync, or to mirror bug bounty agent behavior in Gemini CLI.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -11,6 +11,7 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 
 | Agent | Canonical prompt |
 |---|---|
+| `attack-chain-deep-dive` | `.claude/agents/attack-chain-deep-dive.md` |
 | `bbflow-runner` | `.claude/agents/bbflow-runner.md` |
 | `cvss-auto-scorer` | `.claude/agents/cvss-auto-scorer.md` |
 | `pre-recon` | `.claude/agents/pre-recon.md` |

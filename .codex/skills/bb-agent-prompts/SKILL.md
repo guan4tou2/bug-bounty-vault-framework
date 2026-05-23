@@ -11,6 +11,7 @@ Codex does not run Claude Code workspace agents natively. This skill makes their
 
 | Agent | Canonical prompt |
 |---|---|
+| `attack-chain-deep-dive` | `.claude/agents/attack-chain-deep-dive.md` |
 | `bbflow-runner` | `.claude/agents/bbflow-runner.md` |
 | `cvss-auto-scorer` | `.claude/agents/cvss-auto-scorer.md` |
 | `pre-recon` | `.claude/agents/pre-recon.md` |

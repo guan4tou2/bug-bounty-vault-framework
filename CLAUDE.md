@@ -21,6 +21,12 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-context-handoff** | "Running out of context"; "handoff"; "takeover" | `.claude/skills/bb-context-handoff/SKILL.md` |
 | **bb-triage-response** | "N/A"; "Duplicate"; "Triaged"; "Accepted"; "vendor replied" | `.claude/skills/bb-triage-response/SKILL.md` |
 | **bb-incident-response** | "Service disruption"; "502/503 persistent"; "unintended impact" | `.claude/skills/bb-incident-response/SKILL.md` |
+| **bb-scope-safety-check** | Before scan/fuzz/payload/POST/PUT/DELETE/bbflow hunt | `.claude/skills/bb-scope-safety-check/SKILL.md` |
+| **bb-attack-chain-review** | Candidate may chain into higher impact; "deep dive"; "chain" | `.claude/skills/bb-attack-chain-review/SKILL.md` |
+| **bb-evidence-readiness** | Before creating Finding/Submission/FORM; "evidence ready?" | `.claude/skills/bb-evidence-readiness/SKILL.md` |
+| **bb-attempt-recorder** | Failed test; false positive; blocked; negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
+| **bb-submission-readiness** | Final gate before Submission/FORM creation | `.claude/skills/bb-submission-readiness/SKILL.md` |
+| **bb-knowledge-capture** | New technique/lesson/tool behavior to capture in KB | `.claude/skills/bb-knowledge-capture/SKILL.md` |
 
 **Trigger matched -> immediately load skill -> strictly follow skill content.**
 
@@ -68,6 +74,7 @@ bash automation/session_end_brief.sh <scope>
 | GET-first principle | AGENTS.md section 6a + 6c | POST/PUT/PATCH/DELETE requires known consequence; uncertain = do not execute |
 | Operation log | AGENTS.md section 6d | Log non-scan commands to RECON_DB Operation Log before executing |
 | Unified Finding-style | AGENTS.md section 3e | Every vuln = Finding -> Submission -> FORM with matching IDs |
+| Candidate lifecycle gates | AGENTS.md section 3e | candidate -> safety / chain / evidence / attempt / submission / KB gates |
 | Discovery Log 5 columns | AGENTS.md section 3b | Time, source IP, target IP, audit ref, action+result |
 | KB lookup 3 triggers | AGENTS.md section 0c | Before research / during hunting / before reporting |
 | KB backfill 6 types | AGENTS.md Knowledge Capture | technique / decision tree / chain / stop-loss / pitfall / checklist |

@@ -12,11 +12,17 @@ Generated wrappers:
 | Skill | Path |
 |---|---|
 | `bb-agent-prompts` | `.codex/skills/bb-agent-prompts/SKILL.md` |
+| `bb-attack-chain-review` | `.codex/skills/bb-attack-chain-review/SKILL.md` |
+| `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-context-handoff` | `.codex/skills/bb-context-handoff/SKILL.md` |
 | `bb-cve-citation` | `.codex/skills/bb-cve-citation/SKILL.md` |
 | `bb-dedup-finding` | `.codex/skills/bb-dedup-finding/SKILL.md` |
+| `bb-evidence-readiness` | `.codex/skills/bb-evidence-readiness/SKILL.md` |
 | `bb-hitcon-form` | `.codex/skills/bb-hitcon-form/SKILL.md` |
 | `bb-incident-response` | `.codex/skills/bb-incident-response/SKILL.md` |
+| `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |
+| `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |
+| `bb-submission-readiness` | `.codex/skills/bb-submission-readiness/SKILL.md` |
 | `bb-triage-response` | `.codex/skills/bb-triage-response/SKILL.md` |
 | `bb-version-cve-precheck` | `.codex/skills/bb-version-cve-precheck/SKILL.md` |
 

@@ -31,6 +31,11 @@ One JSON object per line:
   "candidate_id": "<id>",
   "asset": "<asset placeholder>",
   "category": "<generic category>",
+  "candidate_type": "<info_leak | idor | cors | ssrf | debug_endpoint | known_cve | takeover | unknown>",
+  "evidence_hint": "<http_response | screenshot | raw_artifact | needs_repro | needs_manual_validation>",
+  "chain_potential": "<none | low | medium | high>",
+  "requires_scope_safety": false,
+  "suggested_skill": "<bb-scope-safety-check | bb-attack-chain-review | bb-evidence-readiness | bb-attempt-recorder | bb-knowledge-capture>",
   "evidence_ref": "<ignored workspace path or hash>",
   "review_status": "<new | duplicate_likely | needs_evidence | rejected | promote>",
   "knowledge_capture": "<none | pattern | playbook | checklist | reference>"
@@ -43,3 +48,4 @@ One JSON object per line:
 - Store raw output outside the vault.
 - Keep candidates review-oriented, not exploit-oriented.
 - Promote only reviewed items into vault notes.
+- Use lifecycle routing fields to help the private vault decide which skill should review the candidate next.

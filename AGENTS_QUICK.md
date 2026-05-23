@@ -45,6 +45,23 @@ Before analyzing any software, firmware, or SaaS target:
 
 See AGENTS.md section 0g for the full protocol.
 
+## Candidate Lifecycle
+
+```
+candidate found
+→ bb-dedup-finding          # duplicate check
+→ bb-scope-safety-check     # scope + safety gate
+→ bb-attack-chain-review    # chain potential assessment
+→ bb-evidence-readiness     # evidence completeness
+→ Finding                   # create if ready
+→ attack-chain-deep-dive    # optional agent for complex chains
+→ bb-submission-readiness   # final gate before report
+→ Submission / FORM         # platform-specific output
+→ bb-knowledge-capture      # capture reusable learning
+```
+
+Failed candidates → `bb-attempt-recorder` (preserves negative results).
+
 ## During Work
 
 - **Dedup gate**: Read `FINDINGS_QUICK_REF.md` before creating any new Finding

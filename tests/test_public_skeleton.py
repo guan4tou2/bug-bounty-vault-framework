@@ -85,7 +85,7 @@ def test_obsidian_config_exists():
 def test_claude_agents_exist():
     agents_dir = ROOT / ".claude" / "agents"
     assert agents_dir.is_dir()
-    expected = ["bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "submit-form.md", "vault-sync.md"]
+    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "submit-form.md", "vault-sync.md"]
     for name in expected:
         assert (agents_dir / name).exists(), f"Missing agent: {name}"
 
@@ -101,6 +101,12 @@ def test_claude_skills_exist():
         "bb-context-handoff",
         "bb-triage-response",
         "bb-incident-response",
+        "bb-scope-safety-check",
+        "bb-attack-chain-review",
+        "bb-evidence-readiness",
+        "bb-attempt-recorder",
+        "bb-submission-readiness",
+        "bb-knowledge-capture",
     ]
     for name in expected:
         assert (skills_dir / name / "SKILL.md").exists(), f"Missing skill: {name}"
@@ -139,8 +145,42 @@ def test_obsidian_templates_exist():
 
 
 def test_non_obsidian_templates_exist():
-    for name in ("handoff.md", "operation-log.md"):
+    for name in ("handoff.md", "operation-log.md", "candidate-review.md"):
         assert (ROOT / "templates" / name).exists(), f"Missing template: {name}"
+
+
+def test_candidate_lifecycle_is_available_in_public_framework():
+    quick = read("AGENTS_QUICK.md")
+    candidate = read("templates/candidate-review.md")
+    contract = read("bbflow/output-contract.md")
+
+    for required in (
+        "bb-scope-safety-check",
+        "bb-attack-chain-review",
+        "bb-evidence-readiness",
+        "bb-attempt-recorder",
+        "bb-submission-readiness",
+        "bb-knowledge-capture",
+    ):
+        assert required in quick
+
+    for required in (
+        "candidate found",
+        "Scope Safety Check",
+        "Attack Chain Review",
+        "Evidence Readiness",
+        "Candidate Decision",
+    ):
+        assert required in candidate
+
+    for required in (
+        "candidate_type",
+        "evidence_hint",
+        "chain_potential",
+        "requires_scope_safety",
+        "suggested_skill",
+    ):
+        assert required in contract
 
 
 # ── Knowledge Base ───────────────────────────────────────────────────────────
