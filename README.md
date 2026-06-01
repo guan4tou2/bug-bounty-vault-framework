@@ -80,6 +80,8 @@ bash automation/init_target.sh my-target
 
 For optional setup choices after cloning, see [docs/post-clone-checklist.md](docs/post-clone-checklist.md).
 
+For the public/private split, see [docs/public-vs-private.md](docs/public-vs-private.md). To add your own private downstream formatting without changing the public seed, use [docs/private-adapters.md](docs/private-adapters.md).
+
 ## Session Lifecycle
 
 ```bash

@@ -145,6 +145,37 @@ def test_public_framework_uses_platform_neutral_report_writing():
         assert required in text, f"Missing generic report/form workflow marker: {required}"
 
 
+def test_private_adapter_docs_define_public_private_boundary():
+    """Public seed must document how users add private downstream adapters."""
+    readme = read("README.md")
+    private_adapters = read("docs/private-adapters.md")
+    public_vs_private = read("docs/public-vs-private.md")
+
+    for path in ("docs/private-adapters.md", "docs/public-vs-private.md"):
+        assert path in readme, f"README must link {path}"
+
+    for required in (
+        "Private Adapter Pattern",
+        "public seed",
+        "private vault",
+        "generic FORM",
+        "do not upstream",
+        "downstream channel",
+    ):
+        assert required in private_adapters, f"Missing adapter guidance: {required}"
+
+    for required in (
+        "Public Seed",
+        "Private Vault",
+        "workspace",
+        "platform-neutral",
+        "target-specific",
+        "bbflow",
+        "LLM Wiki",
+    ):
+        assert required in public_vs_private, f"Missing boundary marker: {required}"
+
+
 def test_codex_skills_mirror_claude():
     codex_dir = ROOT / ".codex" / "skills"
     assert codex_dir.is_dir()
