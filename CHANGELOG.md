@@ -36,8 +36,8 @@ This release contains architecture, workflow, SOP, templates, optional LLM entry
 
 **Added:**
 - Obsidian numbered folders: `00 - Dashboard/`, `01 - Targets/`, `01 - Dorks/`, `07 - Templates/`, `09 - Knowledge Base/`, `10 - Meta/`
-- `.claude/agents/` — 5 specialized agents (bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync)
-- `.claude/skills/` — 7 workflow skills (version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response)
+- `.claude/agents/` — specialized agents (bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync)
+- `.claude/skills/` — workflow skills (version-cve-precheck, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response)
 - `.codex/skills/` + `.gemini/skills/` — mirrored from Claude (source of truth)
 - `automation/` — session lifecycle scripts (init_target.sh, start_session.py, end_session.py, check_vault.py, claim.sh, release.sh)
 - `tools/` — scanner seed configs (Nuclei templates, Osmedeus profiles, BBOT presets)

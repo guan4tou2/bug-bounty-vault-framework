@@ -1,11 +1,11 @@
 ---
 name: bb-submission-readiness
-description: Use when creating, editing, finalizing, or reviewing a Submission or FORM to confirm dedupe, scope, evidence, attack-chain review, platform fit, severity, and hygiene.
+description: Use when creating, editing, finalizing, or reviewing a Submission or FORM to confirm dedupe, scope, evidence, attack-chain review, channel fit, severity, and hygiene.
 ---
 
 # Bug Bounty — Submission Readiness
 
-Use this as the final gate before Submission / FORM creation. It does not replace platform-specific skills; it decides whether the report is ready to enter them.
+Use this as the final gate before Submission / FORM creation. It decides whether the report is ready for a platform-neutral disclosure draft or a private downstream adapter.
 
 ## Trigger
 
@@ -13,7 +13,7 @@ Run before:
 
 - writing a Submission
 - generating a FORM
-- sending to HITCON / HackerOne / Bugcrowd / Intigriti / TWCERT / other platforms
+- sending to an external disclosure channel
 - asking whether a Finding is ready to report
 - changing status to `ready_to_submit`
 
@@ -27,7 +27,7 @@ Run before:
 | Attack chain | `bb-attack-chain-review` completed, or explicitly not applicable |
 | Evidence | `bb-evidence-readiness` says ready |
 | Severity | CVSS / severity reasoning exists when needed |
-| Platform fit | Platform accepts this asset / vuln class / evidence type |
+| Channel fit | The intended downstream channel accepts this asset / vuln class / evidence type |
 | Report hygiene | No internal IDs, no unverified CVEs, no theoretical overclaim |
 | Knowledge capture | New reusable learning routed to KB / Lessons / Pattern |
 
@@ -42,7 +42,7 @@ Run before:
 - Attack chain review:
 - Evidence readiness:
 - Severity / CVSS:
-- Platform fit:
+- Channel fit:
 - Report hygiene:
 - Knowledge capture:
 - Next action:
@@ -56,13 +56,13 @@ Do not create or finalize Submission / FORM when:
 - evidence readiness is `not ready`
 - dedupe is unresolved
 - scope is unclear
-- platform policy likely rejects the report
+- downstream policy likely rejects the report
 - CVE / advisory claims are unverified
 - report relies on potential impact as if it were verified
 
 ## Next Step Routing
 
-- HITCON FORM -> `bb-hitcon-form`
+- Generic FORM / disclosure draft -> `bb-form-writer`
 - CVE / advisory references -> `bb-cve-citation`
 - CVSS / severity uncertainty -> `cvss-auto-scorer`
 - Triage response after submission -> `bb-triage-response`

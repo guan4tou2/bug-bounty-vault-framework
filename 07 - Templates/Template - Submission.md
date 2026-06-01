@@ -2,7 +2,7 @@
 type: submission
 fileClass: Submission
 program: "{{program}}"
-platform: "hackerone | bugcrowd | intigriti | hitcon-zeroday | twcert | email"
+channel: "generic | email | cvd | private-program | internal"
 target: "[[]]"
 finding_id: "{{id}}"
 title: "{{title}}"
@@ -27,7 +27,7 @@ tags: []
 
 | Item | Value |
 |------|-------|
-| Program | |
+| Channel | |
 | Platform | |
 | Target | `[[]]` |
 | Severity | |

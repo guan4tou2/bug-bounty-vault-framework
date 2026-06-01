@@ -24,7 +24,7 @@ Playbook - OAuth Misconfiguration Hunting.md
 Checklist - Firmware Analysis Pre-flight.md
 Tool - Nuclei Custom Templates.md
 Resource - SSRF Bypass Techniques.md
-Reference Card - HITCON ZeroDay Form.md
+Reference Card - Testing Safety Rules.md
 Skill - Version CVE Precheck.md
 ```
 

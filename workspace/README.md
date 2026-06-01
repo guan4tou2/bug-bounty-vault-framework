@@ -18,11 +18,9 @@ workspace/
     _all/
       targets/             # Cross-target index files
   reports/
-    hitcon/                # HITCON ZeroDay submissions
-    h1/                    # HackerOne submissions
-    bugcrowd/              # Bugcrowd submissions
-    intigriti/             # Intigriti submissions
-    twcert/                # TWCERT submissions
+    drafts/                # Generic report/form drafts
+    exports/               # Local export copies
+    archive/               # Local archived report bundles
   firmware_analysis/
     <vendor>/              # Firmware binaries, extracted filesystems, analysis notes
   logs/                    # Session logs, audit logs

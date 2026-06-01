@@ -20,10 +20,8 @@ echo ""
 # --- workspace/workshop/ ---
 mkdir -p "$WS/workshop/_all/targets"
 
-# --- workspace/reports/<platform>/ ---
-for platform in hitcon h1 bugcrowd intigriti twcert; do
-  mkdir -p "$WS/reports/$platform"
-done
+# --- workspace/reports/ ---
+mkdir -p "$WS/reports/drafts" "$WS/reports/exports" "$WS/reports/archive"
 
 # --- workspace/firmware_analysis/ ---
 mkdir -p "$WS/firmware_analysis"

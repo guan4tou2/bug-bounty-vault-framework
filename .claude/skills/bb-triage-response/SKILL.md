@@ -1,6 +1,6 @@
 ---
 name: bb-triage-response
-description: Use when user pastes platform triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, VRT decision, 廠商回覆, or triage 結果.
+description: Use when user pastes triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, severity decision, vendor reply, or triage result.
 ---
 
 # Bug Bounty — Triage 回覆處理（§9 + §10b 規則）
@@ -13,7 +13,7 @@ description: Use when user pastes platform triage replies or says Accepted, Dupl
 - 「triage 回覆 / 結果」
 - 「N/A」/「Duplicate」/「Triaged」/「Accepted」/「Informative」/「Resolved」
 - 「廠商回覆 / bounty / VRT 判定」
-- 貼一段 H1 / Bugcrowd / Intigriti / HITCON 平台 comment
+- 貼一段 disclosure channel / vendor comment
 
 **禁止：只討論 triage 結果而不同步更新檔案**。
 
@@ -24,8 +24,8 @@ description: Use when user pastes platform triage replies or says Accepted, Dupl
 更新欄位：
 - 狀態（active / parked / closed）
 - Triager 說了什麼（一句話摘要）
-- VRT 修正（若 severity 被降級）
-- 點數說明（若 H1 / Bugcrowd 給點）
+- Severity 修正（若 severity 被降級）
+- Reward / reputation 說明（若有）
 - 結案 emoji 修正：📤 → ✅ Accepted / ❌ N/A / ❌ Dup / ⚠️ Informative
 
 ### 2. `memory/MEMORY.md`
@@ -57,7 +57,7 @@ body 加 `## Triage Result` 區塊：
 - **Response**: 
   > <貼平台原始回覆，至少 2-3 句保留 context>
 - **Bounty**: $XXX / N/A
-- **VRT**: <若有 severity 調整>
+- **Severity note**: <若有 severity 調整>
 - **Lessons**: <若有值得記的教訓>
 ```
 
@@ -80,7 +80,7 @@ body 加 `## Triage Result` 區塊：
 只有以下情況需要加 LL：
 
 - 平台政策驚訝（N/A 原因出乎意料）
-- VRT 修正改變對 severity 的認知
+- Severity 修正改變對 severity 的認知
 - Triager 給的 framework 解釋（例：「OCC API anonymous behavior = 預期功能」）
 - 累犯類錯誤（同一 pattern 再次 N/A）
 

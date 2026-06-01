@@ -85,9 +85,10 @@ def test_obsidian_config_exists():
 def test_claude_agents_exist():
     agents_dir = ROOT / ".claude" / "agents"
     assert agents_dir.is_dir()
-    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "submit-form.md", "vault-sync.md"]
+    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "report-writer.md", "vault-sync.md"]
     for name in expected:
         assert (agents_dir / name).exists(), f"Missing agent: {name}"
+    assert not (agents_dir / "submit-form.md").exists(), "Public framework should use generic report-writer agent"
 
 
 def test_claude_skills_exist():
@@ -97,7 +98,7 @@ def test_claude_skills_exist():
         "bb-version-cve-precheck",
         "bb-dedup-finding",
         "bb-cve-citation",
-        "bb-hitcon-form",
+        "bb-form-writer",
         "bb-context-handoff",
         "bb-triage-response",
         "bb-incident-response",
@@ -110,6 +111,38 @@ def test_claude_skills_exist():
     ]
     for name in expected:
         assert (skills_dir / name / "SKILL.md").exists(), f"Missing skill: {name}"
+    assert not (skills_dir / "bb-hitcon-form").exists(), "Public framework should not ship platform-specific form skills"
+
+
+def test_public_framework_uses_platform_neutral_report_writing():
+    """Public seed must provide generic report/form writing, not platform-specific templates."""
+    text = all_text()
+    forbidden = [
+        "bb-hitcon-form",
+        "HITCON ZeroDay",
+        "TWCERT",
+        "HackerOne",
+        "Bugcrowd",
+        "Intigriti",
+        "ZD-2026",
+        "FORM - HITCON",
+        "reports/hitcon",
+        "reports/twcert",
+        "reports/hackerone",
+        "reports/bugcrowd",
+        "reports/intigriti",
+    ]
+    for token in forbidden:
+        assert token.lower() not in text.lower(), f"Platform-specific public content leaked: {token}"
+
+    for required in (
+        "bb-form-writer",
+        "report-writer",
+        "platform-neutral",
+        "templates/form.md",
+        "templates/submission.md",
+    ):
+        assert required in text, f"Missing generic report/form workflow marker: {required}"
 
 
 def test_codex_skills_mirror_claude():

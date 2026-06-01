@@ -87,12 +87,10 @@ workspace/                             <- .gitignored local scratch
 |   +-- _all/                          <- Cross-target shared: target lists, bbot output
 |   +-- <target>/                      <- Per-target skeleton (see section 4)
 |
-+-- reports/                           <- Platform submission copies
-|   +-- hitcon/
-|   +-- hackerone/
-|   +-- bugcrowd/
-|   +-- twcert/
-|   +-- intigriti/
++-- reports/                           <- Local report/form scratch
+|   +-- drafts/
+|   +-- exports/
+|   +-- archive/
 |
 +-- firmware_analysis/                 <- Firmware unpacking workspace
 |   +-- <vendor>/                      <- Per-vendor analysis
@@ -188,11 +186,11 @@ The filename carries only the stable identifier. Human-readable title goes in fr
 
 ### FORM
 
-**Format:** `FORM - <Platform> - <ID>.md`
+**Format:** `FORM - <Channel> - <ID>.md`
 
 | Element | Definition | Example |
 |---------|-----------|---------|
-| `<Platform>` | Submission platform | `HITCON`, `TWCERT`, `HackerOne`, `Bugcrowd` |
+| `<Channel>` | Private downstream channel label | `Generic`, `Email`, `CVD`, `Program` |
 | `<ID>` | Matches the Finding ID | `AC-001` |
 
 ### Knowledge Base
@@ -254,7 +252,7 @@ tags:
 fileClass: Submission
 finding_id: "XX-001"
 target: "[[Target - acme-corp]]"
-platform: hackerone  # hackerone | bugcrowd | hitcon-zeroday | twcert | intigriti | yeswehack
+channel: generic  # generic | email | cvd | private-program | internal
 status: draft  # draft | ready | submitted | accepted | na | dup | withdrawn
 submitted_at: ""
 bounty: ""
@@ -268,9 +266,9 @@ bounty: ""
 fileClass: Form
 finding_id: "XX-001"
 target: "[[Target - acme-corp]]"
-platform: hitcon-zeroday
+channel: generic
 status: ready  # ready | submitted
-case_id: ""  # Platform-assigned ID (e.g., ZD-2026-XXXXX)
+case_id: ""  # Downstream-assigned ID, if any
 reported_date: 2026-05-16
 submitted_date: ""
 ---
@@ -282,8 +280,8 @@ submitted_date: ""
 ---
 fileClass: Target
 target_name: "acme-corp"
-platform: hackerone
-program_url: "https://hackerone.com/acme-corp"
+channel: private-program
+program_url: "https://example.com/security"
 status: active  # active | parked | closed
 tags:
   - web

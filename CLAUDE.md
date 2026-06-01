@@ -17,7 +17,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-version-cve-precheck** | Obtained firmware/binary/app; "start analyzing X"; "init target"; "download firmware" | `.claude/skills/bb-version-cve-precheck/SKILL.md` |
 | **bb-dedup-finding** | Before new Finding/FORM; "wasn't this already found"; "same vulnerability" | `.claude/skills/bb-dedup-finding/SKILL.md` |
 | **bb-cve-citation** | "Write CVE"; "NVD reference"; "prior disclosure" | `.claude/skills/bb-cve-citation/SKILL.md` |
-| **bb-hitcon-form** | "Create HITCON FORM"; "ZD form" | `.claude/skills/bb-hitcon-form/SKILL.md` |
+| **bb-form-writer** | "Create form"; "write report"; "disclosure draft" | `.claude/skills/bb-form-writer/SKILL.md` |
 | **bb-context-handoff** | "Running out of context"; "handoff"; "takeover" | `.claude/skills/bb-context-handoff/SKILL.md` |
 | **bb-triage-response** | "N/A"; "Duplicate"; "Triaged"; "Accepted"; "vendor replied" | `.claude/skills/bb-triage-response/SKILL.md` |
 | **bb-incident-response** | "Service disruption"; "502/503 persistent"; "unintended impact" | `.claude/skills/bb-incident-response/SKILL.md` |
@@ -106,7 +106,7 @@ Paste at the end of subagent prompts:
 - Discovery Log 5 columns: time [IP->IP] [audit:ref] action->result
 - POST/PUT/DELETE requires known consequence first (GET-first)
 - Use an isolated runner/VPS for risky operations when practical
-- No internal IDs (XX-001 etc.) in platform submissions
+- No internal IDs (XX-001 etc.) in external-facing submissions
 ```
 
 ---
@@ -114,7 +114,7 @@ Paste at the end of subagent prompts:
 ## Claude-Specific Supplements
 
 1. Report body must not overwrite files in `09 - Knowledge Base/References/`
-2. New submissions canonical in Vault `Submissions/Forms/`; `reports/` directory is historical archive
+2. New submissions are canonical in Vault `Submissions/Forms/`; local `reports/` is only a private scratch/export area
 3. PoC/payload files go to `workspace/workshop/<target>/poc/`
 4. Submission-ready versions: theoretical chains must not be written as accomplished facts
 5. graphify subagents must use `model: "sonnet"` (parallel <= 4-5 chunks)

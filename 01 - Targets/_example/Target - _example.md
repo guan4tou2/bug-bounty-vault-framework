@@ -2,8 +2,8 @@
 fileClass: Target
 target: "_example"
 status: "recon"
-platform: "h1"
-program_url: "https://hackerone.com/example"
+channel: "private-program"
+program_url: "https://example.com/security"
 scope_type: "web"
 created: "2026-01-01"
 ---
@@ -16,7 +16,7 @@ created: "2026-01-01"
 
 | Field | Value |
 |-------|-------|
-| Platform | HackerOne |
+| Channel | Private program |
 | Scope | `*.example.com` |
 | Status | Recon |
 | Tech stack | TBD |
@@ -39,7 +39,7 @@ SORT finding_id ASC
 ```dataview
 TABLE
   finding_id AS "ID",
-  platform AS "Platform",
+  channel AS "Channel",
   status AS "Status"
 FROM "01 - Targets/_example/Submissions"
 WHERE fileClass = "Submission"

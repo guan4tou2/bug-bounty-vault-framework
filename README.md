@@ -50,7 +50,7 @@ bug-bounty-vault/                     ← Obsidian Vault root + Git repo
 │
 ├── workspace/                        ← .gitignored local scratch
 │   ├── workshop/<target>/            ← Per-target: SCOPE, RECON_DB, HANDOFF, poc/
-│   ├── reports/<platform>/           ← Platform submission copies
+│   ├── reports/drafts/               ← Local-only report/form drafts and exports
 │   ├── firmware_analysis/            ← Firmware unpacking workspace
 │   └── logs/                         ← Audit logs
 │
@@ -116,9 +116,9 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 
 Choose Claude Code, Codex, Gemini, another assistant, or no LLM. The workflow documents are written so the vault can still be operated manually.
 
-Skills: version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response, scope-safety-check, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
+Skills: version-cve-precheck, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
 
-Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync.
+Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync.
 
 ## Knowledge Base
 

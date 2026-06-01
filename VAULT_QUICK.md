@@ -11,7 +11,7 @@ Quick path reference for the Bug Bounty Vault. Use this to find where things go.
 | Target hub | `01 - Targets/<target>/Target - <target>.md` |
 | Findings | `01 - Targets/<target>/Findings/Finding - <target> - <ID>.md` |
 | Submissions | `01 - Targets/<target>/Submissions/Submission - <target> - <ID>.md` |
-| Forms | `01 - Targets/<target>/Submissions/Forms/FORM - <platform> - <ID>.md` |
+| Forms | `01 - Targets/<target>/Submissions/Forms/FORM - <channel> - <ID>.md` |
 | Attempts | `01 - Targets/<target>/Attempts/Attempt - <target> - <slug>.md` |
 | Recon notes | `01 - Targets/<target>/Recon/Recon - <target> - <topic>.md` |
 | Attack chains | `01 - Targets/<target>/Attack Chains/` |
@@ -55,7 +55,7 @@ created: "YYYY-MM-DD"
 ---
 fileClass: Submission
 finding_id: "<TARGET>-<NNN>"
-platform: "hitcon | h1 | bugcrowd | intigriti | twcert"
+channel: "generic | email | cvd | private-program | internal"
 status: "draft | ready | submitted | triaged | resolved | duplicate | n-a"
 submitted_date: "YYYY-MM-DD"
 ---
@@ -67,7 +67,7 @@ submitted_date: "YYYY-MM-DD"
 ---
 fileClass: Form
 finding_id: "<TARGET>-<NNN>"
-platform: "hitcon | h1 | bugcrowd | intigriti | twcert"
+channel: "generic | email | cvd | private-program | internal"
 case_id: ""
 status: "draft | ready | submitted"
 ---
@@ -78,8 +78,8 @@ status: "draft | ready | submitted"
 Every vulnerability follows a three-document pipeline with a shared `finding_id`:
 
 1. **Finding** -- Technical analysis, root cause, impact, PoC
-2. **Submission** -- Platform-formatted report ready for submission
-3. **FORM** -- Final form fields matching the target platform
+2. **Submission** -- Canonical report draft
+3. **FORM** -- Platform-neutral form fields for private downstream adaptation
 
 The `finding_id` (e.g., `ACME-001`) links all three documents together.
 

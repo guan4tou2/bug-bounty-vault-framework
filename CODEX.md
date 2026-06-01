@@ -64,7 +64,7 @@ bash automation/session_end_brief.sh <scope>
 
 1. **Finding** -- discovery note (what, when, how, evidence)
 2. **Submission** -- platform-ready report draft
-3. **FORM** -- formatted for specific platform (HackerOne, Bugcrowd, HITCON ZeroDay, TWCERT, etc.)
+3. **FORM** -- platform-neutral disclosure draft or private downstream adapter output
 
 Order is mandatory: Finding first, then Submission, then FORM. IDs must match across all three.
 

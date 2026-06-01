@@ -10,8 +10,8 @@ first_seen: "{{date}}"
 last_verified: ""
 rounds_completed: 0
 findings_total: 0
-hitcon_id: ""
-twcert_id: ""
+program_id: ""
+channel: ""
 related_targets: []
 tags: []
 ---
@@ -32,7 +32,7 @@ tags: []
 | Tech Stack | — |
 | Risk | 🟡 Medium |
 | Status | 🔍 Recon |
-| Channel | — (TWCERT / HITCON / HackerOne / Bugcrowd) |
+| Channel | — |
 | First Seen | {{date}} |
 | Last Verified | — |
 | Rounds | 0 |

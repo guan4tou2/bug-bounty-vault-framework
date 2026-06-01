@@ -1,6 +1,6 @@
 ---
 name: bb-submission-readiness
-description: Use when creating, editing, finalizing, or reviewing a Submission or FORM to confirm dedupe, scope, evidence, attack-chain review, platform fit, severity, and hygiene.
+description: Use when creating, editing, finalizing, or reviewing a Submission or FORM to confirm dedupe, scope, evidence, attack-chain review, channel fit, severity, and hygiene.
 ---
 
 # Bug Bounty — Submission Readiness

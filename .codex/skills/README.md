@@ -18,7 +18,7 @@ Generated wrappers:
 | `bb-cve-citation` | `.codex/skills/bb-cve-citation/SKILL.md` |
 | `bb-dedup-finding` | `.codex/skills/bb-dedup-finding/SKILL.md` |
 | `bb-evidence-readiness` | `.codex/skills/bb-evidence-readiness/SKILL.md` |
-| `bb-hitcon-form` | `.codex/skills/bb-hitcon-form/SKILL.md` |
+| `bb-form-writer` | `.codex/skills/bb-form-writer/SKILL.md` |
 | `bb-incident-response` | `.codex/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |
 | `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |

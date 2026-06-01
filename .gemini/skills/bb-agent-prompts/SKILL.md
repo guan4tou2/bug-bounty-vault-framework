@@ -1,6 +1,6 @@
 ---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync, or to mirror bug bounty agent behavior in Gemini CLI.
+description: Use when asked to use project Claude agents, attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync, or to mirror bug bounty agent behavior in Gemini CLI.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -15,7 +15,7 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 | `bbflow-runner` | `.claude/agents/bbflow-runner.md` |
 | `cvss-auto-scorer` | `.claude/agents/cvss-auto-scorer.md` |
 | `pre-recon` | `.claude/agents/pre-recon.md` |
-| `submit-form` | `.claude/agents/submit-form.md` |
+| `report-writer` | `.claude/agents/report-writer.md` |
 | `vault-sync` | `.claude/agents/vault-sync.md` |
 
 ## Required Workflow
@@ -32,6 +32,6 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 |---|---|
 | run hunters / bbflow / automated scan | `.claude/agents/bbflow-runner.md` |
 | start recon / what do we know / pre-recon | `.claude/agents/pre-recon.md` |
-| generate form / submit report / platform FORM | `.claude/agents/submit-form.md` |
+| generate form / write report / disclosure draft | `.claude/agents/report-writer.md` |
 | session end / sync vault / checklist | `.claude/agents/vault-sync.md` |
 | CVSS / severity scoring / vector calculation | `.claude/agents/cvss-auto-scorer.md` |

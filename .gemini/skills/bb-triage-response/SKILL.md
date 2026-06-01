@@ -1,6 +1,6 @@
 ---
 name: bb-triage-response
-description: Use when user pastes platform triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, VRT decision, 廠商回覆, or triage 結果.
+description: Use when user pastes triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, severity decision, vendor reply, or triage result.
 ---
 
 # Bug Bounty — Triage 回覆處理（§9 + §10b 規則）
