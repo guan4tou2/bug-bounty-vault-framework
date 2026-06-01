@@ -94,14 +94,28 @@ Update the `Result` column immediately after execution.
 
 ### 2.3 Finding creation flow
 
+Every candidate passes through lifecycle gates before becoming a submission:
+
 ```
-Discovery → Finding → Submission → FORM
+candidate found
+→ bb-dedup-finding          # duplicate check
+→ bb-scope-safety-check     # scope + safety gate
+→ bb-attack-chain-review    # chain potential assessment
+→ bb-evidence-readiness     # evidence completeness
+→ Finding                   # create if ready
+→ bb-submission-readiness   # final gate before report
+→ Submission / FORM         # platform-specific output
+→ bb-knowledge-capture      # capture reusable learning
 ```
+
+Failed candidates → `bb-attempt-recorder` (preserves negative results).
+
+Each gate is a skill in `.claude/skills/` (or equivalent manual checklist).
 
 | Artifact | When created | By whom |
 |----------|-------------|---------|
-| **Finding** | Immediately on confirmed vuln | LLM auto-creates (no waiting, no batching) |
-| **Submission** | LLM proposes, user approves | LLM drafts, user confirms |
+| **Finding** | After evidence-readiness gate passes | LLM auto-creates (no waiting, no batching) |
+| **Submission** | After submission-readiness gate passes | LLM drafts, user confirms |
 | **FORM** | User explicitly requests | LLM generates on user trigger only |
 
 **Granularity rule:** Same endpoint + same vuln type but different parameters or resources = separate Findings.

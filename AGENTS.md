@@ -101,6 +101,27 @@ Finding → Submission → FORM
 
 All three share the same ID. No Submission-only workflow — every Submission must have a parent Finding.
 
+### §3e.1 Candidate Lifecycle Gates
+
+Every candidate passes through lifecycle gates before becoming a Submission:
+
+```
+candidate found
+→ bb-dedup-finding          # duplicate check
+→ bb-scope-safety-check     # scope + safety gate (before live verification)
+→ bb-attack-chain-review    # chain potential assessment
+→ bb-evidence-readiness     # evidence completeness
+→ Finding                   # create if ready
+→ attack-chain-deep-dive    # optional agent for complex chains
+→ bb-submission-readiness   # final gate before report
+→ Submission / FORM         # platform-specific output
+→ bb-knowledge-capture      # capture reusable learning
+```
+
+Failed candidates → `bb-attempt-recorder` (preserves negative results for future reference).
+
+Each gate is implemented as a skill in `.claude/skills/`. The gates can also be performed manually without LLM integration — the workflow documents describe the same checks as prose.
+
 ### §3f Dedup Rules
 
 **Same Finding:** Same root cause, same endpoint, same parameter.

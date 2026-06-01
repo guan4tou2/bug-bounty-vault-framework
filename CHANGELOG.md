@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.1.1 — 2026-05-23
+
+### Candidate Lifecycle Skills
+
+Added 6 lifecycle gate skills and 1 agent to formalize the candidate-to-submission pipeline.
+
+**Added:**
+- `.claude/skills/` — 6 new lifecycle skills:
+  - `bb-scope-safety-check` — scope + safety gate before live verification
+  - `bb-attack-chain-review` — chain potential assessment
+  - `bb-evidence-readiness` — evidence completeness gate
+  - `bb-attempt-recorder` — negative result preservation
+  - `bb-submission-readiness` — final gate before report
+  - `bb-knowledge-capture` — reusable learning capture
+- `.claude/agents/attack-chain-deep-dive.md` — deep analysis agent for complex chains
+- `09 - Knowledge Base/Reference Card - Testing Safety Rules.md` — safety quick reference
+- `09 - Knowledge Base/Reference Card - Knowledge Capture Quality Rubric.md` — KB quality rubric
+- `AGENTS.md §3e.1` — candidate lifecycle gates specification
+- Codex + Gemini skill mirrors auto-synced
+
+**Changed:**
+- Skill count: 7 → 13; agent count: 5 → 6
+- `CLAUDE.md` — skill trigger table expanded with 6 new entries
+- `AGENTS_QUICK.md` — candidate lifecycle pipeline diagram added
+- Private data safety test strengthened (case-insensitive + expanded forbidden list)
+
 ## v0.1.0 — 2026-05-22
 
 ### Public Seed Release

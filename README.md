@@ -110,15 +110,15 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
-| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 7 skills + 5 agents |
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 13 skills + 6 agents |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
 Choose Claude Code, Codex, Gemini, another assistant, or no LLM. The workflow documents are written so the vault can still be operated manually.
 
-Skills: version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response.
+Skills: version-cve-precheck, dedup-finding, cve-citation, hitcon-form, context-handoff, triage-response, incident-response, scope-safety-check, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
 
-Agents: bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync.
+Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, submit-form, vault-sync.
 
 ## Knowledge Base
 

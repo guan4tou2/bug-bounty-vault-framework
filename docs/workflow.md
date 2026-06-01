@@ -8,21 +8,35 @@ Target -> Recon -> Finding -> Review -> Knowledge Capture
 
 ## Gates
 
-### Safety gate
+Each gate can be performed manually or via the corresponding LLM skill.
+
+### Safety gate (`bb-scope-safety-check`)
 
 Confirm authorization, scope, and testing constraints before any active work.
 
-### Dedupe gate
+### Dedupe gate (`bb-dedup-finding`)
 
 Check whether the same host, feature, primitive, or root cause has already been investigated.
 
-### Evidence gate
+### Chain review gate (`bb-attack-chain-review`)
+
+Assess whether a candidate can chain into higher impact before finalizing a Finding.
+
+### Evidence gate (`bb-evidence-readiness`)
 
 Do not promote a candidate into a Finding until the evidence is reproducible, scoped, and minimally documented.
 
-### Knowledge capture gate
+### Submission gate (`bb-submission-readiness`)
+
+Final check before creating a Submission or FORM: dedupe, scope, evidence, severity, platform fit, and report hygiene.
+
+### Knowledge capture gate (`bb-knowledge-capture`)
 
 Capture what can be reused: decision points, false-positive filters, stop conditions, and workflow lessons.
+
+### Attempt recording (`bb-attempt-recorder`)
+
+When a candidate fails any gate, record the negative result to prevent repeated effort.
 
 ## Lifecycle
 
