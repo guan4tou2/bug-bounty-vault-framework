@@ -128,12 +128,15 @@ Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, repo
 
 The `09 - Knowledge Base/` folder holds cross-target reusable knowledge:
 
-- **Pattern** — Attack techniques (IDOR, CORS, OAuth, etc.)
-- **Playbook** — Step-by-step workflows
-- **Checklist** — Verification checklists
+- **Pattern** — Attack techniques (IDOR, CORS, OAuth, SSRF, Subdomain Takeover)
+- **Playbook** — Step-by-step workflows (Recon)
+- **Checklist** — Verification checklists (Pre-Submission Validation)
+- **Reference Card** — Quick rules (Testing Safety Rules, Knowledge Capture Rubric)
 - **Lessons Learned** — What worked, what didn't
 
-Three seed patterns are included. Add your own as you learn.
+Seed content is included as a starting point. Add your own as you learn.
+
+New to the vault? Walk through one target end-to-end in [docs/getting-started.md](docs/getting-started.md).
 
 ## Scanner Configs
 

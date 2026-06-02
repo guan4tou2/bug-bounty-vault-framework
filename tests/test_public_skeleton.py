@@ -593,7 +593,7 @@ def test_no_private_infrastructure_path_patterns():
         "memory `project_",    # private auto-memory citation (backtick form)
         "bbops",               # private tooling
         "graphify",            # author's private tooling — keep KB indexing tool-agnostic
-        "Master Kanban",       # not present in public seed
+        "Master Kanban.md",    # dangling private file path (public board is "Kanban Board.md")
     ]
     for needle in forbidden_patterns:
         assert needle not in content, f"Private infra leak: {needle}"

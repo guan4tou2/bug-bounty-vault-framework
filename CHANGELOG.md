@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.1.2 — 2026-06-02
+
+### Seed content + onboarding
+
+Adds usable starter content so a fresh clone has something to look at and learn from.
+
+**Added:**
+- `docs/getting-started.md` — full clone → recon → Finding → Submission walkthrough
+- `01 - Targets/_example/` — a filled-in sample Finding + Submission (ACME-001 IDOR) so the dashboards render on first open
+- `00 - Dashboard/Kanban Board.md` — master workflow board (Kanban plugin)
+- KB seeds: `Pattern - SSRF`, `Pattern - Subdomain Takeover`, `Playbook - Recon`, `Checklist - Pre-Submission Validation`
+
+**Changed:**
+- `00 - Dashboard/Dashboard.md` — Dataview queries reconciled to the real frontmatter schema (P1-P5 severity, `discovered_date`) + added open-findings and severity-count views
+- README Knowledge Base section updated for the expanded seed set
+
 ## v0.1.1 — 2026-05-23
 
 ### Candidate Lifecycle Skills

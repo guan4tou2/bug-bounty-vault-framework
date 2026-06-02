@@ -1,11 +1,14 @@
 # Dashboard
 
+> Live views over `01 - Targets/`. Requires the **Dataview** community plugin (see `docs/post-clone-checklist.md`). On a fresh clone these populate from the `_example` target.
+
 ## Active Targets
 
 ```dataview
 TABLE
   status AS "Status",
-  length(filter(file.inlinks, (l) => contains(meta(l).path, "Findings"))) AS "Findings"
+  channel AS "Channel",
+  scope_type AS "Scope"
 FROM "01 - Targets"
 WHERE fileClass = "Target" AND status != "closed"
 SORT status ASC, file.name ASC
@@ -20,8 +23,34 @@ TABLE
   status AS "Status",
   verified_evidence AS "Evidence"
 FROM "01 - Targets"
-WHERE fileClass = "Finding" AND created >= date(today) - dur(7 days)
-SORT created DESC
+WHERE fileClass = "Finding" AND discovered_date >= date(today) - dur(7 days)
+SORT discovered_date DESC
+```
+
+## Findings by Severity
+
+```dataview
+TABLE
+  finding_id AS "ID",
+  target AS "Target",
+  status AS "Status",
+  verified_evidence AS "Evidence"
+FROM "01 - Targets"
+WHERE fileClass = "Finding"
+SORT severity ASC, finding_id ASC
+```
+
+## Open Findings Needing Action
+
+```dataview
+TABLE
+  finding_id AS "ID",
+  target AS "Target",
+  severity AS "Severity",
+  status AS "Status"
+FROM "01 - Targets"
+WHERE fileClass = "Finding" AND (status = "verified" OR status = "ready")
+SORT severity ASC
 ```
 
 ## Submissions by Status
@@ -37,24 +66,12 @@ WHERE fileClass = "Submission"
 SORT status ASC, submitted_date DESC
 ```
 
-## Findings by Severity
+## Counts by Severity
 
 ```dataview
-TABLE
-  finding_id AS "ID",
-  target AS "Target",
-  status AS "Status",
-  verified_evidence AS "Evidence"
+TABLE length(rows) AS "Count"
 FROM "01 - Targets"
 WHERE fileClass = "Finding"
-SORT choice(severity, "Critical", 1, "High", 2, "Medium", 3, "Low", 4, "Informational", 5, 9) ASC
-```
-
-## Pipeline Overview
-
-```dataview
-LIST
-FROM "01 - Targets"
-WHERE fileClass = "Finding" AND status = "verified"
-GROUP BY target
+GROUP BY severity AS "Severity"
+SORT severity ASC
 ```
