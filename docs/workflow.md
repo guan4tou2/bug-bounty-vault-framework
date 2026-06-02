@@ -6,6 +6,30 @@ The generic lifecycle is:
 Target -> Recon -> Finding -> Review -> Knowledge Capture
 ```
 
+## Candidate Lifecycle
+
+Every candidate passes the same gates before becoming a submission. Each gate maps to an optional LLM skill (named in parentheses) and can also be run by hand.
+
+```mermaid
+flowchart TD
+  R["Recon<br/>(Playbook - Recon)"] --> C{"Candidate?"}
+  C -->|no| R
+  C -->|yes| D["Dedup<br/>(bb-dedup-finding)"]
+  D --> S["Scope + safety<br/>(bb-scope-safety-check)"]
+  S --> CH["Chain review<br/>(bb-attack-chain-review)"]
+  CH --> E["Evidence readiness<br/>(bb-evidence-readiness)"]
+  E -->|passes| F["Finding"]
+  E -->|fails| A["Attempt<br/>(bb-attempt-recorder)"]
+  D -->|duplicate| A
+  F --> SR["Submission readiness<br/>(bb-submission-readiness)"]
+  SR --> SUB["Submission → FORM"]
+  SUB --> T["Triage response<br/>(bb-triage-response)"]
+  F -.-> KC["Knowledge capture<br/>(bb-knowledge-capture)"]
+  A -.-> KC
+  T -.-> KC
+  KC -.->|"patterns / lessons"| R
+```
+
 ## Gates
 
 Each gate can be performed manually or via the corresponding LLM skill.

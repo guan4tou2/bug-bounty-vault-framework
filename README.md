@@ -6,6 +6,36 @@ Clone, open in Obsidian, and start hunting. No target data, no findings, no secr
 
 This repository is a **public seed** for building your own private vault: start from the framework, collect your own target notes and lessons, and let it become a **self-updating private vault** over time.
 
+## Architecture at a Glance
+
+```mermaid
+flowchart TB
+  subgraph VAULT["Obsidian Vault = repo root (git-tracked)"]
+    DASH["00 - Dashboard<br/>Dataview + Kanban"]
+    TGT["01 - Targets<br/>Findings · Submissions · Recon · Attempts · Services · Chains"]
+    TPL["07 - Templates<br/>Templater"]
+    KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
+  end
+  subgraph LLM["Optional LLM layer"]
+    SK[".claude / .codex / .gemini<br/>13 skills + 6 agents"]
+  end
+  subgraph LOCAL["workspace/ (gitignored, local only)"]
+    WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
+  end
+  AUTO["automation/<br/>claim · init_target · session lifecycle"]
+
+  AUTO -->|scaffolds| TGT
+  AUTO -->|scaffolds| WS
+  WS -->|"reviewed candidates"| TGT
+  TGT -->|"Finding → Submission → FORM"| DASH
+  TGT -->|"reusable lessons"| KB
+  KB -->|"informs hunting"| TGT
+  TPL -.->|"creates notes in"| TGT
+  SK -.->|"drives the flow (optional)"| TGT
+```
+
+See [docs/architecture.md](docs/architecture.md) for the layer-by-layer map and [docs/workflow.md](docs/workflow.md) for the candidate lifecycle flow.
+
 ## What This Is
 
 - An **Obsidian vault as the top-level control plane** — not a flat file tree
