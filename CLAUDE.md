@@ -80,7 +80,7 @@ bash automation/session_end_brief.sh <scope>
 | KB backfill 6 types | AGENTS.md Knowledge Capture | technique / decision tree / chain / stop-loss / pitfall / checklist |
 | Anti-exaggeration + severity | AGENTS.md sections 5 + 8 | Theoretical chains not written as facts; severity matches evidence |
 | Triage response | AGENTS.md section 9 | Submission + Kanban + KB sync on vendor reply |
-| Incident response | AGENTS.md section 6e | Stop testing, document, apologize, disclose |
+| Incident response | bb-incident-response skill | Stop testing, document, apologize, disclose |
 
 ---
 

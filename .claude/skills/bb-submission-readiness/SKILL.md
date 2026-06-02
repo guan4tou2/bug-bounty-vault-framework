@@ -75,4 +75,4 @@ Do not create or finalize Submission / FORM when:
 - `bb-attack-chain-review`
 - `bb-evidence-readiness`
 - `bb-knowledge-capture`
-- `AGENTS.md §3e.2 Finding → Submission → FORM`
+- `AGENTS.md §3e Finding → Submission → FORM`
