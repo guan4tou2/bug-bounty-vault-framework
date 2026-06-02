@@ -97,12 +97,14 @@ def claim(scope: str, owner: str, eta_minutes: int) -> bool:
 
 def print_brief(target: str) -> None:
     """Print a minimal handoff brief from workspace files."""
-    # Try to find workspace root
+    # Try to find workspace root. Default is the in-repo workspace/; an optional
+    # external workspace can be set via the VAULT_WORKSPACE env var.
     workspace_root = None
-    for candidate in [
-        ROOT / "workspace" / "workshop" / target,
-        ROOT.parent / ".vault-workspace" / "workshop" / target,
-    ]:
+    candidates = [ROOT / "workspace" / "workshop" / target]
+    ext = os.environ.get("VAULT_WORKSPACE")
+    if ext:
+        candidates.append(Path(ext) / "workshop" / target)
+    for candidate in candidates:
         if candidate.is_dir():
             workspace_root = candidate
             break

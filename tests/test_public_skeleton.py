@@ -176,13 +176,21 @@ def test_private_adapter_docs_define_public_private_boundary():
         assert required in public_vs_private, f"Missing boundary marker: {required}"
 
 
+# The mirrors carry exactly the Claude skills plus one CLI-only router.
+MIRROR_EXTRA = {"bb-agent-prompts"}
+
+
 def test_codex_skills_mirror_claude():
     codex_dir = ROOT / ".codex" / "skills"
     assert codex_dir.is_dir()
     claude_skills = {p.parent.name for p in (ROOT / ".claude" / "skills").glob("*/SKILL.md")}
     codex_skills = {p.parent.name for p in codex_dir.glob("*/SKILL.md")}
-    # Codex may have extra (bb-agent-prompts router), but must cover all Claude skills
-    assert claude_skills.issubset(codex_skills), f"Codex missing: {claude_skills - codex_skills}"
+    # Exact set-equality (minus the known router) catches Claude-side renames
+    # that would otherwise leave orphaned mirror skills behind.
+    assert codex_skills == claude_skills | MIRROR_EXTRA, (
+        f"Codex drift — missing: {claude_skills - codex_skills}, "
+        f"orphaned: {codex_skills - claude_skills - MIRROR_EXTRA}"
+    )
 
 
 def test_gemini_skills_mirror_claude():
@@ -190,7 +198,10 @@ def test_gemini_skills_mirror_claude():
     assert gemini_dir.is_dir()
     claude_skills = {p.parent.name for p in (ROOT / ".claude" / "skills").glob("*/SKILL.md")}
     gemini_skills = {p.parent.name for p in gemini_dir.glob("*/SKILL.md")}
-    assert claude_skills.issubset(gemini_skills), f"Gemini missing: {claude_skills - gemini_skills}"
+    assert gemini_skills == claude_skills | MIRROR_EXTRA, (
+        f"Gemini drift — missing: {claude_skills - gemini_skills}, "
+        f"orphaned: {gemini_skills - claude_skills - MIRROR_EXTRA}"
+    )
 
 
 # ── Templates ────────────────────────────────────────────────────────────────
@@ -578,11 +589,71 @@ def test_no_private_infrastructure_path_patterns():
         "09 - KB/",            # wrong abbreviation; folder is '09 - Knowledge Base/'
         "memory/MEMORY",       # private auto-memory file
         "memory/project_",     # private auto-memory file
+        "memory `feedback_",   # private auto-memory citation (backtick form)
+        "memory `project_",    # private auto-memory citation (backtick form)
         "bbops",               # private tooling
+        "graphify",            # author's private tooling — keep KB indexing tool-agnostic
         "Master Kanban",       # not present in public seed
     ]
     for needle in forbidden_patterns:
         assert needle not in content, f"Private infra leak: {needle}"
+
+
+# ── CI & deeper integrity ────────────────────────────────────────────────────
+
+
+def test_ci_workflow_runs_the_test_suite():
+    ci = ROOT / ".github" / "workflows" / "test.yml"
+    assert ci.exists(), "Missing CI workflow .github/workflows/test.yml"
+    text = ci.read_text(encoding="utf-8")
+    assert "pytest" in text, "CI workflow must run pytest"
+
+
+def test_frontmatter_blocks_are_valid_yaml():
+    """Every .md with a leading frontmatter block must parse as YAML and close."""
+    import re as _re
+    import pytest
+    yaml = pytest.importorskip("yaml")  # PyYAML is a test dependency (see CI)
+    scan_dirs = ["07 - Templates", "09 - Knowledge Base", "01 - Targets/_example", "templates"]
+    fm_re = _re.compile(r"\A---\n(.*?)\n---\n", _re.DOTALL)
+    for d in scan_dirs:
+        for md in (ROOT / d).rglob("*.md"):
+            text = md.read_text(encoding="utf-8")
+            if not text.startswith("---"):
+                continue
+            m = fm_re.match(text)
+            assert m, f"Frontmatter not closed with --- in {md.relative_to(ROOT)}"
+            # Templater/placeholder tokens aren't valid YAML scalars on their own;
+            # only assert parse-ability when there are no unescaped template tokens.
+            block = m.group(1)
+            if "<%" in block or "{{" in block:
+                continue
+            try:
+                yaml.safe_load(block)
+            except Exception as e:  # noqa: BLE001
+                raise AssertionError(f"Invalid YAML frontmatter in {md.relative_to(ROOT)}: {e}")
+
+
+def test_relative_markdown_links_resolve():
+    """In-repo relative [text](path.md) links must point at existing files."""
+    import re as _re
+    link_re = _re.compile(r"\]\(([^)]+\.md)(#[^)]*)?\)")
+    skip_parts = {".git", ".pytest_cache", "__pycache__"}
+    missing = []
+    for md in ROOT.rglob("*.md"):
+        if skip_parts.intersection(md.parts):
+            continue
+        text = md.read_text(encoding="utf-8", errors="ignore")
+        for m in link_re.finditer(text):
+            target = m.group(1)
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if "<" in target or ">" in target:  # placeholder like <target>.md
+                continue
+            resolved = (md.parent / target).resolve()
+            if not resolved.exists():
+                missing.append(f"{md.relative_to(ROOT)} -> {target}")
+    assert not missing, "Broken relative markdown links:\n" + "\n".join(missing)
 
 
 def test_agents_md_references_automation_not_scripts():

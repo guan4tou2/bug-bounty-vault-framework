@@ -51,9 +51,8 @@ The knowledge graph indexes all KB artifacts and maps relationships between patt
 
 **After adding new KB entries:**
 
-- Run graphify to update the knowledge graph
-- Use the `sonnet` model for all graphify subagents
-- Keep parallel chunk count at 4-5 maximum
+- If you maintain a knowledge-graph index over this folder, re-run it to stay current (optional, tool-agnostic)
+- Keep entries small and single-topic so they index and cross-link cleanly
 
 ## Knowledge Capture Gate
 

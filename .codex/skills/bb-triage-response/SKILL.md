@@ -3,7 +3,7 @@ name: bb-triage-response
 description: Use when user pastes triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, severity decision, vendor reply, or triage result.
 ---
 
-# Bug Bounty — Triage 回覆處理
+# Bug Bounty — Triage Response Handling
 
 This is a Codex compatibility wrapper. The canonical workspace skill remains:
 

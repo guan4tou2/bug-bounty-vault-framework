@@ -24,6 +24,12 @@ bash automation/install_codex_skills.sh
 
 Skills are functionally identical to the Claude versions. See [CLAUDE.md](CLAUDE.md) for the full skill trigger table.
 
+> Note: the `.codex/skills/` mirror also includes a `bb-agent-prompts` router skill that does not exist in `.claude/skills/`. It is a CLI-specific add-on (see Agents below), not part of the Claude skill set, so it is absent from CLAUDE.md's trigger table.
+
+## Agents
+
+Claude Code ships 6 specialized agents in `.claude/agents/` (attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync). Codex CLI does not run these natively, but their prompts are plain Markdown you can load on demand. The generated `bb-agent-prompts` skill routes common requests (e.g. "run hunters", "pre-recon", "score CVSS") to the right agent prompt under `.claude/agents/*.md`.
+
 ---
 
 ## Session Start

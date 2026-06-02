@@ -22,13 +22,13 @@ tags:
 # Service — {{TARGET}} — `{{HOST}}`{{KIND_SUFFIX}}
 
 > Hub: [[Target - {{TARGET}}]]
-> TODO: 一段話 — 這個服務是什麼、誰用、與其他 service 的關係。
+> TODO: One paragraph — what this service does, who uses it, and how it relates to other services.
 
 ---
 
 ## 1. Snapshot
 
-| 欄位 | 值 |
+| Field | Value |
 |---|---|
 | Target | [[Target - {{TARGET}}]] |
 | Kind | `{{KIND}}` |
@@ -51,30 +51,30 @@ tags:
 ## 3. Tech Fingerprint
 
 ```bash
-# curl 指令 / 指紋
+# curl command / fingerprint
 ```
 
 ---
 
-## 4. 已驗證的弱點
+## 4. Confirmed Vulnerabilities
 
-（尚無）
+(none yet)
 
 ---
 
 ## 5. Credentials
 
-（尚無）
+(none yet)
 
 ---
 
-## 6. 攻擊面備忘
+## 6. Attack Surface Notes
 
-- 待測：
-- 已測但無料：
+- To test:
+- Tested, nothing found:
 
 ---
 
 ## 7. References
 
-- Recon source: `workshop/{{TARGET}}/RECON_DB.md`
+- Recon source: `workspace/workshop/{{TARGET}}/RECON_DB.md`

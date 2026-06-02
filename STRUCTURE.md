@@ -35,6 +35,8 @@ bug-bounty-vault/                      <- Obsidian Vault + Git repo + control pl
 |   +-- <target>/                      <- Target folder (see section 3 for structure)
 |
 +-- 01 - Dorks/                        <- Google dork collections and search queries
+|   (Note: Targets and Dorks intentionally share the "01 -" prefix to group
+|    primary working folders together; number gaps below are reserved slots.)
 |
 +-- 05 - Tools/                        <- Vault-level tool notes; runtime tooling stays in workspace/
 |   +-- README.md                      <- Boundary between durable notes and runtime toolchain
@@ -55,7 +57,7 @@ bug-bounty-vault/                      <- Obsidian Vault + Git repo + control pl
 |   +-- Reference Card - *.md         <- Quick-reference cards
 |   +-- Lessons Learned.md            <- Rolling log of what worked and what didn't
 |   +-- References/                   <- External articles, PDFs, vendor docs
-|   +-- graphify-out/                 <- Knowledge graph output
+|   +-- kb-index-out/                 <- Optional knowledge-graph indexer output
 |
 +-- 10 - Meta/                         <- Workspace meta notes
 |

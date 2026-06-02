@@ -7,14 +7,14 @@ last_updated: <% tp.date.now("YYYY-MM-DD") %>
 
 ## 🔍 Recon
 
-- [ ] 主子網域列舉
-- [ ] JS / source map 分析
-- [ ] API spec / Swagger 找
-- [ ] 認證後攻擊面盤點
+- [ ] Subdomain / host enumeration
+- [ ] JS / source map analysis
+- [ ] API spec / Swagger discovery
+- [ ] Authenticated attack surface inventory
 
 ## 🎯 Hunting (active findings)
 
-- [ ] <填入正在挖的方向>
+- [ ] <active hunting direction>
 
 ## ✅ Verified (PoC done, not yet reported)
 
@@ -35,7 +35,7 @@ last_updated: <% tp.date.now("YYYY-MM-DD") %>
 
 ## 💡 Ideas (parked)
 
-- [ ] <未來可試的角度>
+- [ ] <future angle to explore>
 
 %% kanban:settings
 ```

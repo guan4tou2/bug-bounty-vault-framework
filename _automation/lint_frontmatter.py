@@ -99,7 +99,7 @@ _known_notes: set[str] | None = None
 def known_notes() -> set[str]:
     global _known_notes
     if _known_notes is None:
-        skip = {"_automation", "graphify-out", ".obsidian", ".trash"}
+        skip = {"_automation", "kb-index-out", ".obsidian", ".trash"}
         _known_notes = {
             p.stem
             for p in VAULT_ROOT.rglob("*.md")
@@ -282,13 +282,38 @@ def check_duplicate_finding_ids(files: list[Path]) -> list[str]:
     return errors
 
 
+USAGE = """usage: lint_frontmatter.py [--staged | --all | <file.md> ...]
+
+  --staged   lint all staged .md files (pre-commit mode)
+  --all      lint every target .md file in the vault
+  <file.md>  lint the given .md files
+  -h, --help show this help
+"""
+
+
 def main(argv: list[str]) -> int:
+    if "-h" in argv or "--help" in argv:
+        print(USAGE)
+        return 0
+
+    known_flags = {"--staged", "--all"}
+    unknown = [a for a in argv if a.startswith("-") and a not in known_flags]
+    if unknown:
+        print(f"error: unknown argument(s): {' '.join(unknown)}\n", file=sys.stderr)
+        print(USAGE, file=sys.stderr)
+        return 2
+
     if "--staged" in argv:
         files = staged_md_files()
     elif "--all" in argv:
         files = all_target_md_files()
     else:
         files = [Path(a) for a in argv if a.endswith(".md")]
+        positional = [a for a in argv if not a.startswith("-")]
+        if positional and not files:
+            print(f"error: positional args must be .md files: {' '.join(positional)}\n", file=sys.stderr)
+            print(USAGE, file=sys.stderr)
+            return 2
 
     if not files:
         return 0

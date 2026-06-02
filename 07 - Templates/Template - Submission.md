@@ -80,11 +80,11 @@ tags: []
 
 ## OOS Pre-Submit Check
 
-- [ ] 漏洞類型不在 program OOS 列表
-- [ ] asset 在 scope 內
-- [ ] 嚴重度符合平台現實標準（非理論最壞情況）
-- [ ] Triager 可在 5 分鐘內重現
-- [ ] 已搜尋 disclosed reports 確認無重複
+- [ ] Vulnerability type is not on the program OOS list
+- [ ] Asset is within scope
+- [ ] Severity matches the platform's realistic standards (not theoretical worst case)
+- [ ] Triager can reproduce within 5 minutes
+- [ ] Disclosed reports searched to confirm no duplicates
 
 ## Triage Notes
 

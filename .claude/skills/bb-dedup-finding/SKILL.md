@@ -1,114 +1,113 @@
 ---
 name: bb-dedup-finding
-description: Use when opening a new Finding or FORM, checking duplicate likelihood, deciding whether to merge reports, handling same endpoint/different user evidence, or user says 這不是挖過了嗎/同一漏洞/該不該合併.
+description: Use when opening a new Finding or FORM, checking duplicate likelihood, deciding whether to merge reports, handling same endpoint/different user evidence, or user says "wasn't this already found" / "same vulnerability" / "should I merge". Triggers: 這不是挖過了嗎/同一漏洞/該不該合併
 ---
 
-# Bug Bounty — 重複 Finding 判定（§3f 規則 + 6 步驟）
+# Bug Bounty — Duplicate Finding Determination (§3f Rules + 6 Steps)
 
-> **2026-05-16 從 AGENTS.md §3f promote 到 skill**：每次「開新 Finding/FORM 前必過」+「用戶質疑是不是重複」的高頻 trigger，獨立 skill 保證強制觸發。
+> **Promoted from AGENTS.md §3f to a standalone skill (2026-05-16):** "Must pass this check before opening a new Finding/FORM" and "user suspects a duplicate" are high-frequency triggers. A standalone skill guarantees this fires every time.
 
-## 判定核心（單一問題）
+## Core Question (single test)
 
-**「同一個 commit 能不能把所有 PoC 一起修好？」**
-- ✅ 能 → 同一漏洞，**合併 1 份**（多端點列表 + 代表性 PoC + 公司列附錄）
-- ❌ 不能 → 不同漏洞，分開送
+**"Could a single commit fix all the PoCs at once?"**
+- YES → Same vulnerability; **merge into 1 report** (list all endpoints + representative PoCs + company list in an appendix)
+- NO → Different vulnerabilities; submit separately
 
-## §3f.1 決策三問（依序）
+## §3f.1 Decision Tree — Three Questions (in order)
 
-| Q | 問題 | Yes | No |
-|---|------|-----|-----|
-| Q1 | 同一個 backend code path？（同一段 missing auth check / 同一個 IDOR 欄位） | → Q2 | 不重複，分開送 |
-| Q2 | 同一個 fix 能否一起修好？ | **合併 1 份** | 分開送（例：同 host 但 SSRF + IDOR 不同根因）|
-| Q3 | 換了什麼？ |  |  |
-|    | └ 換子端點 / 換 HTTP method | **合併** | — |
-|    | └ 換查詢字串撈不同公司 / 不同 user_id | **合併**（屬枚舉證據）| — |
-|    | └ 換 host（PROD ↔ SIT ↔ DEV，同 backend）| **可合可分**（部分平台容許分送，保守做法合併）| — |
-|    | └ 換 backend / 不同認證系統 / 不同 fix | — | **分開** |
+| Q | Question | Yes | No |
+|---|----------|-----|----|
+| Q1 | Same backend code path? (same missing auth check / same IDOR field) | → Q2 | Not a duplicate; submit separately |
+| Q2 | Can a single fix repair all of them? | **Merge into 1 report** | Submit separately (e.g., same host but SSRF + IDOR are different root causes) |
+| Q3 | What changed? | | |
+|    | Changed sub-endpoint / changed HTTP method | **Merge** | — |
+|    | Changed query string pulling different company / different user_id | **Merge** (enumeration evidence) | — |
+|    | Changed host (PROD ↔ SIT ↔ DEV, same backend) | **Either** (some platforms allow separate submissions; conservative choice is to merge) | — |
+|    | Changed backend / different auth system / different fix required | — | **Submit separately** |
 
-## §3f.2 三種典型情境
+## §3f.2 Three Common Scenarios
 
-| 情境 | 範例 | 處置 |
-|------|------|------|
-| **同 missing auth，不同子端點** | `/acp/v1/{zhaocai,robot,hideyoshi}` 都不驗 `planner_id` | 合併 1 份；端點列表格；PoC 選 1 讀 + 1 寫 |
-| **同 backend code，不同 host** | PROD `api.ai` + SIT `apihub.sit` 同套 `/memory/v1/*` | 合併 1 份（`## Affected Hosts` 區塊列出）；或分送但互引 |
-| **不同根因，剛好同 host** | 同 service 同時有 IDOR + SSRF | **分開送**（fix 不同）|
+| Scenario | Example | Action |
+|----------|---------|--------|
+| **Same missing auth, different sub-endpoints** | `/api/v1/{alpha,beta,gamma}` all skip the `planner_id` check | Merge into 1; list endpoints in a table; pick 1 read + 1 write as representative PoCs |
+| **Same backend code, different hosts** | PROD `api.example.com` + SIT `api-sit.example.com` share the same `/data/v1/*` handler | Merge into 1 (list under `## Affected Hosts`); or submit separately with mutual cross-references |
+| **Different root causes, happen to share a host** | Same service has both IDOR and SSRF | **Submit separately** (different fixes required) |
 
-## §3f.3 「不同公司／不同 user_id」幾乎一定不算新 finding
+## §3f.3 "Different Company / Different user_id" Is Almost Never a New Finding
 
-- 換查詢字串撈不同 victim = 同一漏洞的**枚舉證據**，不是新漏洞
-- 寫法：把所有確認過的公司／用戶整理成附錄表（強化嚴重性，不拆 N 份）
-- 例外：若不同 victim 對應**不同 backend / 不同權限模型** → 才另計
+- Changing the query string to pull a different victim = **enumeration evidence** for the same vulnerability, not a new finding
+- Write it up by adding all confirmed companies/users to an appendix table (strengthens severity; do not split into N reports)
+- Exception: if different victims correspond to **different backends / different permission models** → count separately
 
-## §3f.4 合併報告寫法（範本）
+## §3f.4 Merged Report Template
 
 ```markdown
-## 受影響端點（同一 root cause）
-| Endpoint | 動作 | 已驗證 |
-|----------|------|-------|
-| /acp/v1/zhaocai    | 讀 CRM         | ✅ |
-| /acp/v1/dispatcher | 讀 CRM         | ✅ |
-| /acp/v1/robot      | 寫 DailyReport | ✅ |
-| /acp/v1/hideyoshi  | 寫+讀          | ✅ |
+## Affected Endpoints (same root cause)
+| Endpoint            | Action          | Verified |
+|---------------------|-----------------|----------|
+| /api/v1/alpha       | Read CRM data   | YES      |
+| /api/v1/dispatcher  | Read CRM data   | YES      |
+| /api/v1/beta        | Write report    | YES      |
+| /api/v1/gamma       | Read + Write    | YES      |
 
-## PoC（代表性 2 個）
-1. **讀**：zhaocai 撈出亞德客 customerCode
-2. **寫**：robot 以 planner_id=99999 寫入 TRIGGERED
+## PoC (2 representative examples)
+1. **Read**: alpha endpoint — retrieved customer records for victim org
+2. **Write**: beta endpoint — injected data with planner_id=99999
 
-## 已枚舉客戶（附錄，強化嚴重性）
-鴻海/廣達/緯創/仁寶/英業達/台積電/友達/群創/亞德客/日揚...
+## Enumerated Victims (appendix — strengthens severity)
+Org-A / Org-B / Org-C / Org-D / ...
 ```
 
-## §3f.5 撤回／合併處理流程（強制）
+## §3f.5 Withdrawal / Merge Process (mandatory)
 
-當判定 N 份報告應合併為 1 份：
+When N reports are determined to be the same vulnerability and must merge into 1:
 
-1. **挑主 ID**：優先順序 = 已送出 > ready_to_submit > needs_revalidation > draft；同階段挑 severity 最高的
-2. **重寫主 ID 報告**：合併端點清單 + PoC + 公司附錄，severity 取最高（讀+寫合併通常升 P1）；frontmatter 加 `components: [<被合併的 IDs>]` + `merged_date`
-3. **被合併的報告**：
-   - 檔名加 `(superseded by #N)` 後綴
-   - frontmatter `status: withdrawn`（用 withdrawn 而非 superseded — 與「主動撤件」語義一致，索引過濾邏輯統一）
-   - frontmatter 加 `superseded_by: <主 ID>` + `superseded_date` + `superseded_reason`
-   - 保留檔案不刪，方便後續查證
-4. **同步 RECON_DB / FINDINGS_QUICK_REF**：跑 `bash automation/generate_findings_index.sh <target>`
-5. **commit 訊息**：`refactor(<target>): 合併 #A/#B/#C → #N (root cause: <一句話>)`
+1. **Pick the primary ID**: priority = submitted > ready_to_submit > needs_revalidation > draft; at the same stage, pick the highest severity
+2. **Rewrite the primary report**: merge endpoint list + PoCs + victim appendix; take the highest severity (read+write combined typically upgrades to P1); add `components: [<merged IDs>]` and `merged_date` to frontmatter
+3. **Merged-away reports**:
+   - Append `(superseded by #N)` suffix to the filename
+   - Set frontmatter `status: withdrawn` (use `withdrawn`, not a new `superseded` value — consistent with the index filter logic used elsewhere)
+   - Add frontmatter: `superseded_by: <primary ID>`, `superseded_date`, `superseded_reason`
+   - Keep the file; do not delete (useful for later reference)
+4. **Sync RECON_DB / FINDINGS_QUICK_REF**: regenerate FINDINGS_QUICK_REF (if your setup provides an index generator)
+5. **Commit message**: `refactor(<target>): merge #A/#B/#C → #N (root cause: <one-line summary>)`
 
-> **status 用 `withdrawn` 不用 `superseded` 的理由**：索引 / FINDINGS_QUICK_REF 通常已有 withdrawn 處理邏輯（過濾不顯示）；新增 superseded 會增加 schema 複雜度。`superseded_by` 欄位本身已記錄合併關係，不需另開 status 值。
+> **Why `withdrawn` instead of `superseded`:** The index / FINDINGS_QUICK_REF pipeline already has `withdrawn` filter logic. Adding a new `superseded` value increases schema complexity. The `superseded_by` field already records the merge relationship; a separate status value is not needed.
 
-## §3f.6 開新 Finding 前的預檢（強制）
+## §3f Pre-check Before Opening a New Finding (mandatory)
 
-任何 agent 開新 Finding／FORM 前必須執行：
+Any agent must run these steps before creating a new Finding or FORM:
 
 ```bash
-# 1. 先讀 FINDINGS_QUICK_REF — 看根因是否已被覆蓋
-cat workshop/<target>/FINDINGS_QUICK_REF.md | grep -i "<關鍵字>"
+# 1. Read FINDINGS_QUICK_REF — check whether the root cause is already covered
+cat workspace/workshop/<target>/FINDINGS_QUICK_REF.md | grep -i "<keyword>"
 
-# 2. 跑 vault_precheck — 端點 / host 比對
-bash automation/vault_precheck.sh <target> "<endpoint或host>" "<service>"
+# 2. Run vault_precheck — endpoint / host comparison
+bash automation/vault_precheck.sh <target> "<endpoint or host>" "<service>"
 
-# 3. 用 §3f.1 三問自我審查
+# 3. Self-audit using the §3f.1 three-question decision tree
 ```
 
-任一命中 → 停止開新 Finding，改走「合併」或「Attempt」流程。
+Any match → stop creating a new Finding; switch to the "merge" or "Attempt" workflow instead.
 
-## 用戶質疑「這不是挖過了嗎」處理 SOP
+## Handling "Wasn't This Already Found?" — SOP
 
-紅旗：用戶說「這不是挖過了嗎」/「這挖過了」→ **立刻停**，**不能繼續挖**，做以下：
+Red flag: user says "wasn't this already found?" / "we already dug this" → **stop immediately**, **do not continue hunting**, and do the following:
 
-1. 讀 `workshop/<target>/FINDINGS_QUICK_REF.md`（含父 target QUICK_REF，若是 sub-target）
-2. 列出**所有**覆蓋此區域的 Finding ID
-3. 分類：
-   - **True duplicate**（同 endpoint + 同 technique + 同 finding）→ STOP，問用戶要挖什麼新地方
-   - **新資訊在已知 endpoint**（新 cred / 新 path / 新行為，未在 RECON_DB）→ 不是 dup，**明確說**「[ID] 覆蓋此端點，但 [X] 是新的」，補 RECON_DB 再繼續
-   - **攻擊鏈**（已知 A + 新 B = 新 impact）→ 不是 dup，**明確說**「我用 [Finding ID] + 這個新發現組成鏈，目標是 [Z]」，先說 chain goal 再繼續
+1. Read `workspace/workshop/<target>/FINDINGS_QUICK_REF.md` (and the parent target's QUICK_REF if this is a sub-target)
+2. List **all** Finding IDs that cover this area
+3. Classify:
+   - **True duplicate** (same endpoint + same technique + same finding) → STOP; ask the user what new area to investigate
+   - **New information on a known endpoint** (new credential / new path / new behavior, not yet in RECON_DB) → Not a dup; **explicitly state** "[ID] covers this endpoint, but [X] is new"; update RECON_DB, then continue
+   - **Attack chain** (known A + new B = new impact) → Not a dup; **explicitly state** "I'm using [Finding ID] + this new discovery to build a chain; goal is [Z]"; state the chain goal first, then continue
 
-**禁用 pattern**：「I'm using it for a different purpose」WITHOUT 命名 specific 新資訊或 chain → 是 rationalization 紅旗 = duplicate → STOP
+**Prohibited pattern:** saying "I'm using it for a different purpose" WITHOUT naming a specific new piece of information or a concrete chain goal → this is a rationalization red flag = duplicate → STOP
 
-詳見 memory `feedback_no_goal_shifting_on_duplicate` + `feedback_dedup_root_cause`。
+See also `09 - Knowledge Base/Lessons Learned.md` for lessons on duplicate root-cause judgment and goal-shifting rationalization.
 
 ## Cross-reference
 
-- AGENTS.md §3f（已 promote 到本 skill）
-- memory `feedback_dedup_root_cause`
-- memory `feedback_no_goal_shifting_on_duplicate`
+- AGENTS.md §3f (promoted to this skill)
+- `09 - Knowledge Base/Lessons Learned.md`
 - automation/vault_precheck.sh
-- workshop/`<target>`/FINDINGS_QUICK_REF.md
+- `workspace/workshop/<target>/FINDINGS_QUICK_REF.md`

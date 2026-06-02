@@ -11,13 +11,13 @@ Optionally: specific hunters to run (e.g., `--only git-exposed,sms-static-cred`)
 
 ## Step 1 — Pre-run deduplication check
 
-Read these files first to know what's already discovered:
+Read these files first to know what is already discovered:
 ```bash
-cat workshop/<target>/FINDINGS_QUICK_REF.md
-cat workshop/<target>/RECON_DB.md
+cat workspace/workshop/<target>/FINDINGS_QUICK_REF.md
+cat workspace/workshop/<target>/RECON_DB.md
 ```
 
-If either file doesn't exist, run:
+If either file does not exist, run:
 ```bash
 bash automation/init_target.sh <target>
 ```
@@ -25,62 +25,71 @@ bash automation/init_target.sh <target>
 ## Step 2 — Check scope
 
 ```bash
-cat workshop/<target>/SCOPE.md 2>/dev/null | head -40
+cat workspace/workshop/<target>/SCOPE.md 2>/dev/null | head -40
 ```
 
-Note any out-of-scope domains/IPs. Never run hunters against OOS targets.
+Note any out-of-scope domains/IPs. Never run hunters against out-of-scope targets.
 
 ## Step 3 — Run hunters
 
+bbflow is a CLI tool that runs on a VPS or isolated runner (see `tools/README.md` — do not call `tools/bbflow.sh`, it does not exist). Run hunters via the bbflow CLI:
+
 ```bash
-bash tools/bbflow.sh hunt <target>
+bbflow hunt <target> --hunters all
 ```
 
 Or with specific hunters:
 ```bash
-bash tools/bbflow.sh hunt <target> --only <hunter1>,<hunter2>
+bbflow hunt <target> --hunters <hunter1>,<hunter2>
 ```
 
 To list available hunters first:
 ```bash
-bash tools/bbflow.sh list
+bbflow list
 ```
+
+To generate a report after the hunt completes:
+```bash
+bbflow report <target>
+```
+
+> Note: `bbflow hunt` and `bbflow report` must be run on the VPS/isolated runner per `tools/README.md`. Do not run these commands against live targets from your local machine.
 
 ## Step 4 — Parse results
 
 After running, check:
 ```bash
-ls workshop/<target>/hits/ 2>/dev/null
-cat workshop/<target>/hits/*.hit 2>/dev/null
-cat workshop/<target>/hits/*.warn 2>/dev/null
+ls workspace/workshop/<target>/hits/ 2>/dev/null
+cat workspace/workshop/<target>/hits/*.hit 2>/dev/null
+cat workspace/workshop/<target>/hits/*.warn 2>/dev/null
 ```
 
 ## Step 5 — Classify each hit
 
 For each hit result, determine:
 - **Already known?** — check against RECON_DB.md and FINDINGS_QUICK_REF.md
-- **New cred/path/endpoint?** → append to RECON_DB.md under the correct section
-- **New significant vulnerability?** → recommend creating a Vault Finding
-- **Service version / firmware build revealed in hit?** (e.g., nuclei fingerprint, banner with version, JS bundle build id, exposed `/version` endpoint) → **flag for §0g pre-flight** before any deep analysis or Finding creation
+- **New credential/path/endpoint?** — append to RECON_DB.md under the correct section
+- **New significant vulnerability?** — recommend creating a Vault Finding
+- **Service version / firmware build revealed in hit?** (e.g., nuclei fingerprint, banner with version, JS bundle build id, exposed `/version` endpoint) — **flag for version+CVE pre-flight** before any deep analysis or Finding creation
 
-## Step 5.5 — §0g pre-flight flag（version+CVE 預檢標記，NOT auto-run）
+## Step 5.5 — Version+CVE pre-flight flag (NOT auto-run)
 
-If any hit reveals concrete `<vendor>/<product>/<version>` info, **mark it** for §0g pre-flight check. **Do NOT auto-run web search per hit** — too expensive. Instead, surface it in Step 8 summary so the user (or next session) runs `bb-version-cve-precheck` skill before deep analysis.
+If any hit reveals concrete `<vendor>/<product>/<version>` info, **mark it** for version+CVE pre-flight check. **Do NOT auto-run web search per hit** — too expensive. Instead, surface it in Step 8 summary so the user (or next session) runs the `bb-version-cve-precheck` skill before deep analysis.
 
 Mark format in RECON_DB Session Log:
 ```
-| YYYY-MM-DD | bbflow hunt | <hunter> | hit: <vendor>/<product>/<version> @ <url> [needs §0g pre-flight] |
+| YYYY-MM-DD | bbflow hunt | <hunter> | hit: <vendor>/<product>/<version> @ <url> [needs version+CVE pre-flight] |
 ```
 
-Why this matters: AGENTS.md §0g forbids deep analysis / Finding creation on a known-CVE target. QN-003 教訓 = 6h sunk cost when 5min web search would've avoided. bbflow surfaces the version data — but the **decision to proceed or abort** is §0g's job, run separately via skill or `automation/precheck_version_cve.sh`.
+Why this matters: AGENTS.md section 0g forbids deep analysis or Finding creation on a known-CVE target. A previous engagement sank 6 hours when a 5-minute web search would have revealed an existing CVE (e.g., ACME-001-style scenario). bbflow surfaces the version data — but the **decision to proceed or abort** is the version+CVE pre-flight job, run separately via the `bb-version-cve-precheck` skill.
 
 ## Step 6 — Update RECON_DB.md
 
-Append new discoveries to `workshop/<target>/RECON_DB.md`:
-- New credentials → `## 🔑 Credentials & Keys` section
-- New paths/endpoints → `## 🛤 Discovered Paths & Endpoints` section
-- New infra/IPs → `## 🖥 Internal Infrastructure` section
-- New accounts → `## 👤 Accounts & Usernames` section
+Append new discoveries to `workspace/workshop/<target>/RECON_DB.md`:
+- New credentials — `## 🔑 Credentials & Keys` section
+- New paths/endpoints — `## 🛤 Discovered Paths & Endpoints` section
+- New infra/IPs — `## 🖥 Internal Infrastructure` section
+- New accounts — `## 👤 Accounts & Usernames` section
 
 Also append to the Session Log at the bottom:
 ```
@@ -90,7 +99,7 @@ Also append to the Session Log at the bottom:
 ## Step 7 — Commit
 
 ```bash
-git add workshop/<target>/RECON_DB.md workshop/<target>/hits/
+git add workspace/workshop/<target>/RECON_DB.md workspace/workshop/<target>/hits/
 git commit -m "[recon] <target>: bbflow hunt — <summary of new findings>"
 ```
 
@@ -100,20 +109,16 @@ Output a clean summary:
 - Hunters run: N
 - New hits: N (list each)
 - Already known: N
-- **§0g pre-flight needed**: N hits revealed `<vendor>/<product>/<version>` — list each with suggested command:
-  ```
-  bash automation/precheck_version_cve.sh <vendor> <product> <version>
-  ```
-  Or invoke skill `bb-version-cve-precheck` before deep analysis / Finding creation.
+- **Version+CVE pre-flight needed**: N hits revealed `<vendor>/<product>/<version>` — list each and suggest running the `bb-version-cve-precheck` skill before deep analysis or Finding creation.
 - RECON_DB updated: yes/no
-- Recommended next steps (e.g., "create Vault Finding for X — but run §0g first")
+- Recommended next steps (e.g., "create Vault Finding for X — but run version+CVE pre-flight first")
 
 ## Rules
 
 - Never run destructive tests. Hunters are read-only probes.
-- If a hunter outputs credentials, immediately check if they're already in RECON_DB before treating as new.
+- If a hunter outputs credentials, immediately check if they are already in RECON_DB before treating as new.
 - If scope is unclear, ask before running.
 - Do NOT commit raw scan logs (only commit RECON_DB summary + hit files).
-- **Do NOT recommend creating a Vault Finding for any version-bearing hit without first running §0g pre-flight** (AGENTS.md §0g). Surface the hit + flag it; let the user / next session run the precheck.
-- Theoretical attack chains are NOT to be reported as facts (anti-exaggeration, AGENTS.md §5).
-- Reports / Findings must NOT contain internal IDs (`LOGI-001`, `Advisory A`, etc.) — AGENTS.md §5 + memory `feedback_no_internal_ids_in_reports`.
+- **Do NOT recommend creating a Vault Finding for any version-bearing hit without first running the version+CVE pre-flight** (AGENTS.md section 0g). Surface the hit and flag it; let the user or next session run the precheck via the `bb-version-cve-precheck` skill.
+- Theoretical attack chains must NOT be reported as facts (anti-exaggeration, AGENTS.md section 5).
+- Reports and Findings must NOT contain internal IDs (e.g., `ACME-001`, advisory reference codes) in external-facing submissions — AGENTS.md section 5.

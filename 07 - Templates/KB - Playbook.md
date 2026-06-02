@@ -9,26 +9,26 @@ added: <% tp.date.now("YYYY-MM-DD") %>
 
 # <% tp.system.prompt("Playbook Title") %>
 
-> 一句話說明這份 Playbook 涵蓋的攻擊面或方法論。
+> One-sentence description of the attack surface or methodology this Playbook covers.
 
 ---
 
-## 核心觀念
+## Core Concepts
 
-## 測試步驟
+## Testing Steps
 
-## 工具清單
+## Tool List
 
-| 工具 | 用途 | 安裝 |
-|------|------|------|
+| Tool | Purpose | Installation |
+|------|---------|-------------|
 
-## 完整 Checklist
+## Full Checklist
 
 - [ ]
 
 ---
 
-## 相關筆記
+## Related Notes
 
 - [[Pattern - ]]
 - [[Checklist - ]]

@@ -19,7 +19,7 @@ tags:
 
 # Credential — {{TARGET}} — {{KIND}}
 
-> ⚠️ 明文 / 真值 / hash 只放在下方的 fenced code block，**不要進 frontmatter**。
+> ⚠️ Plaintext / actual value / hash goes only in the fenced code block below — **do not put it in frontmatter**.
 > Hub: `[[Target - {{TARGET}}]]`
 > Service: `[[]]`
 
@@ -27,7 +27,7 @@ tags:
 
 ## 1. Snapshot
 
-| 欄位 | 值 |
+| Field | Value |
 |---|---|
 | Target | `[[]]` |
 | Service | `[[]]` |
@@ -42,15 +42,15 @@ tags:
 
 ---
 
-## 2. 真值（敏感）
+## 2. Actual Value (sensitive)
 
 ```
-<!-- 明文 / hash / 真值放這裡。不要 commit 這個 block 到 public repo。 -->
+<!-- Put plaintext / hash / actual value here. Do not commit this block to a public repo. -->
 ```
 
 ---
 
-## 3. 怎麼挖到的
+## 3. How It Was Found
 
 - Tool / command:
 - Source path:
@@ -62,37 +62,37 @@ tags:
 
 ---
 
-## 4. 驗證 PoC
+## 4. Verification PoC
 
 ```bash
-# 證明憑證可用
+# Prove the Credential is usable
 curl -H "Authorization: Bearer ..." https://api.example.com/me
 ```
 
-預期回應：
+Expected response:
 - HTTP code:
-- Body 摘要:
+- Body summary:
 
 ---
 
 ## 5. Privilege / Blast Radius
 
-- 拿到後可以做什麼：
-- 影響到的其他 service / target：
-- 這條憑證是否被 reuse 在別的環境？
+- What can be done with this Credential:
+- Other services / targets affected:
+- Is this Credential reused in other environments?
 
 ---
 
-## 6. 升級成 Finding
+## 6. Upgrade to Finding
 
-- 對應 Finding: `[[Finding - ...]]`
-- VRT 分類：
-- CVSS：
+- Corresponding Finding: `[[Finding - ...]]`
+- VRT category:
+- CVSS:
 
 ---
 
 ## 7. Disclosure
 
-- 通報日期：
-- Rotation 確認：
-- 後續責任揭露：
+- Reported date:
+- Rotation confirmed:
+- Follow-up responsible disclosure:

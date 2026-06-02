@@ -1,134 +1,134 @@
 # {{TARGET}} — Recon Database
 
-> **Session 開頭必讀**（搭配 FINDINGS_QUICK_REF.md）。這份記錄所有原始 recon 數據：憑證、路徑、帳號、infra。
-> 每次找到新東西就追加，commit 儲存。
-> 最後更新：{{DATE}}
+> **Required reading at session start** (alongside FINDINGS_QUICK_REF.md). This file records all raw recon data: Credentials, paths, accounts, and infrastructure details.
+> Append new findings as you go; commit to save.
+> Last updated: {{DATE}}
 
 ---
 
-## 狀態速覽
+## Status Overview
 
-| 項目 | 內容 |
-|------|------|
+| Field | Value |
+|-------|-------|
 | Platform | |
 | Program URL | |
-| 最後 recon 日期 | |
-| 目前狀態 | active / parked / closed |
-| 已知 findings | 見 FINDINGS_QUICK_REF.md |
-| 重點攻擊面 | — |
+| Last Recon Date | |
+| Current Status | active / parked / closed |
+| Known Findings | See FINDINGS_QUICK_REF.md |
+| Key Attack Surface | — |
 
 ---
 
-## ⏳ Deferred Actions（已部署，等觸發）
+## ⏳ Deferred Actions (deployed, awaiting trigger)
 
-> **新 session 必讀。** 已執行但尚未觸發的動作。「找到端點」≠「已部署動作」——凡是部署了 payload、寫入了檔案、觸發了需等待的鏈條，必須在此紀錄狀態，並在 memory 更新。
+> **Required reading at session start.** Actions that have been executed but not yet triggered. "Found an endpoint" does not equal "action deployed" — any deployed payload, written file, or chain step awaiting a callback must be recorded here with its current status, and reflected in memory.
 
-_目前無 deferred action。_
+_No deferred actions at this time._
 
 <!--
-範例欄位（有 deferred action 時填入）：
+Example row (fill in when a deferred action exists):
 
-| 動作描述 | 目標主機 | 部署時間 | 觸發條件 | 已觸發 | 回呼 / 回傳 |
-|---------|---------|---------|---------|-------|------------|
-| /app/main.py payload write（#84） | api.example.com PROD | Session N | pod 自然重啟 | ❌ | VPS :80/rce_proof |
+| Action Description | Target Host | Deployed At | Trigger Condition | Triggered | Callback / Response |
+|--------------------|------------|-------------|-------------------|-----------|---------------------|
+| /app/main.py payload write (#84) | api.example.com PROD | Session N | pod natural restart | ❌ | VPS :80/rce_proof |
 
-SSRF 能力邊界（常見誤解）：
-- 「服務可達（oracle confirmed）」≠「可讀取回應」≠「可利用」
-- 若是 blind SSRF：只能確認連通性，無法讀任何回應內容
+SSRF capability boundaries (common misconceptions):
+- "Service reachable (oracle confirmed)" ≠ "response readable" ≠ "exploitable"
+- Blind SSRF: can only confirm connectivity; cannot read any response content
 -->
 
 ---
 
 ## 🔑 Credentials & Keys
 
-> ⚠️ 內部使用，不得出現在送給平台的表單或 ZIP。
+> ⚠️ Internal use only — must not appear in platform submissions or ZIP attachments.
 
-| Type | User / Key | Value | Host / Service | 來源 | 狀態 |
-|------|-----------|-------|---------------|------|------|
+| Type | User / Key | Value | Host / Service | Source | Status |
+|------|-----------|-------|---------------|--------|--------|
 | — | — | — | — | — | — |
 
 ---
 
-## 🔍 Known Artifacts（已確認存在，勿重複挖）
+## 🔍 Known Artifacts (confirmed to exist — do not re-investigate)
 
-> **每次確認一個 finding，立刻把所有具體識別子（姓名、IP、token、email、分機、版本等）追加到這裡。**
-> vault_precheck.sh 會搜這個 section — 這是你最重要的去重防線。
-> 格式：`| #NNN | <類型> | <值 1>、<值 2>... | <備註> |`
+> **Each time you confirm a finding, immediately append all concrete identifiers (names, IPs, tokens, emails, extensions, versions, etc.) here.**
+> The dedup pre-check script searches this section — this is your primary deduplication line of defense.
+> Format: `| #NNN | <type> | <value 1>, <value 2>... | <notes> |`
 
-| Report | 類型 | 具體識別子 | 備註 |
-|--------|------|-----------|------|
+| Report | Type | Concrete Identifiers | Notes |
+|--------|------|----------------------|-------|
 | — | — | — | — |
 
 ---
 
 ## 🛤 Discovered Paths & Endpoints
 
-> Confidence: **TENTATIVE**（間接跡象）→ **FIRM**（直接觀測）→ **CONFIRMED**（多源驗證）
+> Confidence: **TENTATIVE** (indirect hints) → **FIRM** (direct observation) → **CONFIRMED** (multi-source verified)
 
-| URL / Path | Method | Auth? | 回應 | Confidence | 備註 | 狀態 |
-|-----------|--------|-------|------|-----------|------|------|
+| URL / Path | Method | Auth? | Response | Confidence | Notes | Status |
+|-----------|--------|-------|----------|-----------|-------|--------|
 | — | — | — | — | — | — | — |
 
 ---
 
 ## 🖥 Internal Infrastructure
 
-| Host / IP | Port | 角色 | 來源 |
-|-----------|------|------|------|
+| Host / IP | Port | Role | Source |
+|-----------|------|------|--------|
 | — | — | — | — |
 
 ---
 
 ## 👤 Accounts & Usernames
 
-| 帳號 | 平台 / 系統 | 備註 | 來源 |
-|------|-----------|------|------|
+| Account | Platform / System | Notes | Source |
+|---------|------------------|-------|--------|
 | — | — | — | — |
 
 ---
 
 ## 📦 Technology Stack
 
-| Service / Framework | Version | 位置 | 備註 |
-|--------------------|---------|------|------|
+| Service / Framework | Version | Location | Notes |
+|--------------------|---------|----------|-------|
 | — | — | — | — |
 
 ---
 
-## 🎯 Attack Surface（已測 / 未測）
+## 🎯 Attack Surface (tested / untested)
 
-| 端點 / 功能 | 狀態 | 優先度 | 下一步 | Attack Path Hint |
-|-----------|------|--------|--------|-----------------|
-| — | 未測 | — | — | — |
+| Endpoint / Feature | Status | Priority | Next Step | Attack Path Hint |
+|-------------------|--------|----------|-----------|-----------------|
+| — | untested | — | — | — |
 
 ---
 
-## 🛡️ Pre-flight Checks（§0g — 動手前版本+CVE 預檢）
+## 🛡️ Pre-flight Checks (version + CVE check before analysis)
 
-> **何時填**：拿到具體 target 版本或 cloud target 後、動手分析前，依 AGENTS.md §0g 跑預檢並把結果記在此處。
-> **多版本目標**：一個版本（或一個機型）一個 entry；同 vendor 多機型 firmware 分別記錄。
-> **SaaS / Cloud**：用 §0g.9 子表 B 模板；有版本號 target 用子表 A。
+> **When to fill**: After obtaining a concrete target version or identifying a cloud target, before starting analysis — run the version and CVE pre-flight check and record results here.
+> **Multi-version targets**: One entry per version (or per model); separate entries for each firmware model under the same vendor.
+> **SaaS / Cloud**: Use the cloud target sub-table template; use the versioned target sub-table for targets with a version number.
 
-_尚無記錄。第一次跑 §0g 時依 AGENTS.md §0g.9 模板新增 entry。_
+_No entries yet. Add an entry the first time you run the pre-flight check._
 
 ---
 
 ## 📋 Operation Log
 
-> **送出請求之前先填一行（執行前記錄）。** `結果` 欄預填 `pending`，執行後立即更新。
-> 需記錄：任何 POST/PUT/PATCH/DELETE、手動 curl GET（測試端點）、exploit/payload 測試。
-> 不需記錄：自動化掃描工具逐條輸出、VPS 後台腳本（poller/C2/exploit.sh）、純瀏覽器 UI 操作。
+> **Log a row before sending any request (pre-execution logging).** Pre-fill the `Result` column with `pending`; update immediately after execution.
+> Log: any POST/PUT/PATCH/DELETE, manual curl GET (endpoint probing), exploit/payload tests.
+> Skip: automated scanner per-line output, background VPS scripts (poller/C2/exploit.sh), plain browser UI interactions.
 >
-> 取得來源 IP：`curl -s https://ifconfig.me`（本機）或 `ssh <vps-user>@<vps-ip> "curl -s ifconfig.me"`（VPS）
+> Get source IP: `curl -s https://ifconfig.me` (local) or `ssh <vps-user>@<vps-ip> "curl -s ifconfig.me"` (VPS)
 
-| 時間（本地） | 時間（UTC） | 來源 IP | 方法 | 目標 URL | 意圖說明 | 結果 |
+| Time (local) | Time (UTC) | Source IP | Method | Target URL | Intent | Result |
 |---|---|---|---|---|---|---|
 | — | — | — | — | — | — | — |
 
 ---
 
-## 📝 Session Log（滾動追加）
+## 📝 Session Log (rolling append)
 
-### {{DATE}} — 初始化
+### {{DATE}} — Initialized
 
-- RECON_DB 建立
+- RECON_DB created

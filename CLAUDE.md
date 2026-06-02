@@ -74,7 +74,7 @@ bash automation/session_end_brief.sh <scope>
 | GET-first principle | AGENTS.md section 6a + 6c | POST/PUT/PATCH/DELETE requires known consequence; uncertain = do not execute |
 | Operation log | AGENTS.md section 6d | Log non-scan commands to RECON_DB Operation Log before executing |
 | Unified Finding-style | AGENTS.md section 3e | Every vuln = Finding -> Submission -> FORM with matching IDs |
-| Candidate lifecycle gates | AGENTS.md section 3e | candidate -> safety / chain / evidence / attempt / submission / KB gates |
+| Candidate lifecycle gates | AGENTS.md section 3e.1 | candidate -> safety / chain / evidence / attempt / submission / KB gates |
 | Discovery Log 5 columns | AGENTS.md section 3b | Time, source IP, target IP, audit ref, action+result |
 | KB lookup 3 triggers | AGENTS.md section 0c | Before research / during hunting / before reporting |
 | KB backfill 6 types | AGENTS.md Knowledge Capture | technique / decision tree / chain / stop-loss / pitfall / checklist |
@@ -100,7 +100,7 @@ Paste at the end of subagent prompts:
 
 ```
 ## Rules (mandatory)
-- Before creating Finding: read workshop/<target>/FINDINGS_QUICK_REF.md to avoid duplicates
+- Before creating Finding: read workspace/workshop/<target>/FINDINGS_QUICK_REF.md to avoid duplicates
 - Theoretical attack chains must not be written as facts (anti-exaggeration)
 - Finding format: Finding -> Submission -> FORM, see AGENTS.md section 3e
 - Discovery Log 5 columns: time [IP->IP] [audit:ref] action->result
@@ -117,7 +117,7 @@ Paste at the end of subagent prompts:
 2. New submissions are canonical in Vault `Submissions/Forms/`; local `reports/` is only a private scratch/export area
 3. PoC/payload files go to `workspace/workshop/<target>/poc/`
 4. Submission-ready versions: theoretical chains must not be written as accomplished facts
-5. graphify subagents must use `model: "sonnet"` (parallel <= 4-5 chunks)
+5. (Optional) If you wire up a knowledge-graph indexer over `09 - Knowledge Base/`, run it after KB changes. The tool is your choice and not required by the framework.
 
 ---
 

@@ -3,24 +3,24 @@ name: bb-context-handoff
 description: Use when session context is low, work needs checkpointing, takeover is needed, user says 快滿了/整理進度/handoff/checkpoint/context low/takeover/接手, or a long bug bounty session reaches a natural handoff point.
 ---
 
-# Bug Bounty — Context Window 管理 + 接手協議（§0f 規則）
+# Bug Bounty — Context Window Management + Takeover Protocol
 
-> **2026-05-16 從 AGENTS.md §0f promote 到 skill**：handoff 是高風險操作（搞錯會丟失 work-in-progress），獨立 skill 強制 trigger 完整流程。
+> **Promoted from AGENTS.md (the bb-context-handoff skill) to a standalone skill (2026-05-16):** A handoff is a high-risk operation — done incorrectly it causes loss of work-in-progress. A standalone skill forces the full process to run.
 
-## 何時觸發 handoff
+## When to Trigger a Handoff
 
-**LLM 沒辦法自己感知剩多少 token**。觸發時機：
+**The LLM cannot sense how many tokens remain.** Trigger on any of the following:
 
-| Trigger | 場景 |
+| Trigger | Situation |
 |---|---|
-| 用戶顯式 | 「快滿了 / 整理進度 / handoff / checkpoint / 接手」 |
-| LLM 自覺 | 寫完一份報告、跑完大型 PoC、確認 / 否定一個 hypothesis — 天然斷點 |
-| 結構性 | 同 session 跑了 ≥ 30 turn 或 ≥ 1.5hr 後檢查是否該 handoff |
-| 系統 | Claude Code 顯示 context warning 時 |
+| Explicit user request | "running out of context / summarize progress / handoff / checkpoint / takeover" |
+| Natural LLM milestone | Finished writing a report, completed a large PoC, confirmed or ruled out a hypothesis — natural breakpoint |
+| Structural check | Same session has run >= 30 turns or >= 1.5 hours — check whether a handoff is appropriate |
+| System signal | Claude Code displays a context warning |
 
-## Handoff 流程（current session，context 快滿時）
+## Handoff Process (current session — context nearly full)
 
-### Step 1：verify lock is alive
+### Step 1: Verify lock is alive
 
 ```bash
 jq . automation/active_sessions/<scope>.lock
@@ -34,126 +34,125 @@ p.write_text(json.dumps(d, indent=2))
 "
 ```
 
-確保 lock 還活著（stale lock 可能被其他 session 用 `--force` 搶走）。
+Ensure the lock is still alive. A stale lock may be claimed by another session using `--force`.
 
-### Step 2：**不釋放 lock**
+### Step 2: Do NOT release the lock
 
-讓接手 session 用 `--takeover`，否則別人會搶到。
+Leave it for the takeover session to claim with `--takeover`; otherwise another session may grab it.
 
-### Step 3：寫 In-Progress block 到 HANDOFF.md
+### Step 3: Write an In-Progress block to HANDOFF.md
 
-Edit `workshop/<target>/HANDOFF.md`，加入：
+Edit `workspace/workshop/<target>/HANDOFF.md` and add:
 
 ```markdown
-<!-- BEGIN_INPROGRESS — 由 handoff 流程寫入；新 dump 會 overwrite 此區 -->
-## In-Progress（session <短 id> → next session takeover）
+<!-- BEGIN_INPROGRESS — written by the handoff process; a new dump will overwrite this block -->
+## In-Progress (session <short-id> → next session takeover)
 
-> Handoff 時間：<ISO timestamp>
-> Reason：<context-low / explicit-handoff / milestone>
-> Model：<claude-sonnet-4-6 / claude-opus-4-7>
-> Scope：<lock scope>
+> Handoff time: <ISO timestamp>
+> Reason: <context-low / explicit-handoff / milestone>
+> Model: <claude-sonnet-4-6 / claude-opus-4-7>
+> Scope: <lock scope>
 
-### 已完成（不要重做）
+### Completed (do not redo)
 - [x] ...
 
-### 進行中（接手第一步）
-- [ ] **next**: <精準到可複製執行的指令 / URL>
+### In Progress (takeover session's first step)
+- [ ] **next**: <command / URL precise enough to copy-paste and execute>
 
-### 已驗證 hypothesis
+### Confirmed hypotheses
 - ...
 
-### 已否定 hypothesis
+### Ruled-out hypotheses
 - ...
 
-### Pending decisions（接手 session 確認）
+### Pending decisions (confirm in takeover session)
 - ...
 
 ### File locations
-- workshop/`<target>`/recon/...
-- Vault `01 - Targets/<t>/Findings/Finding - <t> - <ID>.md`
+- workspace/workshop/<target>/recon/...
+- Vault 01 - Targets/<t>/Findings/Finding - <t> - <ID>.md
 
-### DO NOT do（避免重複）
+### DO NOT do (avoid repeating)
 - ...
 <!-- END_INPROGRESS -->
 ```
 
-### Step 4：commit + 結束
+### Step 4: Commit and close
 
 ```bash
-git add workshop/<target>/HANDOFF.md
+git add workspace/workshop/<target>/HANDOFF.md
 git commit -m "[handoff] <target>: context-low @ <milestone>"
 ```
 
-## 接手流程（new session）
+## Takeover Process (new session)
 
-### Step 1：讀環境
+### Step 1: Read the environment
 
 ```bash
 bash automation/check_active_sessions.sh
-cat workshop/<target>/HANDOFF.md
+cat workspace/workshop/<target>/HANDOFF.md
 ```
 
-### Step 2：看 `## In-Progress` 段
+### Step 2: Check the `## In-Progress` block
 
-**如果存在 In-Progress**：
+**If an In-Progress block exists:**
 
 ```bash
 bash automation/claim.sh <scope> --takeover --owner=<new model>
-# claim.sh 會檢查 HANDOFF.md 含 BEGIN_INPROGRESS，否則拒絕；
-# 通過後把前 session lock 移到 _expired/<scope>.takeover-from-<sid>
+# claim.sh verifies that HANDOFF.md contains BEGIN_INPROGRESS; rejects if not found.
+# On success, moves the previous session lock to _expired/<scope>.takeover-from-<sid>
 ```
 
-**如果不存在**：用 `claim.sh <scope>` 一般 claim（前 session 自然完成；非接手場景）。
+**If no In-Progress block exists:** use `claim.sh <scope>` for a normal claim (the previous session completed naturally; this is not a takeover scenario).
 
-### Step 3：第一個訊息給用戶
+### Step 3: First message to the user
 
 ```
-接手 from session `<前 id>`，立即下一步是 `<In-Progress 第一條>`
+Takeover from session `<previous-id>`. Immediate next step: `<first item from In-Progress>`
 ```
 
-### Step 4：工作中隨時 update
+### Step 4: Update In-Progress as work proceeds
 
-工作中可隨時 update `## In-Progress` 段（perl marker 替換或 LLM Edit）。BEGIN/END marker 隔離此區塊，其他 automation 不會動到。
+The In-Progress block can be updated at any point during work (replace content between the BEGIN/END markers). The markers isolate this block; other automation scripts will not touch it.
 
-### Step 5：完成所有 In-Progress 後
+### Step 5: After all In-Progress items are complete
 
-整段刪除（保留 marker 但內容空），跑 vault-sync 寫 `## Last Completed Session`。
+Delete the block content (keep the markers but leave the content empty), then run vault-sync to write `## Last Completed Session`.
 
 ## `--takeover` vs `--force`
 
-| 選項 | 用途 | HANDOFF.md 要求 |
+| Option | Purpose | HANDOFF.md requirement |
 |---|---|---|
-| `--takeover` | 合作交接（前 session context 滿、留下交接訊息） | 必須有 BEGIN_INPROGRESS 段 |
-| `--force` | 強搶（前 session 死掉、過期未自動清、沒留交接） | 不檢查；有資料丟失風險 |
+| `--takeover` | Cooperative handoff (previous session context full, left handoff notes) | Must have BEGIN_INPROGRESS block |
+| `--force` | Forced grab (previous session crashed, expired without auto-cleanup, left no handoff) | No check; risk of data loss |
 
-## 異常結束的手動操作
+## Manual Operations for Abnormal Terminations
 
-| 情境 | 動作 |
+| Situation | Action |
 |---|---|
-| Session 結束但忘了跑 session_end_checklist.sh | `bash automation/release.sh <scope>` 手動釋放 |
-| Lock 過期 30min+ 仍在 active_sessions/（sweep 沒生效）| `bash automation/release.sh --all` 全清 + 通報維護 |
-| 想看最近 history | `git log --oneline --grep "<target>:" -20`（HANDOFF.md 不存 Recent Activity，避免被 git add -A 夾帶） |
-| Vault Dashboard 沒同步 | 手動更新 `00 - Dashboard/Dashboard.md`（或實作 regen script） |
+| Session ended but `session_end_checklist.sh` was not run | `bash automation/release.sh <scope>` to release manually |
+| Lock expired 30+ minutes ago and still in active_sessions/ (sweep did not fire) | `bash automation/release.sh --all` to clear all + notify maintenance |
+| Want to see recent history | `git log --oneline --grep "<target>:" -20` (HANDOFF.md does not store Recent Activity to avoid accidental `git add -A` inclusion) |
+| Vault Dashboard out of sync | Update `00 - Dashboard/Dashboard.md` manually (or implement a regen script) |
 
-## 查詢命令備忘
+## Quick Reference Commands
 
 ```bash
-# 看誰在做什麼
+# See what is currently active
 bash automation/check_active_sessions.sh
 
-# 看 <target> 最近活動（替代 Recent Activity）
+# See recent activity for <target> (replaces Recent Activity)
 git log --oneline --grep "<target>:" -20
 
-# 看單一 lock 詳情
+# Inspect a single lock
 jq . automation/active_sessions/<scope>.lock
 ```
 
 ## Cross-reference
 
-- AGENTS.md §0f（已 promote 到本 skill）
-- automation/start_session.py（claim + brief）
-- automation/end_session.py（checklist + release）
-- automation/check_vault.py（health check）
-- automation/claim.sh / release.sh（bash wrappers）
+- automation/start_session.py (claim + brief)
+- automation/end_session.py (checklist + release)
+- automation/check_vault.py (health check)
+- automation/claim.sh / release.sh (bash wrappers)
 - automation/templates/HANDOFF_template.md
-- skill bb-triage-response（若 handoff 同時要處理 triage 回覆）
+- skill bb-triage-response (if the handoff coincides with a pending triage response)

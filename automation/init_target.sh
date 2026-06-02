@@ -86,6 +86,13 @@ else
 | Local Time | UTC Time | Source IP | Method | Target URL | Intent | Result |
 |---|---|---|---|---|---|---|
 
+## 🛡️ Pre-flight Checks (version + CVE check before analysis)
+
+> When to fill: after obtaining a concrete target version or identifying a cloud target, before starting analysis — run the version and CVE pre-flight check and record results here. See the bb-version-cve-precheck skill / AGENTS.md section 0g.
+
+| Date | Target + version | Latest stable | Known CVEs / advisories | Decision (proceed / stop) |
+|------|------------------|---------------|-------------------------|---------------------------|
+
 ## Session Log
 
 ### $DATE — Initialized

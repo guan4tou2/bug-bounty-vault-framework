@@ -35,3 +35,4 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 | generate form / write report / disclosure draft | `.claude/agents/report-writer.md` |
 | session end / sync vault / checklist | `.claude/agents/vault-sync.md` |
 | CVSS / severity scoring / vector calculation | `.claude/agents/cvss-auto-scorer.md` |
+| deep-dive attack chain / chain analysis | `.claude/agents/attack-chain-deep-dive.md` |

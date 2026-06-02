@@ -9,37 +9,37 @@ added: <% tp.date.now("YYYY-MM-DD") %>
 
 # <% tp.system.prompt("Tool Name") %>
 
-## 核心概念
+## Core Concept
 
-> 一句話說明這個工具解決什麼問題。
-
----
-
-## 安裝
-
-```bash
-# 安裝指令
-```
-
-## 基本用法
-
-```bash
-# 常用指令
-```
-
-## 使用場景
-
-- 何時用這個工具
-- 適合什麼類型的目標
-
-## 限制
-
-- 無法做什麼
-- 需要什麼前提條件
+> One-sentence description of the problem this tool solves.
 
 ---
 
-## 相關筆記
+## Installation
+
+```bash
+# installation command
+```
+
+## Basic Usage
+
+```bash
+# common commands
+```
+
+## Use Cases
+
+- When to use this tool
+- What types of targets it is suited for
+
+## Limitations
+
+- What it cannot do
+- Prerequisites required
+
+---
+
+## Related Notes
 
 - [[Pattern - ]]
 - [[Playbook - ]]

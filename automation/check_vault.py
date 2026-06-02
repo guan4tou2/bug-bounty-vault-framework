@@ -44,7 +44,7 @@ KB_PREFIXES = [
     "Knowledge Base Index", "Wiki Schema",
     "Dataview -", "External Writeups",
     "AGENTS", "CLAUDE", "CODEX", "GEMINI",
-    "index", "log", "graphify-out",
+    "index", "log", "kb-index-out",
 ]
 
 

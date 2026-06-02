@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test deps
+        run: python -m pip install --upgrade pip pytest pyyaml
+      - name: Run test suite
+        run: python -m pytest tests/ -q
+      - name: Vault health check
+        run: python3 automation/check_vault.py
+      - name: Skill mirror sync check
+        run: python3 automation/sync_codex_skills.py --check

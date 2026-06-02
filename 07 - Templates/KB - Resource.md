@@ -9,33 +9,33 @@ added: <% tp.date.now("YYYY-MM-DD") %>
 
 # <% tp.system.prompt("Resource List Title") %>
 
-> 說明這份資源清單涵蓋的主題。
+> Describe the topic this Resource list covers.
 
 ---
 
-## 文章
+## Articles
 
-| 標題 | 連結 |
-|------|------|
+| Title | Link |
+|-------|------|
 
-## Writeup
+## Writeups
 
-| 標題 | 重點 |
-|------|------|
+| Title | Key Takeaway |
+|-------|-------------|
 
-## 工具
+## Tools
 
-| 工具 | 用途 | 連結 |
-|------|------|------|
+| Tool | Purpose | Link |
+|------|---------|------|
 
-## 練習場
+## Practice Labs
 
-| 平台 | 連結 |
-|------|------|
+| Platform | Link |
+|----------|------|
 
 ---
 
-## 相關筆記
+## Related Notes
 
 - [[Pattern - ]]
 - [[Playbook - ]]

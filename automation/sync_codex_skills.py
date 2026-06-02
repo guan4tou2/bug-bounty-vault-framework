@@ -146,6 +146,7 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 | generate form / write report / disclosure draft | `.claude/agents/report-writer.md` |
 | session end / sync vault / checklist | `.claude/agents/vault-sync.md` |
 | CVSS / severity scoring / vector calculation | `.claude/agents/cvss-auto-scorer.md` |
+| deep-dive attack chain / chain analysis | `.claude/agents/attack-chain-deep-dive.md` |
 """
 
 
@@ -195,9 +196,10 @@ def agent_router() -> str:
         name = agent.stem
         rows.append(f"| `{name}` | `.claude/agents/{agent.name}` |")
     table = "\n".join(rows)
+    agent_list = ", ".join(a.stem for a in claude_agent_files())
     return f"""---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, bbflow-runner, pre-recon, report-writer, vault-sync, cvss-auto-scorer, or to mirror bug bounty agent behavior in Codex.
+description: Use when asked to use project Claude agents, {agent_list}, or to mirror bug bounty agent behavior in Codex.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -227,6 +229,7 @@ Codex does not run Claude Code workspace agents natively. This skill makes their
 | generate form / write report / disclosure draft | `.claude/agents/report-writer.md` |
 | session end / sync vault / checklist | `.claude/agents/vault-sync.md` |
 | CVSS / severity scoring / vector calculation | `.claude/agents/cvss-auto-scorer.md` |
+| deep-dive attack chain / chain analysis | `.claude/agents/attack-chain-deep-dive.md` |
 """
 
 

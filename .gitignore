@@ -8,9 +8,9 @@
 # Smart Connections AI cache (rebuildable)
 .smart-env/
 
-# Graphify output (rebuildable, graph.json can reach hundreds of MB)
-09 - Knowledge Base/graphify-out/
-graphify-out/
+# Optional knowledge-graph indexer output (rebuildable, can be large)
+09 - Knowledge Base/kb-index-out/
+kb-index-out/
 
 # Workspace — local only, never goes to GitHub
 # Contains: workshop/ reports/ firmware_analysis/ logs/ tmp/

@@ -42,10 +42,13 @@ def lock_path(scope: str) -> Path:
 
 
 def find_workspace(target: str) -> Path | None:
-    for candidate in [
-        ROOT / "workspace" / "workshop" / target,
-        ROOT.parent / ".vault-workspace" / "workshop" / target,
-    ]:
+    # Default is the in-repo workspace/; an optional external workspace can be
+    # set via the VAULT_WORKSPACE env var.
+    candidates = [ROOT / "workspace" / "workshop" / target]
+    ext = os.environ.get("VAULT_WORKSPACE")
+    if ext:
+        candidates.append(Path(ext) / "workshop" / target)
+    for candidate in candidates:
         if candidate.is_dir():
             return candidate
     return None

@@ -3,37 +3,37 @@ name: bb-triage-response
 description: Use when user pastes triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, severity decision, vendor reply, or triage result.
 ---
 
-# Bug Bounty — Triage 回覆處理
+# Bug Bounty — Triage Response Handling
 
-> 高頻陷阱：用戶貼 triage 回覆時容易只討論不更新檔案。本 skill 強制觸發多處同步，避免狀態漂移。
+> High-frequency trap: when a user pastes a triage reply, the tendency is to discuss the result without updating any files. This skill forces a multi-location sync to prevent state drift.
 
-## 觸發紅旗
+## Trigger Red Flags
 
-用戶說以下任一句 = 必須觸發本 skill：
-- 「triage 回覆 / 結果」
-- 「N/A」/「Duplicate」/「Triaged」/「Accepted」/「Informative」/「Resolved」
-- 「廠商回覆 / bounty / VRT 判定」
-- 貼一段 disclosure channel / vendor comment
+Any of the following phrases must trigger this skill:
+- "triage reply / result"
+- "N/A" / "Duplicate" / "Triaged" / "Accepted" / "Informative" / "Resolved"
+- "vendor reply / bounty / VRT verdict"
+- Pasting a disclosure-channel or vendor comment
 
-**禁止：只討論 triage 結果而不同步更新檔案**。
+**Prohibited: discussing the triage result without syncing the files.**
 
-## 強制同步順序（Submission → Kanban → Target hub → Dashboard → KB → commit）
+## Mandatory Sync Order (Submission → Kanban → Target hub → Dashboard → KB → commit)
 
-所有路徑相對於 vault root（repo 根目錄）。
+All paths are relative to the vault root (repo root directory).
 
 ### 1. `01 - Targets/<target>/Submissions/Submission - <target> - <ID>.md`
 
-frontmatter 更新：
+Update frontmatter:
 
 ```yaml
 status: accepted | duplicate | na | informative | resolved | fixed
-triage_status: <平台回覆原句一句話>
+triage_status: <one-line platform response verbatim>
 triage_date: YYYY-MM-DD
-triager: <triager name 或 anonymous>
-bounty: <金額或 N/A>
+triager: <triager name or anonymous>
+bounty: <amount or N/A>
 ```
 
-body 加 `## Triage Result` 區塊：
+Add a `## Triage Result` block to the body:
 
 ```markdown
 ## Triage Result
@@ -42,90 +42,90 @@ body 加 `## Triage Result` 區塊：
 - **Status**: <Accepted/Duplicate/N/A/Informative/Resolved>
 - **Triager**: <name>
 - **Response**:
-  > <貼平台原始回覆，至少 2-3 句保留 context>
+  > <paste the platform's original reply verbatim; keep at least 2-3 sentences for context>
 - **Bounty**: $XXX / N/A
-- **Severity note**: <若有 severity 調整>
-- **Lessons**: <若有值得記的教訓>
+- **Severity note**: <if severity was adjusted>
+- **Lessons**: <any lesson worth recording>
 ```
 
 ### 2. Kanban
 
 - `01 - Targets/<target>/Kanban - <target>.md` — per-target board
-- 若你維護跨 target 總覽（例如 `00 - Dashboard/` 下的 Kanban / Dataview 看板），同步移卡
+- If you maintain a cross-target overview (e.g., a Kanban / Dataview board under `00 - Dashboard/`), sync the card there as well
 
-**移卡規則：**
+**Card movement rules:**
 
-| triage 結果 | 從 column | 移到 column |
+| Triage result | From column | Move to column |
 |---|---|---|
-| Accepted / Resolved | 📤 Submitted — Waiting | ✅ Triaged / Closed |
-| Duplicate | 📤 Submitted — Waiting | ✅ Triaged / Closed（標 dup）|
-| N/A / Informative | 📤 Submitted — Waiting | ✅ Triaged / Closed（標 N/A）|
-| Pending more info | 📤 Submitted — Waiting | ⏸️ On Hold（等廠商）|
+| Accepted / Resolved | Submitted — Waiting | Triaged / Closed |
+| Duplicate | Submitted — Waiting | Triaged / Closed (mark as dup) |
+| N/A / Informative | Submitted — Waiting | Triaged / Closed (mark N/A) |
+| Pending more info | Submitted — Waiting | On Hold (awaiting vendor) |
 
 ### 3. `01 - Targets/<target>/Target - <target>.md`
 
-更新 hub 的 Submission Status 區塊（frontmatter 與表格）。
+Update the Submission Status section (both frontmatter and the table) in the target hub file.
 
 ### 4. `00 - Dashboard/Dashboard.md`
 
-更新 `last_updated` 與 Quick Stats（若 Dashboard 由 Dataview 自動聚合則可略）。
+Update `last_updated` and Quick Stats (skip if Dashboard is auto-aggregated by Dataview).
 
-### 5. `09 - Knowledge Base/Lessons Learned.md`（若有教訓）
+### 5. `09 - Knowledge Base/Lessons Learned.md` (if a lesson applies)
 
-只有以下情況需要加 LL：
+Add a new Lessons Learned entry only when one of the following is true:
 
-- 平台政策驚訝（N/A 原因出乎意料）
-- Severity 修正改變對 severity 的認知
-- Triager 給的 framework 解釋
-- 累犯類錯誤（同一 pattern 再次 N/A）
+- Platform policy surprised you (N/A reason was unexpected)
+- Severity correction changes your understanding of severity calibration
+- Triager explained a framework or policy you were unaware of
+- Recurring mistake (same pattern resulted in N/A again)
 
-新增 LL 格式：
+New entry format:
 
 ```markdown
-### LL #NN — <短標題>（YYYY-MM-DD <target>）
+### LL #NN — <short title> (YYYY-MM-DD <target>)
 
-**情境**：<一句話>
-**Triager 回覆**：<原句>
-**教訓**：<未來怎麼避免 / 怎麼框架化>
-**Cross-ref**：[[Submission - <target> - <ID>]] / [[Pattern - ...]]
+**Context**: <one sentence>
+**Triager response**: <verbatim quote>
+**Lesson**: <how to avoid this in the future / how to frame it>
+**Cross-ref**: [[Submission - <target> - <ID>]] / [[Pattern - ...]]
 ```
 
-### 6. commit
+### 6. Commit
 
 ```bash
 git add "01 - Targets/<target>/" "09 - Knowledge Base/" "00 - Dashboard/"
-git commit -m "[triage] <target> <ID>: <Accepted|Duplicate|N/A> — <one-line>"
+git commit -m "[triage] <target> <ID>: <Accepted|Duplicate|N/A> — <one-line summary>"
 ```
 
-> 若你的私有實作有 post-commit index / graph rebuild hook，commit 會自動觸發；否則手動重建索引。
+> If your private setup has a post-commit index / graph rebuild hook, the commit will trigger it automatically; otherwise rebuild the index manually.
 
-## 還需要更新的（若相關）
+## Additional Files to Update (if relevant)
 
-- `01 - Targets/<target>/Findings/Finding - <target> - <ID>.md`（frontmatter status 與 last_verified 同步）
-- `09 - Knowledge Base/Pattern - <相關 pattern>.md`（若 triager 修正 VRT 分類）
+- `01 - Targets/<target>/Findings/Finding - <target> - <ID>.md` — sync `status` and `last_verified` in frontmatter
+- `09 - Knowledge Base/Pattern - <related pattern>.md` — if the triager corrected the VRT classification
 
-## 禁止 pattern（高頻陷阱）
+## Prohibited Patterns (high-frequency traps)
 
-| 錯誤 | 為何不可 |
+| Mistake | Why it is harmful |
 |---|---|
-| 只討論 triage 結果不改檔 | 下次 session 看不到，狀態漂移 |
-| 只改一處不改 Kanban | 看板顯示的還是「Submitted Waiting」 |
-| 跨 target 與 per-target 看板不一致 | 兩個視圖矛盾 |
-| 沒 commit | 索引 / 跨 target query 看不到更新 |
+| Discussing triage result without editing files | The next session cannot see the outcome; state drifts |
+| Updating only one location, skipping Kanban | Board still shows "Submitted Waiting" |
+| Cross-target and per-target Kanban boards inconsistent | Two views contradict each other |
+| No commit | Index / cross-target queries do not see the update |
 
-## 完整 checklist（送件後 60 秒）
+## Full Checklist (60 seconds after receiving triage)
 
-- [ ] Submission frontmatter + `## Triage Result`
-- [ ] per-target Kanban 卡片移位
-- [ ] 跨 target 看板（若有）卡片移位
-- [ ] Target hub Submission Status 區塊
-- [ ] Dashboard last_updated（若非自動聚合）
-- [ ] （若有教訓）Lessons Learned 加新條
-- [ ] commit `[triage] <target> <ID>: <status>`
+- [ ] Submission frontmatter + `## Triage Result` block
+- [ ] Per-target Kanban card moved
+- [ ] Cross-target Kanban card moved (if applicable)
+- [ ] Target hub Submission Status section updated
+- [ ] Dashboard `last_updated` updated (if not auto-aggregated)
+- [ ] (If lesson applies) New entry added to Lessons Learned
+- [ ] Commit `[triage] <target> <ID>: <status>`
 
 ## Cross-reference
 
-- `AGENTS.md §9`（Triage 回覆處理）
-- `bb-submission-readiness`（送件前 gate）
-- `bb-knowledge-capture`（教訓回流 KB）
+- `AGENTS.md §9` (triage response handling)
+- `bb-submission-readiness` (pre-submission gate)
+- `bb-knowledge-capture` (lesson backfill to KB)
 - `09 - Knowledge Base/Lessons Learned.md`

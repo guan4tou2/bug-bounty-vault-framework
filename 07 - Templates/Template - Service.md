@@ -27,7 +27,7 @@ tags:
 
 ## 1. Snapshot
 
-| 欄位 | 值 |
+| Field | Value |
 |---|---|
 | Target | `[[]]` |
 | Kind | |
@@ -42,7 +42,7 @@ tags:
 
 ## 2. Endpoints / Paths
 
-> 已知 path、admin panel 入口、API endpoint、有趣 response 的 URL。
+> Known paths, admin panel entry points, API endpoints, and URLs with interesting responses.
 
 | Path | Method | Auth | Notes |
 |---|---|---|---|
@@ -64,28 +64,28 @@ tags:
 
 ---
 
-## 4. 已驗證的弱點 / 異常
+## 4. Verified Weaknesses / Anomalies
 
-> 連到 Finding / Attempt note，配上一行 takeaway。
+> Link to Finding / Attempt notes with a one-line takeaway each.
 
 - `[[Finding - ...]]` —
 - `[[Attempt - ...]]` —
 
 ---
 
-## 5. Credentials 挖出來的東西
+## 5. Credentials Discovered
 
-> 連到 Credential note。
+> Link to Credential notes.
 
 - `[[Credential - ...]]` —
 
 ---
 
-## 6. 攻擊面備忘
+## 6. Attack Surface Notes
 
-- 待測 endpoint：
-- 想嘗試但沒空的角度：
-- 同 vendor 的 sibling service：
+- Endpoints to test:
+- Angles to try when time allows:
+- Sibling services from the same vendor:
 
 ---
 

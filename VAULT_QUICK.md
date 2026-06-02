@@ -34,18 +34,21 @@ Files in `09 - Knowledge Base/` use these naming prefixes:
 
 ## Frontmatter Requirements
 
+> These mirror the enforced schema in `_automation/lint_frontmatter.py` and `07 - Templates/`. If they ever diverge, the linter and templates win — they are the single source of truth.
+
 ### Finding (required fields)
 
 ```yaml
 ---
 fileClass: Finding
 finding_id: "<TARGET>-<NNN>"
-target: "<target>"
-host: "affected.host.com"
-severity: "Critical | High | Medium | Low | Informational"
-status: "draft | verified | submitted | accepted | duplicate | n-a | fixed"
+target: "[[Target - <target>]]"
+severity: "P1 | P2 | P3 | P4 | P5"
+verification_level: "A | B | C | D"
 verified_evidence: "live | source_code | static | theoretical"
-created: "YYYY-MM-DD"
+status: "discovered | verified | ready | submitted | duplicate | na | accepted | fixed | on_hold | killed | withdrawn"
+discovered_date: "YYYY-MM-DD"
+discovered_time: "HH:MM"
 ---
 ```
 
@@ -54,10 +57,12 @@ created: "YYYY-MM-DD"
 ```yaml
 ---
 fileClass: Submission
+type: submission
 finding_id: "<TARGET>-<NNN>"
-channel: "generic | email | cvd | private-program | internal"
-status: "draft | ready | submitted | triaged | resolved | duplicate | n-a"
-submitted_date: "YYYY-MM-DD"
+target: "[[Target - <target>]]"
+platform: "<platform>"
+severity: "P1 | P2 | P3 | P4 | P5"
+status: "ready | submitted | triaged | duplicate | na | accepted | fixed | withdrawn | needs_revalidation | superseded"
 ---
 ```
 
@@ -66,10 +71,12 @@ submitted_date: "YYYY-MM-DD"
 ```yaml
 ---
 fileClass: Form
+type: submission
 finding_id: "<TARGET>-<NNN>"
-channel: "generic | email | cvd | private-program | internal"
+target: "[[Target - <target>]]"
+platform: "<platform>"
 case_id: ""
-status: "draft | ready | submitted"
+status: "ready | submitted | withdrawn | duplicate | na | needs_revalidation | superseded"
 ---
 ```
 
@@ -83,13 +90,12 @@ Every vulnerability follows a three-document pipeline with a shared `finding_id`
 
 The `finding_id` (e.g., `ACME-001`) links all three documents together.
 
-## Graphify Integration
+## Knowledge-Graph Indexing (optional)
 
-The knowledge graph (`graphify`) indexes KB artifacts and finding relationships.
+If you wire up a knowledge-graph indexer over `09 - Knowledge Base/`, it can map KB artifacts and finding relationships. This is optional and tool-agnostic — the framework does not require any specific indexer.
 
 - **Query before creating**: check if a Pattern or Playbook already covers your topic
-- **Update after adding**: run graphify after adding new KB entries to keep the graph current
-- **Use `sonnet` model**: all graphify subagents must use the sonnet model
+- **Update after adding**: re-run your indexer after adding new KB entries to keep it current
 
 ## Templates
 

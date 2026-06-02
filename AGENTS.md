@@ -55,7 +55,7 @@ python3 automation/end_session.py <scope>
 
 Every target gets:
 - **Vault:** `01 - Targets/<target>/` with Findings, Submissions, Forms, Attempts, Recon, Services, Attack Chains, Screenshots
-- **Workspace:** `workshop/<target>/` with SCOPE.md, RECON_DB.md, HANDOFF.md, FINDINGS_QUICK_REF.md, poc/, scan_results/
+- **Workspace:** `workspace/workshop/<target>/` with SCOPE.md, RECON_DB.md, HANDOFF.md, FINDINGS_QUICK_REF.md, poc/, scan_results/
 
 **Rule:** Vault stores canonical knowledge. Workspace stores process artifacts.
 

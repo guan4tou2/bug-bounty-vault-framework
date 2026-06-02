@@ -3,7 +3,7 @@ name: bb-context-handoff
 description: Use when session context is low, work needs checkpointing, takeover is needed, user says 快滿了/整理進度/handoff/checkpoint/context low/takeover/接手, or a long bug bounty session reaches a natural handoff point.
 ---
 
-# Bug Bounty — Context Window 管理 + 接手協議（§0f 規則）
+# Bug Bounty — Context Window Management + Takeover Protocol
 
 This is a Gemini CLI compatibility wrapper. The canonical workspace skill remains:
 

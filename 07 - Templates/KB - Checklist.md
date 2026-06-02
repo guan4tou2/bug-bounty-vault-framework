@@ -9,25 +9,25 @@ added: <% tp.date.now("YYYY-MM-DD") %>
 
 # <% tp.system.prompt("Checklist Title") %>
 
-> **原則：**
+> **Guiding principle:**
 
 ---
 
-## 策略
+## Strategy
 
-## 測試項目
+## Test Items
 
 - [ ]
 
-## 報告送出前
+## Before Submission
 
-- [ ] PoC 可在 5 分鐘內重現？
-- [ ] 每個 impact 都有對應的 PoC 步驟？
-- [ ] Severity 符合平台現實標準？
+- [ ] Can the PoC be reproduced within 5 minutes?
+- [ ] Does every claimed impact have a corresponding PoC step?
+- [ ] Does the severity match the platform's real-world standards?
 
 ---
 
-## 相關筆記
+## Related Notes
 
 - [[Pattern - Triage Calibration]]
 - [[Pattern - ]]

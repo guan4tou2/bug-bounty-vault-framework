@@ -13,45 +13,45 @@ tags: []
 
 # Pattern — {{NAME}}
 
-## 簡述
+## Summary
 
-跨 target 的漏洞模式：是什麼、為什麼會出現、典型樣態。
+Cross-target vulnerability Pattern: what it is, why it occurs, and typical manifestations.
 
-## 偵測方法
+## Detection Method
 
-> 怎麼找：grep / nuclei template / Burp matcher / 自製腳本
+> How to find it: grep / nuclei template / Burp matcher / custom script
 
 ```bash
 ```
 
-## 必要條件
+## Prerequisites
 
-- 目標必須有...
-- 目標必須沒有...
+- Target must have...
+- Target must not have...
 
-## Bypass 表
+## Bypass Table
 
-| 防禦 | Bypass 方法 | 範例 |
-|------|------------|------|
+| Defense | Bypass Method | Example |
+|---------|--------------|---------|
 | | | |
 
-## 成功案例索引（可重用）
+## Reusable Success Cases
 
 | Target | Endpoint / Host | Account / Role | Primitive | Command |
-|--------|------------------|----------------|-----------|---------|
+|--------|-----------------|----------------|-----------|---------|
 | | | | | |
 
-## 典型 PoC
+## Typical PoC
 
 ```bash
 ```
 
-## 影響
+## Impact
 
-- 平台典型 severity：
-- 平台態度：（大廠的標準回應，e.g.「大廠 source map 必 N/A」）
+- Typical platform severity:
+- Platform stance: (typical response from major programs, e.g. "large programs auto-N/A source maps")
 
-## 影響的 Target
+## Affected Targets
 
 ```dataview
 LIST
@@ -60,7 +60,7 @@ WHERE contains(file.outlinks, this.file.link) AND fileClass = "Finding"
 SORT file.mtime DESC
 ```
 
-## 同類 Findings
+## Related Findings
 
 ```dataview
 TABLE target, severity, status
@@ -68,10 +68,10 @@ FROM "01 - Targets"
 WHERE contains(related_pattern, this.file.link) AND fileClass = "Finding"
 ```
 
-## 相關 Pattern
+## Related Patterns
 
 - [[]]
 
-## 學習來源
+## Learning Sources
 
-- [[]] — disclosed report / writeup / 自己的 finding
+- [[]] — disclosed report / writeup / personal finding

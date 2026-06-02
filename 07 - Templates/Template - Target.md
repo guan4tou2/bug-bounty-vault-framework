@@ -18,7 +18,7 @@ tags: []
 
 # {{org}} — {{domain}}
 
-> 一行 pitch：這個產品是什麼、誰用、為什麼有趣。
+> One-line pitch: what this product is, who uses it, and why it is interesting.
 
 ---
 
@@ -37,15 +37,15 @@ tags: []
 | Last Verified | — |
 | Rounds | 0 |
 
-> [!info] 關於本頁
-> 這是 hub 主頁。客戶清單、攻擊面細節、round log 在子頁，連結見 §5。
-> 拆頁規則：見 [[STRUCTURE]] §2.3。
+> [!info] About this page
+> This is the hub page. Customer lists, Attack Surface details, and round logs live in sub-pages linked in §5.
+> Sub-page rules: see [[STRUCTURE]] §2.3.
 
 ---
 
 ## 2. Findings Summary
 
-> 0 findings recorded — 開始 hunt 後在 Findings/_index.md 自動列出
+> 0 findings recorded — auto-listed in Findings/_index.md once hunting begins
 
 | Severity | Count | Top finding |
 |---|---|---|
@@ -54,7 +54,7 @@ tags: []
 | 🟡 Medium | 0 | — |
 | 🟢 Low / Info | 0 | — |
 
-明細：[[Findings/_index|Findings index]]
+Details: [[Findings/_index|Findings index]]
 
 ---
 
@@ -64,31 +64,31 @@ tags: []
 |---|---|---|---|
 | — | — | — | — |
 
-明細：[[Submissions/_index|Submissions index]]
+Details: [[Submissions/_index|Submissions index]]
 
 ---
 
 ## 4. Active Attack Chains
 
-- 尚無 active chain
+- No active chain yet
 
-明細：[[Attack Chains|Attack Chains folder]]
+Details: [[Attack Chains|Attack Chains folder]]
 
 ---
 
 ## 5. Quick Links
 
-- [[{{domain}} - Customers|Customers]] — 暫無資料
-- [[{{domain}} - Attack Surface|Attack Surface]] — 暫無資料
-- [[{{domain}} - Round Log|Round Log]] — 暫無資料
-- [[SCOPE]] — program scope（必須有）
+- [[{{domain}} - Customers|Customers]] — No data yet
+- [[{{domain}} - Attack Surface|Attack Surface]] — No data yet
+- [[{{domain}} - Round Log|Round Log]] — No data yet
+- [[SCOPE]] — program scope (required)
 - [[Kanban - {{domain}}|Per-target Kanban]]
 
 ---
 
 ## 6. Failed Attempts (top 3)
 
-> 最近 3 條摘要；明細在 [[Attempts/_index|Attempts]]
+> Summary of the 3 most recent; details in [[Attempts/_index|Attempts]]
 
 - —
 
