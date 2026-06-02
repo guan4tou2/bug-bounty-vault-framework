@@ -4,6 +4,20 @@ A bug bounty session has three phases: **claim**, **work**, and **closeout**. Ev
 
 This document describes the abstract workflow. The reference implementation lives in `automation/` (bash scripts) and can be replaced with any language that follows the same protocol.
 
+```mermaid
+flowchart TD
+  START([Session start]) --> CAS["check_active_sessions.sh<br/>list current locks"]
+  CAS --> CONFLICT{"Conflicting<br/>scope lock?"}
+  CONFLICT -->|"same / parent-child overlap"| WAIT["Blocked → wait or negotiate takeover"]
+  CONFLICT -->|"sibling / none"| CLAIM["claim.sh &lt;scope&gt;<br/>writes active_sessions/&lt;scope&gt;.lock"]
+  WAIT -.-> CLAIM
+  CLAIM --> BRIEF["start_session.py<br/>print HANDOFF / RECON_DB brief"]
+  BRIEF --> WORK["Work<br/>recon · candidate lifecycle · notes"]
+  WORK --> END["end_session.py<br/>closeout checklist + update HANDOFF"]
+  END --> REL["release.sh<br/>lock → active_sessions/_expired/"]
+  REL --> DONE([Next session starts informed])
+```
+
 ---
 
 ## Phase 1: Claim (Session Start)

@@ -99,6 +99,22 @@ Tooling can produce machine-readable output, but the framework does not depend o
 | Raw evidence | `workspace/` runtime directory |
 | Review-ready evidence | Finding note |
 
+## Cross-Platform Skill Sync
+
+`.claude/skills/` is the single source of truth. The Codex and Gemini mirrors are generated — never hand-edited — by `automation/sync_codex_skills.py`. The generator also emits a `bb-agent-prompts` router skill (CLI-only) that points back at the Claude agent prompts.
+
+```mermaid
+flowchart LR
+  SRC[".claude/skills/<br/>(source of truth)"] -->|sync_codex_skills.py| CDX[".codex/skills/"]
+  SRC -->|sync_codex_skills.py| GEM[".gemini/skills/"]
+  AG[".claude/agents/<br/>6 agent prompts"] -.->|"routed by"| ROUTER["bb-agent-prompts<br/>(generated, in mirrors only)"]
+  ROUTER --> CDX
+  ROUTER --> GEM
+  CHECK["sync_codex_skills.py --check<br/>(CI gate)"] -->|"fails if mirrors stale"| SRC
+```
+
+Edit a skill in `.claude/skills/`, run `python3 automation/sync_codex_skills.py`, and CI enforces parity with `--check` on every push.
+
 ## Public Boundary
 
 This public repository ends at architecture and workflow. A real deployment should keep private data in a separate private repository or local vault.
