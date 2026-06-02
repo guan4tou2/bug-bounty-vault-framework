@@ -30,6 +30,7 @@ TEMPLATE_DIR="$SCRIPT_DIR/templates"
 # Determine workspace location
 if [[ -f "$ROOT/.workspace_root" ]]; then
   WORKSPACE_ROOT=$(cat "$ROOT/.workspace_root")
+  WORKSPACE_ROOT="${WORKSPACE_ROOT%/}"   # strip trailing slash to avoid // in paths
   # Resolve relative paths
   [[ "$WORKSPACE_ROOT" != /* ]] && WORKSPACE_ROOT="$ROOT/$WORKSPACE_ROOT"
 elif [[ -d "$ROOT/workspace" ]]; then
