@@ -21,7 +21,7 @@ bash automation/setup_workspace.sh
 
 ## 3. Open in Obsidian
 
-Open the repository root as an Obsidian vault. The `.obsidian/` directory ships the **settings and a recommended plugin enable-list** — but **not** the plugin binaries. On first open, install the community plugins via **Settings → Community plugins**. **Templater** and **Dataview** are required for the templates and dashboards to work; the rest are optional. See `.obsidian/plugins/README.md` for the full list. You can enable or replace plugins based on your own note-taking style.
+Open the repository root as an Obsidian vault. The `.obsidian/` directory ships the **settings and a recommended plugin enable-list** — but **not** the plugin binaries. On first open, install the community plugins via **Settings → Community plugins**. **Templater**, **Dataview**, and **Kanban** are required for the templates, dashboards, and boards to render; the rest are optional. The full step-by-step (including how to verify the dashboards render and how to point Templater at `07 - Templates`) is in [obsidian-setup.md](obsidian-setup.md).
 
 ## 4. Optional LLM setup
 

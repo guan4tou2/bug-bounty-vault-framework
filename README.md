@@ -76,11 +76,11 @@ bash automation/setup_workspace.sh
 bash automation/init_target.sh my-target
 
 # 4. Open in Obsidian — point Obsidian at the repo root
-#    Then install community plugins (Templater + Dataview required) via
-#    Settings → Community plugins. See .obsidian/plugins/README.md.
+#    Then install community plugins (Templater + Dataview + Kanban) via
+#    Settings → Community plugins. Full guide: docs/obsidian-setup.md.
 ```
 
-For optional setup choices after cloning, see [docs/post-clone-checklist.md](docs/post-clone-checklist.md).
+For the full Obsidian setup (plugins, verifying dashboards render), see [docs/obsidian-setup.md](docs/obsidian-setup.md). For optional setup choices after cloning, see [docs/post-clone-checklist.md](docs/post-clone-checklist.md).
 
 For the public/private split, see [docs/public-vs-private.md](docs/public-vs-private.md). To add your own private downstream formatting without changing the public seed, use [docs/private-adapters.md](docs/private-adapters.md).
 
