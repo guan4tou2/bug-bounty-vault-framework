@@ -22,7 +22,7 @@ description: Use when opening a new Finding or FORM, checking duplicate likeliho
 | Q3 | 換了什麼？ |  |  |
 |    | └ 換子端點 / 換 HTTP method | **合併** | — |
 |    | └ 換查詢字串撈不同公司 / 不同 user_id | **合併**（屬枚舉證據）| — |
-|    | └ 換 host（PROD ↔ SIT ↔ DEV，同 backend）| **可合可分**（HITCON 容許分送，保守做法合併）| — |
+|    | └ 換 host（PROD ↔ SIT ↔ DEV，同 backend）| **可合可分**（部分平台容許分送，保守做法合併）| — |
 |    | └ 換 backend / 不同認證系統 / 不同 fix | — | **分開** |
 
 ## §3f.2 三種典型情境
@@ -66,13 +66,13 @@ description: Use when opening a new Finding or FORM, checking duplicate likeliho
 2. **重寫主 ID 報告**：合併端點清單 + PoC + 公司附錄，severity 取最高（讀+寫合併通常升 P1）；frontmatter 加 `components: [<被合併的 IDs>]` + `merged_date`
 3. **被合併的報告**：
    - 檔名加 `(superseded by #N)` 後綴
-   - frontmatter `status: withdrawn`（用 withdrawn 而非 superseded — 與「主動撤件」語義一致，bbops 過濾邏輯統一）
+   - frontmatter `status: withdrawn`（用 withdrawn 而非 superseded — 與「主動撤件」語義一致，索引過濾邏輯統一）
    - frontmatter 加 `superseded_by: <主 ID>` + `superseded_date` + `superseded_reason`
    - 保留檔案不刪，方便後續查證
 4. **同步 RECON_DB / FINDINGS_QUICK_REF**：跑 `bash automation/generate_findings_index.sh <target>`
 5. **commit 訊息**：`refactor(<target>): 合併 #A/#B/#C → #N (root cause: <一句話>)`
 
-> **status 用 `withdrawn` 不用 `superseded` 的理由**：bbops Action Queue / FINDINGS_QUICK_REF 已有 withdrawn 處理邏輯（過濾不顯示）；新增 superseded 會增加 schema 複雜度。`superseded_by` 欄位本身已記錄合併關係，不需另開 status 值。
+> **status 用 `withdrawn` 不用 `superseded` 的理由**：索引 / FINDINGS_QUICK_REF 通常已有 withdrawn 處理邏輯（過濾不顯示）；新增 superseded 會增加 schema 複雜度。`superseded_by` 欄位本身已記錄合併關係，不需另開 status 值。
 
 ## §3f.6 開新 Finding 前的預檢（強制）
 

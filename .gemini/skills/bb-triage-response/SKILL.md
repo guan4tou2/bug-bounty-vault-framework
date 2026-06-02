@@ -3,7 +3,7 @@ name: bb-triage-response
 description: Use when user pastes triage replies or says Accepted, Duplicate, N/A, Informative, Triaged, Resolved, bounty result, severity decision, vendor reply, or triage result.
 ---
 
-# Bug Bounty — Triage 回覆處理（§9 + §10b 規則）
+# Bug Bounty — Triage 回覆處理
 
 This is a Gemini CLI compatibility wrapper. The canonical workspace skill remains:
 

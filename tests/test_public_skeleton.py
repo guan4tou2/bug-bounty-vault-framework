@@ -565,6 +565,26 @@ def test_no_private_or_target_specific_data():
         assert needle not in content, f"Private data leak: {needle}"
 
 
+def test_no_private_infrastructure_path_patterns():
+    """Catch incomplete neutralization of the private vault's own infra.
+
+    The public repo IS the vault root, so the literal 'Bug Bounty Vault/'
+    path prefix, private auto-memory files, private tooling names, and the
+    wrong '09 - KB/' folder abbreviation must never appear.
+    """
+    content = all_text()
+    forbidden_patterns = [
+        "Bug Bounty Vault/",   # repo root is the vault — no nested prefix
+        "09 - KB/",            # wrong abbreviation; folder is '09 - Knowledge Base/'
+        "memory/MEMORY",       # private auto-memory file
+        "memory/project_",     # private auto-memory file
+        "bbops",               # private tooling
+        "Master Kanban",       # not present in public seed
+    ]
+    for needle in forbidden_patterns:
+        assert needle not in content, f"Private infra leak: {needle}"
+
+
 def test_agents_md_references_automation_not_scripts():
     agents = read("AGENTS.md")
     assert "automation/" in agents, "AGENTS.md should reference automation/"

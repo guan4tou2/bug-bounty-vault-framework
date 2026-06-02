@@ -49,7 +49,7 @@ Ask user: "本輪有新發現的 cred/path/endpoint 嗎？" If yes, help append 
 ### FAIL: Recon note 缺少段落
 Find the latest Recon note:
 ```bash
-ls -t "Bug Bounty Vault/01 - Targets/<Target>/Recon/"*.md | head -1
+ls -t "01 - Targets/<Target>/Recon/"*.md | head -1
 ```
 Add the missing section (目的/過程/發現) based on conversation context.
 
@@ -66,7 +66,7 @@ git commit -m "[recon] <target>: session end — <brief summary>"
 
 ### FAIL: Vault 有未 commit 的 Finding/Attempt 變更
 ```bash
-git status --short | grep "Bug Bounty Vault/01 - Targets/<Target>"
+git status --short | grep "01 - Targets/<Target>"
 ```
 If user confirms, commit them (git hook will auto-update FINDINGS_QUICK_REF).
 
@@ -78,7 +78,7 @@ Ask: "本輪學到了什麼？" Add to the Learned Items section in the Recon no
 ### WARN: Kanban 超過 2 天未更新
 Check current Kanban:
 ```bash
-cat "Bug Bounty Vault/01 - Targets/<Target>/Kanban - <Target>.md" | head -30
+cat "01 - Targets/<Target>/Kanban - <Target>.md" | head -30
 ```
 Update last_updated date and any changed task statuses.
 
@@ -121,15 +121,15 @@ git add workshop/<target>/HANDOFF.md
 git commit -m "[recon] <target>: update HANDOFF — <one-line summary>"
 ```
 
-## Step 6 — Memory update check
+## Step 6 — Persistent status note check
 
-If any significant status changed this session (new finding submitted, triage result received, new cred discovered):
-- Update `memory/project_<target>_recon.md` status section
-- Update `memory/MEMORY.md` summary line for this target
+If any significant status changed this session (new finding submitted, triage result received, new cred discovered), update your cross-session status store so the next session starts informed:
+- Target hub `01 - Targets/<target>/Target - <target>.md` status section
+- Any cross-target index or summary note your private implementation maintains (e.g. a dashboard note or an LLM memory file, if configured)
 
 ## Step 7 — Final commit
 
-If FINDINGS_QUICK_REF was regenerated or memory was updated:
+If FINDINGS_QUICK_REF was regenerated or the status note was updated:
 ```bash
 git add workshop/<target>/FINDINGS_QUICK_REF.md
 git commit -m "[infra] <target>: session-end index rebuild"

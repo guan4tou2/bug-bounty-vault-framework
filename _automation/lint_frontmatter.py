@@ -19,7 +19,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-VAULT_ROOT = Path(__file__).resolve().parent.parent  # Bug Bounty Vault/
+VAULT_ROOT = Path(__file__).resolve().parent.parent  # repo root = vault root
 
 # Schemas: { dir_pattern: (kind_label, required_fields, enums) }
 # enums maps field → list of allowed values (membership check); enums[field] == None means non-empty only
