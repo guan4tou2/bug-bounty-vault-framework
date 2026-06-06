@@ -19,7 +19,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-VAULT_ROOT = Path(__file__).resolve().parent.parent  # repo root = vault root
+VAULT_ROOT = Path(__file__).resolve().parent.parent  # 
 
 # Schemas: { dir_pattern: (kind_label, required_fields, enums) }
 # enums maps field → list of allowed values (membership check); enums[field] == None means non-empty only
@@ -27,6 +27,7 @@ ENUM_SEVERITY = ["P1", "P2", "P3", "P4", "P5"]
 ENUM_VERIFICATION_LEVEL = ["A", "B", "C", "D"]
 ENUM_GRADE = ["A", "B", "C", "D"]
 ENUM_VERIFIED_EVIDENCE = ["live", "source_code", "static", "theoretical"]
+ENUM_DISCOVERY_MODE = ["exploration", "pattern"]  # how the finding was discovered (novel:pattern ratio; optional, validated only if present)
 # Source of truth: 10 - Meta/fileClasses/Finding.md (metadata-menu dropdown values).
 ENUM_FINDING_STATUS = ["discovered", "verified", "ready", "submitted", "duplicate", "na", "accepted", "fixed", "on_hold", "killed", "withdrawn"]
 ENUM_RISK = ["critical", "high", "medium", "low", "info"]
@@ -52,6 +53,7 @@ SCHEMAS = {
             "status": ENUM_FINDING_STATUS,
             "risk": ENUM_RISK,
             "grade": ENUM_GRADE,
+            "discovery_mode": ENUM_DISCOVERY_MODE,
         },
         "regex": {"discovered_time": TIME_RE, "discovered_date": DATE_RE, "last_verified": DATE_RE},
         "wikilink_fields": ["target", "pattern", "related_pattern"],
@@ -87,6 +89,60 @@ SCHEMAS = {
         "regex": {"session_date": DATE_RE, "session_time_start": TIME_RE},
         "wikilink_fields": ["target"],
     },
+    # 2026-06-05: 09 - KB schemas for Pattern / Playbook / Checklist / Reference
+    # Card / Tool / Lesson. All enforced **only on newly added files**
+    # (A-only diff filter) — existing legacy files grandfathered.
+    # Minimum requirement: frontmatter present + minimal identifying field(s).
+    # Conventions vary across KB (some use fileClass, some use type), so
+    # schemas use loose checks where the field can be either.
+    "KB-Pattern": {
+        "kind": "Pattern",
+        "fileclass_field": ("fileClass", "Pattern"),
+        "required": ["fileClass", "type", "title"],
+        "enums": {"fileClass": ["Pattern"], "type": ["pattern"]},
+        "regex": {},
+        "wikilink_fields": [],
+    },
+    "KB-Playbook": {
+        "kind": "Playbook",
+        "fileclass_field": ("type", "playbook"),  # may also be fileClass:Playbook or type:reference+category:playbook
+        "required": ["type"],  # presence of frontmatter is the main gate
+        "enums": {},
+        "regex": {},
+        "wikilink_fields": [],
+    },
+    "KB-Checklist": {
+        "kind": "Checklist",
+        "fileclass_field": ("type", "checklist"),
+        "required": ["type"],
+        "enums": {},
+        "regex": {},
+        "wikilink_fields": [],
+    },
+    "KB-ReferenceCard": {
+        "kind": "ReferenceCard",
+        "fileclass_field": ("fileClass", "ReferenceCard"),  # canonical from existing files
+        "required": ["fileClass", "type", "title"],
+        "enums": {"fileClass": ["ReferenceCard"], "type": ["reference-card", "reference"]},
+        "regex": {},
+        "wikilink_fields": [],
+    },
+    "KB-Tool": {
+        "kind": "Tool",
+        "fileclass_field": ("type", "tool"),
+        "required": ["type"],
+        "enums": {"type": ["tool", "reference"]},  # Tool - Arsenal Index uses type:tool; some legacy may differ
+        "regex": {},
+        "wikilink_fields": [],
+    },
+    "KB-Lesson": {
+        "kind": "Lesson",
+        "fileclass_field": ("type", "lesson"),
+        "required": ["type", "id", "title"],  # established by split_lessons.py for LL-NNN-*.md
+        "enums": {"type": ["lesson"]},
+        "regex": {},
+        "wikilink_fields": [],
+    },
 }
 
 # Matches [[Note Name]] or [[Note Name|alias]] or [[Note Name#heading]].
@@ -99,7 +155,7 @@ _known_notes: set[str] | None = None
 def known_notes() -> set[str]:
     global _known_notes
     if _known_notes is None:
-        skip = {"_automation", "kb-index-out", ".obsidian", ".trash"}
+        skip = {"_automation", "kg-out", ".obsidian", ".trash"}
         _known_notes = {
             p.stem
             for p in VAULT_ROOT.rglob("*.md")
@@ -148,6 +204,17 @@ def detect_kind(rel_path: Path) -> str | None:
         for i, p in enumerate(parts):
             if p in SCHEMAS:
                 return p
+    # 09 - Knowledge Base/<kind> - *.md  → KB-* schemas (2026-06-05)
+    if "09 - Knowledge Base" in parts:
+        name = rel_path.name
+        if name.startswith("Pattern - "): return "KB-Pattern"
+        if name.startswith("Playbook - "): return "KB-Playbook"
+        if name.startswith("Checklist - "): return "KB-Checklist"
+        if name.startswith("Reference Card - "): return "KB-ReferenceCard"
+        if name.startswith("Tool - "): return "KB-Tool"
+        # Lessons live under Lessons/ subdirectory: 09 - Knowledge Base/Lessons/LL-NNN-*.md
+        if "Lessons" in parts and name.startswith("LL-"):
+            return "KB-Lesson"
     return None
 
 
@@ -225,23 +292,66 @@ def lint_file(path: Path) -> list[str]:
 
 
 def staged_md_files() -> list[Path]:
-    """Return staged .md files (Added or Modified) under 01 - Targets/."""
+    """Return staged .md files for lint.
+
+    Scope policy(2026-06-05):
+    - 01 - Targets/: AM(Added + Modified)— template-bound schema
+    - 09 - Knowledge Base/Pattern - *.md: A only(Added)— enforce frontmatter ONLY
+      on newly added patterns;既有 legacy patterns 不強制(too aggressive
+      grandfather burden). Modifying an existing pattern that lacks
+      frontmatter still passes — but a brand-new pattern MUST have it.
+    """
+    paths = []
+    # Targets:AM
     try:
-        out = subprocess.check_output(
+        out_am = subprocess.check_output(
             ["git", "diff", "--cached", "--name-only", "--diff-filter=AM"],
-            cwd=VAULT_ROOT,
-            text=True,
+            cwd=VAULT_ROOT, text=True,
         )
+        for line in out_am.splitlines():
+            if line.endswith(".md") and ("01 - Targets" in line or "Targets/" in line):
+                paths.append(VAULT_ROOT / line)
     except subprocess.CalledProcessError:
-        return []
-    return [VAULT_ROOT / line for line in out.splitlines() if line.endswith(".md") and ("01 - Targets" in line or "Targets/" in line)]
+        pass
+    # KB files:A only(NEW files)— Pattern / Playbook / Checklist / Reference Card / Tool / Lesson
+    kb_prefixes = (
+        "09 - Knowledge Base/Pattern - ",
+        "09 - Knowledge Base/Playbook - ",
+        "09 - Knowledge Base/Checklist - ",
+        "09 - Knowledge Base/Reference Card - ",
+        "09 - Knowledge Base/Tool - ",
+        "09 - Knowledge Base/Lessons/LL-",
+    )
+    try:
+        out_a = subprocess.check_output(
+            ["git", "diff", "--cached", "--name-only", "--diff-filter=A"],
+            cwd=VAULT_ROOT, text=True,
+        )
+        for line in out_a.splitlines():
+            if line.endswith(".md") and any(line.startswith(p) for p in kb_prefixes):
+                paths.append(VAULT_ROOT / line)
+    except subprocess.CalledProcessError:
+        pass
+    return paths
 
 
 def all_target_md_files() -> list[Path]:
+    """For --all full scan. KB Pattern files NOT included by default
+    (legacy free-form, would yield 228+ violations). Pass --include-kb
+    to enforce KB-Pattern schema across all 09 - Knowledge Base/Pattern - *.md."""
     targets_dir = VAULT_ROOT / "01 - Targets"
     if not targets_dir.exists():
         return []
     return list(targets_dir.rglob("*.md"))
+
+
+def all_md_files_with_kb() -> list[Path]:
+    """--all --include-kb variant: includes KB Pattern files."""
+    files = all_target_md_files()
+    kb_dir = VAULT_ROOT / "09 - Knowledge Base"
+    if kb_dir.exists():
+        files.extend(kb_dir.glob("Pattern - *.md"))
+    return files
 
 
 def check_duplicate_finding_ids(files: list[Path]) -> list[str]:
@@ -282,38 +392,13 @@ def check_duplicate_finding_ids(files: list[Path]) -> list[str]:
     return errors
 
 
-USAGE = """usage: lint_frontmatter.py [--staged | --all | <file.md> ...]
-
-  --staged   lint all staged .md files (pre-commit mode)
-  --all      lint every target .md file in the vault
-  <file.md>  lint the given .md files
-  -h, --help show this help
-"""
-
-
 def main(argv: list[str]) -> int:
-    if "-h" in argv or "--help" in argv:
-        print(USAGE)
-        return 0
-
-    known_flags = {"--staged", "--all"}
-    unknown = [a for a in argv if a.startswith("-") and a not in known_flags]
-    if unknown:
-        print(f"error: unknown argument(s): {' '.join(unknown)}\n", file=sys.stderr)
-        print(USAGE, file=sys.stderr)
-        return 2
-
     if "--staged" in argv:
         files = staged_md_files()
     elif "--all" in argv:
         files = all_target_md_files()
     else:
         files = [Path(a) for a in argv if a.endswith(".md")]
-        positional = [a for a in argv if not a.startswith("-")]
-        if positional and not files:
-            print(f"error: positional args must be .md files: {' '.join(positional)}\n", file=sys.stderr)
-            print(USAGE, file=sys.stderr)
-            return 2
 
     if not files:
         return 0
