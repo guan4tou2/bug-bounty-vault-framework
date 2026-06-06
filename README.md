@@ -156,7 +156,7 @@ Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, repo
 
 ### Recommended external skill packs
 
-The framework also recommends installing **22 third-party hunting skills** from `yaklang/hack-skills` (covering JWT/SSRF/XSS/IDOR/SAML/OAuth/business-logic/WAF-bypass and more). They are **not bundled** — install via `npx skills add` on a fresh clone. See [`09 - Knowledge Base/Reference Card - External Skills Catalog.md`](09%20-%20Knowledge%20Base/Reference%20Card%20-%20External%20Skills%20Catalog.md) for the curated list, install commands, audit status, and the security considerations of running third-party skills.
+The framework also recommends installing **22 third-party hunting skills** from `yaklang/hack-skills` (covering JWT/SSRF/XSS/IDOR/SAML/OAuth/business-logic/WAF-bypass and more). They are **not bundled** — install via `npx skills add` on a fresh clone. See `09 - Knowledge Base/Reference Card - External Skills Catalog.md` for the curated list, install commands, audit status, and the security considerations of running third-party skills.
 
 ## Knowledge Base
 
