@@ -69,7 +69,7 @@
 
 ### Vendor / stack-specific
 - `hunt-hybris-occ` — SAP Hybris OCC / Commerce Cloud
-- `hunt-mail2000-pre-cmd` — Openfind Mail2000 CGI pre_cmd/job
+- `hunt-mail2000-pre-cmd` — vendor mail-gateway CGI command-injection pattern (pre_cmd/job)
 - `hunt-zpush-version` — Z-Push version fingerprint + CVE-2025-8264 precheck
 - `hunt-electron-open-external` — Electron `shell.openExternal` static triage
 
