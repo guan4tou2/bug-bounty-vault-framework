@@ -176,11 +176,11 @@ New to the vault? Walk through one target end-to-end in [docs/getting-started.md
 
 Basic configurations in `tools/`:
 
-- `tools/nuclei/templates/` — Custom Nuclei templates
-  - `tools/nuclei/templates/kb/` — **KB-derived catch-all-aware templates** (GET-only). Each requires the actual sensitive signal in-body AND a negative matcher against the SPA app-shell, so they do not false-positive on catch-all / framework-public config (e.g. a `.env` that only carries `MIX_*` vars). Synced from the Hermes VPS `custom-safe/` set.
-  - `tools/nuclei/generator/` — `bb_kb_to_nuclei.py` (generator) + `bb_nuclei_template_gaps.py` (gap detector). **Template generation is a strong-model (local) job**, not the cheap VPS model: the VPS detector flags KB patterns lacking a template into a queue; the strong model converts prose→YAML, then `nuclei -validate -t tools/nuclei/templates/kb/`.
+- `tools/nuclei/templates/` — example/seed Nuclei template *shapes* only
 - `tools/osmedeus/profiles/` — Osmedeus scan profiles
 - `tools/bbot/presets/` — BBOT presets
+
+> **This repo is architecture-only / sanitized — no real detection templates, hunters, or payloads belong here.** Real, runnable Nuclei templates + the 47 pattern hunters live in the standalone tool **[`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow)** (`nuclei-templates/bb-recon/`); the autonomous-agent copies live in the private Hermes runtime (`tools/nuclei/custom-safe/`). Do **not** commit real KB-derived templates here.
 
 These are starting points — customize for your workflow.
 

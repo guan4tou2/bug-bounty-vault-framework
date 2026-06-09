@@ -1,5 +1,7 @@
 # bbflow Framework Layer
 
+> **Not the bbflow tool.** This directory is the *generic workflow spec* (gates / scope guard / output contract) — architecture-only, no hunters or templates. The actual runnable toolchain (47 hunters, BBOT/Osmedeus, real nuclei templates, zero-LLM CLI) is the separate repo [`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow), created earlier (2026-04). This framework abstracts the flow that any private toolchain — including that tool — can implement.
+
 This directory is a framework-only placeholder for connecting an optional automation runtime to the vault workflow.
 
 It is intentionally bring your own tools. It defines the shape of the workflow, the scope guard, the expected output contract, and the knowledge capture hook.
