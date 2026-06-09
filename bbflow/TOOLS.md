@@ -81,3 +81,60 @@
 ## Integration points
 - **Hermes (VPS agent)** wraps bbflow via `bbflow_tool.py` (`bbflow-runner` agent runs hunters, parses hits, updates RECON_DB). The Hermes layer is a *separate* repo (`tools/bb_tools.py`); see the vault `reference_bbflow_vs_framework_vs_bbtools` note.
 - **Vault** consumes only machine-readable output (`run_manifest.json`, `candidates.jsonl`) after a run — never the reverse (see `output-contract.md`).
+
+<!-- BEGIN auto-sync hunters -->
+## Pattern hunters (`hunters/hunt-*.sh`)
+
+Auto-synced from the standalone `guan4tou2/bbflow` repo by `sync_bbflow_to_framework.sh`.
+Inventory only — no payloads, no detection logic. (47 hunters total)
+
+| Hunter | One-liner |
+|--------|-----------|
+| `hunt-actuator-deep` | Spring Boot Actuator 深度利用 |
+| `hunt-arjun-params` | 隱藏 HTTP parameter discovery via arjun |
+| `hunt-backup-files` | 備份檔案 / 歷史版本洩漏探測 |
+| `hunt-cert-bypass` | SSO /cert 端點無密碼 token 發行探測 |
+| `hunt-cloud-bucket` | Cloud bucket enumeration（OSINT Arsenal §16.5） |
+| `hunt-config-leak` | xray-inspired 配置洩漏掃描器 |
+| `hunt-cors-reflect` | Reflective CORS + null origin + regex prefix bypass + auth-mechanism awareness |
+| `hunt-crawl-chain` | 完整 URL/param discovery + fuzzing 鏈 |
+| `hunt-dalfox-xss` | XSS hunting: gf filter → dalfox (blind + DOM + stored) |
+| `hunt-devops-unauth` | DevOps / infra 工具無認證路徑探測 |
+| `hunt-electron-open-external` | hunt-electron-open-external.sh |
+| `hunt-email-security` | Email Security Audit（OSINT Arsenal §16.14） |
+| `hunt-envdata` | 從 HTML 提取 window.envData / window.__INITIAL_STATE__ / inline config |
+| `hunt-ffuf-dirs` | Directory/file fuzzing via ffuf |
+| `hunt-git-deep` | .git 物件深層提取（git-exposure 延伸版） |
+| `hunt-git-exposure` | .git 暴露完整利用鏈 |
+| `hunt-gitlab-anon` | GitLab anonymous fingerprinting + open signup + info disclosures |
+| `hunt-google-api-key` | Google API key 自動驗證（對多個服務） |
+| `hunt-graphql-idor` | GraphQL 無認證 resolver + 整數 IDOR 探測 |
+| `hunt-hardcoded-js-secrets` | 對 live .js bundle grep 硬編碼密鑰 |
+| `hunt-hudson-rock` | HudsonRock Cavalier breach corpus 查詢（OSINT Arsenal §15.0.1） |
+| `hunt-hybris-occ` | SAP Hybris OCC / Commerce Cloud endpoint discovery |
+| `hunt-jwt` | JWT decode + weakness probe |
+| `hunt-mail2000-pre-cmd` | vendor mail-gateway CGI command-injection pattern (pre_cmd/job) |
+| `hunt-mcp-oauth-scope` | MCP OAuth scope mismatch / consent screen 與 token 能力差異 |
+| `hunt-monitor-bypass` | 監控 / 管理後台 Auth Bypass 探測 |
+| `hunt-nuclei-deep` | (no description comment) |
+| `hunt-nxdomain-corpus` | 建立歷史 hostname 超集，過濾出 NXDOMAIN 候選 |
+| `hunt-open-redirect` | Open redirect 探測 + OAuth chain 候選 |
+| `hunt-param-fuzz` | URL/param discovery + nuclei DAST fuzzing |
+| `hunt-portscan` | Fast port scan + service detection |
+| `hunt-shodan-ip` | Shodan InternetDB passive port/CVE lookup（OSINT Arsenal §16.3） |
+| `hunt-sms-static-cred` | SMS Gateway 靜態憑證探測 |
+| `hunt-sourcemap-endpoint-family` | Source map → API endpoint family + auth flow extraction |
+| `hunt-sourcemap-secrets` | Source map 發現 → 原始碼內密鑰提取 |
+| `hunt-ssrf-oracle-probe` | Detect blind SSRF that can be turned into a 3-tier classification oracle |
+| `hunt-subdomain-prefix` | 主動前綴掃描（OSINT Arsenal §16.24） |
+| `hunt-subdomain-takeover` | Subdomain takeover 候選探測 |
+| `hunt-swagger` | Swagger / OpenAPI spec discovery（OSINT Arsenal §16.1） |
+| `hunt-trufflehog-secrets` | 深度 git secret 掃描 via trufflehog |
+| `hunt-user-enum` | 登入/註冊/重設密碼的帳號枚舉探測 |
+| `hunt-version-json` | 版本/環境對映 JSON 洩漏探測 |
+| `hunt-vite-spa-json-config` | Vite/Vue/React SPA env config JSON leak |
+| `hunt-waf-bypass` | (no description comment) |
+| `hunt-wayback-endpoints` | Wayback Machine CDX endpoint mining（OSINT Arsenal §16.17） |
+| `hunt-weak-login` | 常見管理介面預設帳密單次探測 |
+| `hunt-zpush-version` | Z-Push fingerprint + CVE-2025-8264 precheck |
+<!-- END auto-sync hunters -->
