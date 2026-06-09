@@ -14,6 +14,7 @@ It is intentionally bring your own tools. It defines the shape of the workflow, 
 - A knowledge capture hook.
 - A public safety boundary.
 - Example configuration shapes for Nuclei, Osmedeus, and BBOT.
+- `TOOLS.md` — a sanitized inventory (names + purposes, no payloads) of the bbflow toolchain that implements this flow.
 
 ## What Is Not Included
 
