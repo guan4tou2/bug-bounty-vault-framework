@@ -18,6 +18,7 @@ Generated wrappers:
 | `bb-cve-citation` | `.gemini/skills/bb-cve-citation/SKILL.md` |
 | `bb-dedup-finding` | `.gemini/skills/bb-dedup-finding/SKILL.md` |
 | `bb-evidence-readiness` | `.gemini/skills/bb-evidence-readiness/SKILL.md` |
+| `bb-exploit-chain` | `.gemini/skills/bb-exploit-chain/SKILL.md` |
 | `bb-form-writer` | `.gemini/skills/bb-form-writer/SKILL.md` |
 | `bb-incident-response` | `.gemini/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.gemini/skills/bb-knowledge-capture/SKILL.md` |

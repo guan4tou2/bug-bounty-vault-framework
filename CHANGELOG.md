@@ -9,6 +9,7 @@ Backports the private vault's most-emphasized discipline — map the attack surf
 **Added:**
 - `.claude/skills/bb-surface-mapping` — vuln-agnostic attack-surface mapping, the FRONT gate of the hunting ring (counters the streetlight effect)
 - `.claude/skills/bb-web-vuln-scan` — OWASP Top 10 coverage + injection matrix + version→CVE + WAF-bypass discipline (runs after surface mapping)
+- `.claude/skills/bb-exploit-chain` — the 6-question chaining gate run on any finding before moving to the next system (escalate exposures instead of stopping at first finding); closes the last methodology gap vs the private vault
 - `.claude/skills/bb-tool-setup` — establishes the Ring 2 tool layer (clone the bbflow tool or wire your own scanner) and verifies its `candidates.jsonl` actually feeds the loop; makes "bring your own tools" an AI-actionable, do-it-now step instead of a passive note
 - `bbflow/setup.md` — step-by-step, agent-followable guide for establishing the tool layer and wiring its output into the candidate lifecycle
 - `docs/architecture-closed-loop.md` — the four-ring loop (wiki ⇄ hunters ⇄ hunting ⇄ learning), the explore-first rationale, the framework-vs-tool-vs-private-vault repo boundary, and the public←private migration direction

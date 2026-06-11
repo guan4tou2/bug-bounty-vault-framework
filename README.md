@@ -17,7 +17,7 @@ flowchart TB
     KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
   end
   subgraph LLM["Optional LLM layer"]
-    SK[".claude / .codex / .gemini<br/>16 skills + 6 agents"]
+    SK[".claude / .codex / .gemini<br/>17 skills + 6 agents"]
   end
   subgraph LOCAL["workspace/ (gitignored, local only)"]
     WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
@@ -146,13 +146,13 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
-| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 16 skills + 6 agents |
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 17 skills + 6 agents |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
 Choose Claude Code, Codex, Gemini, another assistant, or no LLM. The workflow documents are written so the vault can still be operated manually.
 
-Skills: version-cve-precheck, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
+Skills: version-cve-precheck, tool-setup, surface-mapping, web-vuln-scan, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, exploit-chain, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
 
 Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync.
 
