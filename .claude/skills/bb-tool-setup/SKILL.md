@@ -5,7 +5,7 @@ description: Use when the zero-LLM tool layer (Ring 2) is not yet established or
 
 # Bug Bounty — Tool Layer Setup (establish Ring 2 and wire it into the loop)
 
-The tool layer is **bring-your-own and not bundled** with this framework. Before any automated hunting can feed the loop, Ring 2 must be established and verified. This skill makes that an explicit, do-it-now step instead of a passive "bring your own tools" note — so the candidate generator actually exists and its output reaches the candidate lifecycle.
+This framework's tool layer **is bbflow** ([`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow)). It is not bundled (bbflow is a standalone dependency you install, never vendored), but it is the expected Ring 2 — the dependency is one-directional: bbflow runs without this framework, but this framework expects bbflow. Before any automated hunting can feed the loop, Ring 2 must be established and verified. This skill makes that an explicit, do-it-now step so the candidate generator actually exists and its output reaches the candidate lifecycle.
 
 Full procedure: [`bbflow/setup.md`](../../../bbflow/setup.md). This skill is the trigger and the verification gate.
 
@@ -25,9 +25,9 @@ Run this when:
    command -v bbflow >/dev/null && bbflow list || echo "no bbflow CLI"
    ls workspace/workshop/<target>/candidates.jsonl 2>/dev/null || echo "no candidates yet"
    ```
-2. **If absent, establish one** (see `bbflow/setup.md`):
-   - **Option A** — clone + install the bbflow tool (`guan4tou2/bbflow`) as a sibling repo; set `BBFLOW_WORKSPACE` to this vault's `workspace/`; verify `bbflow list`.
-   - **Option B** — wire any scanner (Nuclei / own scripts) with a small private adapter that emits `candidates.jsonl` per [`bbflow/output-contract.md`](../../../bbflow/output-contract.md).
+2. **If absent, establish it** (see `bbflow/setup.md`):
+   - **Default — install bbflow** (`guan4tou2/bbflow`): Docker (`ghcr.io/guan4tou2/bbflow`) or `./install.sh --all` as a sibling repo; set `BBFLOW_WORKSPACE` to this vault's `workspace/`; verify `bbflow doctor && bbflow list`.
+   - **Alternative (only if you cannot run bbflow)** — wire any scanner with a small private adapter that emits `candidates.jsonl` per [`bbflow/output-contract.md`](../../../bbflow/output-contract.md). Prefer bbflow.
 3. **Scope first.** Copy `bbflow/scope.example.yaml` to `workspace/workshop/<target>/scope.yaml` and fill in authorized scope. The tool must refuse to run without valid scope.
 4. **Run in the ignored workspace.** Raw output and `candidates.jsonl` / `run_manifest.json` land in `workspace/workshop/<target>/` — never in the vault.
 5. **Verify it feeds the loop** (the part that is easy to skip):
