@@ -7,7 +7,8 @@ A complete walkthrough of one target, from clone to a ready submission. It uses 
 - **Git** and **Python 3.10+** (for the automation scripts and tests).
 - **Obsidian** (optional but recommended) — open the repo root as a vault.
 - After opening in Obsidian, install the **Templater** and **Dataview** community plugins (Settings → Community plugins). They power the templates and the dashboards. See [post-clone-checklist.md](post-clone-checklist.md).
-- LLM CLIs (Claude Code / Codex / Gemini) are optional. The whole flow works as plain Markdown.
+- An **LLM CLI (Claude Code / Codex / Gemini) is the intended way to operate the vault** — it loads each skill when its trigger fires and enforces the gates. The flow also works by hand in plain Markdown as a fallback.
+- **Tool layer:** establish it once with `bb-tool-setup` ([../bbflow/setup.md](../bbflow/setup.md)) — install the standalone bbflow CLI (or a contract-conforming scanner). It is a separate dependency, not bundled.
 
 ## 1. Clone and scaffold
 
@@ -48,14 +49,21 @@ Follow the [[Playbook - Recon]] note: subdomain enumeration → live hosts → c
 
 > **Safety:** run aggressive scans on an isolated runner/VPS, keep to GET-first, and log manual write requests in the Operation Log before sending them. See [[Reference Card - Testing Safety Rules]].
 
+## 4b. Map the surface, then test (the front gate)
+
+Before you trust any scanner output, **map the attack surface vuln-agnostically** (`bb-surface-mapping`): one row per endpoint/parameter/role/trust-boundary/etc. in the `RECON_DB.md` Attack Surface Map, each with a "how could this break?" hypothesis. Jumping straight to a scanner is the streetlight effect — you only find the vuln classes your patterns already know.
+
+Then test with full coverage (`bb-web-vuln-scan`): OWASP Top 10, the injection matrix per parameter, version→CVE, WAF bypass. A scanner/bbflow hit is a **lead**, not a Finding — it still gets cross-checked against the map. See [architecture-closed-loop.md](architecture-closed-loop.md).
+
 ## 5. From candidate to Finding
 
 When something looks exploitable, run the candidate lifecycle gates (AGENTS.md §3e.1). The short version:
 
 1. **Dedup** — is this already a Finding? (`bash automation/vault_precheck.sh <target> "<keyword>" "<host>"`)
 2. **Scope + safety** — is the next step in scope and safe?
-3. **Chain review** — can this primitive chain into higher impact?
-4. **Evidence readiness** — is it reproducible with request + response captured?
+3. **Exploit chain** — run the 6-question chain (`bb-exploit-chain`); escalate the finding before moving to the next system.
+4. **Chain review** — can this primitive chain into higher impact?
+5. **Evidence readiness** — is it reproducible with request + response captured?
 
 If it clears the gates, create a Finding from the template:
 

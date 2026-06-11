@@ -25,6 +25,8 @@ bash automation/init_target.sh <target>
 
 Then fill: `SCOPE.md` (program boundaries) + `Target - <target>.md` (vault hub page).
 
+First time on a machine, establish the tool layer (Ring 2) once via `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). Then the first hunting action is **always** `bb-surface-mapping` (vuln-agnostic surface map) — never jump straight to a scanner. See §3e.1.
+
 ### §0c Knowledge Base Lookup
 
 Query the KB at three moments:
@@ -103,24 +105,32 @@ All three share the same ID. No Submission-only workflow — every Submission mu
 
 ### §3e.1 Candidate Lifecycle Gates
 
-Every candidate passes through lifecycle gates before becoming a Submission:
+The full path runs through the four-ring loop (see [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md)). Establish the tool layer once, then every target passes the hunting gates, then every candidate passes the lifecycle gates:
 
 ```
-candidate found
+# once per machine — establish Ring 2 (the tool layer)
+→ bb-tool-setup             # install/verify bbflow (or a contract-conforming scanner)
+
+# per target — hunting phase (Ring 3), order matters
+→ bb-surface-mapping        # FRONT gate: vuln-agnostic attack-surface map (explore-first)
+→ bb-web-vuln-scan          # OWASP Top 10 coverage + version→CVE + WAF bypass
+
+candidate found            # a scanner hit is a LEAD here, not a Finding
 → bb-dedup-finding          # duplicate check
 → bb-scope-safety-check     # scope + safety gate (before live verification)
+→ bb-exploit-chain          # 6-question chain on any finding — escalate before the next system
 → bb-attack-chain-review    # chain potential assessment
 → bb-evidence-readiness     # evidence completeness
 → Finding                   # create if ready
 → attack-chain-deep-dive    # optional agent for complex chains
 → bb-submission-readiness   # final gate before report
 → Submission / FORM         # platform-specific output
-→ bb-knowledge-capture      # capture reusable learning
+→ bb-knowledge-capture      # capture reusable learning (Ring 4 — runs even on a parked session)
 ```
 
 Failed candidates → `bb-attempt-recorder` (preserves negative results for future reference).
 
-Each gate is implemented as a skill in `.claude/skills/`. The gates can also be performed manually without LLM integration — the workflow documents describe the same checks as prose.
+**The front gate is non-negotiable:** `bb-surface-mapping` runs *before* any pattern/hunter/scan is trusted as your vuln lens — skipping straight to pattern-matching is the streetlight effect. Each gate is implemented as a skill in `.claude/skills/`. The gates can also be performed manually — the workflow documents describe the same checks as prose — but LLM-agent operation is the intended mode.
 
 ### §3f Dedup Rules
 

@@ -23,6 +23,7 @@ Backports the private vault's most-emphasized discipline — map the attack surf
 - `tests/test_public_skeleton.py` — guards the new skills
 - **Repositioned as LLM-agent-operated by design** — README intro + LLM Integration section now present agent operation as the primary mode (manual Obsidian = fallback), since the skills/gates are the operating interface
 - Added a rendered **mermaid four-ring loop diagram** to README and `docs/architecture-closed-loop.md` (closing ④→① edge highlighted); the ASCII version is kept as a collapsible plain-text fallback
+- **Documentation sync pass** — propagated the front gate + tool layer + exploit-chain + LLM-first framing through every spec/walkthrough that had drifted: `AGENTS.md` §3e.1/§0b, `AGENTS_QUICK.md`, `docs/session-lifecycle.md`, `docs/getting-started.md`, `docs/post-clone-checklist.md`, `docs/sop.md`, `docs/fresh-start.md`, and `templates/candidate-review.md` (added the 6-question exploit-chain block). Updated the post-clone positioning test to match.
 - Regenerated `.codex` / `.gemini` mirrors via `automation/sync_codex_skills.py`
 
 ## v0.1.2 — 2026-06-02

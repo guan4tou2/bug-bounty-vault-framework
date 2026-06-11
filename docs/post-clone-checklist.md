@@ -23,22 +23,22 @@ bash automation/setup_workspace.sh
 
 Open the repository root as an Obsidian vault. The `.obsidian/` directory ships the **settings and a recommended plugin enable-list** — but **not** the plugin binaries. On first open, install the community plugins via **Settings → Community plugins**. **Templater**, **Dataview**, and **Kanban** are required for the templates, dashboards, and boards to render; the rest are optional. The full step-by-step (including how to verify the dashboards render and how to point Templater at `07 - Templates`) is in [obsidian-setup.md](obsidian-setup.md).
 
-## 4. Optional LLM setup
+## 4. LLM setup (primary operating mode)
 
-Choose one path, or skip this section entirely:
+This vault is built to be driven by an LLM agent. Pick one entrypoint:
 
-- **Claude Code**: read `CLAUDE.md`; use `.claude/skills/` and `.claude/agents/` if your environment supports them.
-- **Codex**: read `CODEX.md`; optionally run `bash automation/install_codex_skills.sh` to mirror skills into your local Codex skill directory.
-- **Gemini**: read `GEMINI.md`; optionally run `bash automation/install_gemini_skills.sh` to mirror skills into your local Gemini skill directory.
-- **No LLM**: use Obsidian templates, `AGENTS.md`, `STRUCTURE.md`, and the `automation/` scripts manually.
+- **Claude Code**: read `CLAUDE.md`; the agent uses `.claude/skills/` and `.claude/agents/`.
+- **Codex**: read `CODEX.md`; run `bash automation/install_codex_skills.sh` to mirror skills into your Codex skill directory.
+- **Gemini**: read `GEMINI.md`; run `bash automation/install_gemini_skills.sh` to mirror skills into your Gemini skill directory.
+- **Fallback — no LLM**: operate by hand with Obsidian templates, `AGENTS.md`, `STRUCTURE.md`, and the `automation/` scripts.
 
-## 5. Optional scanner setup
+## 5. Tool layer setup (bbflow)
 
-VPS is recommended for aggressive, high-volume, or long-running scanning, but it is not required to use the vault.
+The tool layer (Ring 2) is the standalone **bbflow** CLI — a separate install, not bundled. Establish it once with `bb-tool-setup` ([../bbflow/setup.md](../bbflow/setup.md)): Docker (`ghcr.io/guan4tou2/bbflow`) or `./install.sh --all`. A contract-conforming scanner is a fallback.
 
+- Run noisy/aggressive scanning (bbflow `hunt`/`flow`, Osmedeus, BBOT, Nuclei at scale, fuzzers) on a VPS or isolated runner.
 - Local-only use is enough for note-taking, report drafting, template use, and low-risk validation.
-- Use a VPS, cloud runner, or other isolated machine if you run bbflow, Osmedeus, BBOT, Nuclei at scale, fuzzers, or long-running recon.
-- Bring your own authorization, scope file, tool installation, and rate limits.
+- Bring your own authorization, scope file, and rate limits.
 
 ## 6. Initialize Your First Target
 

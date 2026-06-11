@@ -35,6 +35,8 @@ bash automation/session_start_brief.sh <target> "<keyword>" "<host>"
 
 This prints a summary of HANDOFF.md, FINDINGS_QUICK_REF.md, and RECON_DB.md high-signal sections. Only deep-read files the brief points you to.
 
+First time on a machine: establish the tool layer once with `bb-tool-setup` ([bbflow/setup.md](bbflow/setup.md)). The first hunting action on any target is always `bb-surface-mapping` — never a scanner first.
+
 ## Pre-flight (Mandatory)
 
 Before analyzing any software, firmware, or SaaS target:
@@ -47,17 +49,26 @@ See AGENTS.md section 0g for the full protocol.
 
 ## Candidate Lifecycle
 
+The four-ring loop — establish the tool layer once, hunt explore-first, then gate each candidate ([docs/architecture-closed-loop.md](docs/architecture-closed-loop.md)):
+
 ```
-candidate found
+bb-tool-setup               # once per machine: install/verify bbflow (Ring 2)
+
+# per target — hunting (order matters)
+bb-surface-mapping          # FRONT gate: vuln-agnostic surface map (explore-first, never skip)
+bb-web-vuln-scan            # OWASP coverage + version→CVE + WAF bypass
+
+candidate found            # a scanner hit is a LEAD, not a Finding
 → bb-dedup-finding          # duplicate check
 → bb-scope-safety-check     # scope + safety gate
+→ bb-exploit-chain          # 6-question chain on any finding (escalate before next system)
 → bb-attack-chain-review    # chain potential assessment
 → bb-evidence-readiness     # evidence completeness
 → Finding                   # create if ready
 → attack-chain-deep-dive    # optional agent for complex chains
 → bb-submission-readiness   # final gate before report
 → Submission / FORM         # platform-specific output
-→ bb-knowledge-capture      # capture reusable learning
+→ bb-knowledge-capture      # Ring 4: capture reusable learning (even on a parked session)
 ```
 
 Failed candidates → `bb-attempt-recorder` (preserves negative results).

@@ -106,20 +106,26 @@ During the session, maintain three living documents:
 
 Update the `Result` column immediately after execution.
 
-### 2.3 Finding creation flow
+### 2.3 Hunting + finding creation flow
 
-Every candidate passes through lifecycle gates before becoming a submission:
+Hunting runs explore-first; then every candidate passes the lifecycle gates ([architecture-closed-loop.md](architecture-closed-loop.md)):
 
 ```
-candidate found
+bb-tool-setup               # once per machine: establish the bbflow tool layer (Ring 2)
+
+bb-surface-mapping          # FRONT gate: vuln-agnostic surface map (explore-first, never skip)
+bb-web-vuln-scan            # OWASP coverage + version→CVE + WAF bypass
+
+candidate found            # a scanner hit is a LEAD, not a Finding
 → bb-dedup-finding          # duplicate check
 → bb-scope-safety-check     # scope + safety gate
+→ bb-exploit-chain          # 6-question chain on any finding (escalate before next system)
 → bb-attack-chain-review    # chain potential assessment
 → bb-evidence-readiness     # evidence completeness
 → Finding                   # create if ready
 → bb-submission-readiness   # final gate before report
 → Submission / FORM         # platform-specific output
-→ bb-knowledge-capture      # capture reusable learning
+→ bb-knowledge-capture      # Ring 4: capture reusable learning (even on a parked session)
 ```
 
 Failed candidates → `bb-attempt-recorder` (preserves negative results).

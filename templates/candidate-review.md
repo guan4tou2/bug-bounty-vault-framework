@@ -21,6 +21,17 @@ Use this template for a `candidate found` that is not yet a Finding.
 - Runtime:
 - Stop condition:
 
+## Exploit Chain (6 questions)
+
+- Skill: `bb-exploit-chain`
+- Q1 leaked identifier usable directly:
+- Q2 read → write escalation:
+- Q3 other endpoints on same system:
+- Q4 reuse on other in-scope systems:
+- Q5 severity escalation path:
+- Q6 same root cause in other components:
+- Chain result: extended / dead end / new finding
+
 ## Attack Chain Review
 
 - Skill: `bb-attack-chain-review`
