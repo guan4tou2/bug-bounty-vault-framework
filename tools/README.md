@@ -17,15 +17,18 @@ pipx install bbflow
 ### Usage with Vault
 
 ```bash
-# Initialize target scope
-bbflow init <target> --scope workspace/workshop/<target>/SCOPE.md
+# Initialize target (creates workspace/workshop/<target>/SCOPE.md — fill it in)
+bbflow init <target>
 
-# Run hunters (on VPS — automated scanning is VPS-only)
-ssh your-vps "bbflow hunt <target> --hunters all"
+# Run hunters (on VPS — noisy scanning is VPS-only); scope file is mandatory.
+# All hunters is the default; add --only h1,h2 for a subset.
+ssh your-vps "bbflow hunt <target> --scope-file workspace/workshop/<target>/SCOPE.md"
 
-# Import results into vault
-bbflow report <target> --format markdown > workspace/workshop/<target>/hunters/report.md
+# Generate a human report (machine-readable candidates.jsonl is emitted automatically)
+bbflow report <target>
 ```
+
+> Flags match the bbflow tool at time of writing — confirm with `bbflow --help`.
 
 ### Vault Integration Points
 
