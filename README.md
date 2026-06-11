@@ -44,7 +44,7 @@ See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the
 - A complete **Finding → Submission → FORM** pipeline with templates and frontmatter schema
 - **Session lifecycle management** with claim/release concurrency control
 - **LLM agent integration** for Claude Code, Codex CLI, and Gemini CLI
-- **Scanner config seeds** for Nuclei, Osmedeus, and BBOT — bring your own tools; establish the tool layer with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md)
+- **Tool layer is [bbflow](https://github.com/guan4tou2/bbflow)** — a standalone zero-LLM scanner CLI you install as a dependency (not bundled); establish it with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). Any contract-conforming scanner is a fallback.
 - A **Knowledge Base** framework for cross-target pattern capture
 - A **workspace scaffold** for local-only operational data (.gitignored)
 

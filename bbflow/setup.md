@@ -6,16 +6,18 @@ Ring 2 is the **zero-LLM candidate generator** in the [closed loop](../docs/arch
 
 ---
 
-## Decision: which tool layer?
+## The tool layer is bbflow
 
-Pick one. Both satisfy the same [output contract](output-contract.md), so the rest of the loop does not care which you chose.
+This framework's Ring 2 **is** [`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow) — the zero-LLM CLI (recon + 47 pattern hunters + Nuclei templates) the framework was designed around. **Install it (Option A).** The dependency is one-directional: **bbflow runs standalone with no need for this framework, but this framework expects bbflow as its tool layer.**
+
+The framework does **not bundle** bbflow — it stays a **separate repo/process**, and you never copy hunters, payloads, or templates into this framework repo or the vault (that boundary is enforced by the public-safety tests). It is a dependency you install, not vendored code.
 
 | Option | When | What you get |
 |---|---|---|
-| **A — the bbflow tool** | You want a ready-made zero-LLM CLI (recon + pattern hunters + Nuclei templates) | Clone and install [`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow) |
-| **B — bring your own** | You already run Nuclei / your own scripts, or have policy constraints | Wire any scanner to emit `candidates.jsonl` per the output contract |
+| **A — bbflow (default)** | Normal case | Install [`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow) — Docker or `install.sh` |
+| **B — contract-conforming alternative** | You genuinely cannot run bbflow (policy/platform constraints) | Any scanner that emits `candidates.jsonl` per the [output contract](output-contract.md) — the loop consumes candidates regardless of producer |
 
-Either way the tool layer stays a **separate repo/process** — never copy hunters, payloads, or templates into this framework repo or the vault (that boundary is enforced by the public-safety tests).
+Option B exists only because the loop is decoupled through the output contract; it is the exception, not an equal choice. Prefer bbflow.
 
 ---
 

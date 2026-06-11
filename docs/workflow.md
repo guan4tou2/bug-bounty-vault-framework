@@ -8,10 +8,10 @@ Target -> Recon -> Finding -> Review -> Knowledge Capture
 
 ## Tool Layer (Ring 2) — establish it before automated hunting
 
-The zero-LLM candidate generator (scanners/hunters) is **bring-your-own and not bundled**. Establish it once per machine **before** the first automated run, or the loop has nothing to consume. Use `bb-tool-setup` (full steps in [`bbflow/setup.md`](../bbflow/setup.md)):
+The zero-LLM candidate generator is **bbflow** ([`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow)) — a standalone dependency you install (not bundled). Establish it once per machine **before** the first automated run, or the loop has nothing to consume. Use `bb-tool-setup` (full steps in [`bbflow/setup.md`](../bbflow/setup.md)):
 
-- **Option A** — clone + install the bbflow tool (`guan4tou2/bbflow`) as a sibling repo and point `BBFLOW_WORKSPACE` at `workspace/`.
-- **Option B** — wire any scanner to emit `candidates.jsonl` per [`bbflow/output-contract.md`](../bbflow/output-contract.md).
+- **Default** — install bbflow (Docker or `install.sh`) as a sibling repo and point `BBFLOW_WORKSPACE` at `workspace/`.
+- **Fallback** — only if you cannot run bbflow, wire any scanner to emit `candidates.jsonl` per [`bbflow/output-contract.md`](../bbflow/output-contract.md).
 
 The tool writes `candidates.jsonl` into `workspace/workshop/<target>/` (gitignored). Those candidates are **leads, not findings** — they enter the lifecycle below through the surface-map front gate, never as confirmed Findings. This is Ring 2 of the [closed loop](architecture-closed-loop.md).
 
