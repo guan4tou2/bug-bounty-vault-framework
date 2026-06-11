@@ -66,6 +66,10 @@ flowchart LR
 
 ## Design Principles
 
+### Explore-first hunting (anti-streetlight)
+
+The hunting ring has a mandatory **front gate**: map the attack surface vuln-agnostically (`bb-surface-mapping`) *before* running any pattern/hunter/scanner, then enforce full OWASP coverage (`bb-web-vuln-scan`). Skipping straight from recon to pattern-matching is the "streetlight effect" — it only finds vuln classes the pattern library already knows. This is the single most-skipped, highest-value discipline in the loop; the four-ring model and its rationale are in [docs/architecture-closed-loop.md](architecture-closed-loop.md).
+
 ### Vault as canonical source
 
 The Vault stores durable, curated, review-ready information. It should contain enough context to understand what happened and why, without storing raw operational material.

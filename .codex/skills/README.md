@@ -23,8 +23,10 @@ Generated wrappers:
 | `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |
 | `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.codex/skills/bb-submission-readiness/SKILL.md` |
+| `bb-surface-mapping` | `.codex/skills/bb-surface-mapping/SKILL.md` |
 | `bb-triage-response` | `.codex/skills/bb-triage-response/SKILL.md` |
 | `bb-version-cve-precheck` | `.codex/skills/bb-version-cve-precheck/SKILL.md` |
+| `bb-web-vuln-scan` | `.codex/skills/bb-web-vuln-scan/SKILL.md` |
 
 ## Install for Codex
 

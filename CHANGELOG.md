@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.3 — 2026-06-11
+
+### Explore-first front gate + closed-loop architecture doc
+
+Backports the private vault's most-emphasized discipline — map the attack surface vuln-agnostically *before* pattern-matching, then enforce full OWASP coverage — which the public seed had been missing. Also documents the four-ring closed loop explicitly to prevent recurring "is this a loop?" and "which repo does X go in?" confusion.
+
+**Added:**
+- `.claude/skills/bb-surface-mapping` — vuln-agnostic attack-surface mapping, the FRONT gate of the hunting ring (counters the streetlight effect)
+- `.claude/skills/bb-web-vuln-scan` — OWASP Top 10 coverage + injection matrix + version→CVE + WAF-bypass discipline (runs after surface mapping)
+- `docs/architecture-closed-loop.md` — the four-ring loop (wiki ⇄ hunters ⇄ hunting ⇄ learning), the explore-first rationale, the framework-vs-tool-vs-private-vault repo boundary, and the public←private migration direction
+
+**Changed:**
+- `docs/workflow.md` — candidate lifecycle now shows the surface-map front gate + coverage gate between Recon and Candidate; gate list and lifecycle steps updated
+- `docs/architecture.md` — added the "explore-first hunting (anti-streetlight)" design principle
+- `README.md` — architecture diagram shows the hunter ring (bring-your-own, e.g. bbflow) and the front gates; skill count 13 → 15
+- `tests/test_public_skeleton.py` — guards the two new skills
+- Regenerated `.codex` / `.gemini` mirrors via `automation/sync_codex_skills.py`
+
 ## v0.1.2 — 2026-06-02
 
 ### Seed content + onboarding
