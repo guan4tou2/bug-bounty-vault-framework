@@ -32,7 +32,7 @@ The system is not a pipeline with an end — it is a loop whose output makes the
    ┌──────────────────────────┐   raw candidates    ┌────────────────────────┐
    │ RING 2 — HUNTERS          │ ──────────────────▶ │ Vault: Finding /        │
    │ zero-LLM scanners         │                     │ Submission / FORM       │
-   │ (bring your own; bbflow)  │ ◀────────────────── │ candidate gate pipeline │
+   │ (bbflow — standalone CLI) │ ◀────────────────── │ candidate gate pipeline │
    └──────────────────────────┘   scope.yaml / scale └────────────────────────┘
 ```
 
@@ -63,6 +63,8 @@ recon → bb-surface-mapping (FRONT gate) → bb-web-vuln-scan → candidate gat
 **Why the front gate exists — the streetlight effect.** If you start from your pattern/hunter library, you only find the vuln classes those patterns already encode. The novel surface — homegrown frameworks, non-standard auth, weird parameters — is exactly where patterns are blind and where the interesting bugs live. Mapping first, vuln-agnostically, forces you to look under the whole street, not just where the lamp already shines. Patterns then run as a "did I miss a known type?" backstop, never as the starting point.
 
 See `bb-surface-mapping` and `bb-web-vuln-scan` for the enforced method.
+
+**"But Ring 2 is a scanner that runs first — doesn't that violate the front gate?"** No, and the distinction matters: Ring 2's recon (asset/endpoint discovery) is part of the **recon floor** that *feeds* the surface map. Its hunter/pattern hits are **leads, not findings** — they are cross-checked against the vuln-agnostic map, never auto-promoted. The front gate's "before any pattern/hunter" rule is about **what you trust as your vuln lens**, not about banning scanners from running. Order of execution (the tool may run hunters early) is not order of trust (the map still gates every candidate).
 
 ---
 

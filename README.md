@@ -23,7 +23,7 @@ flowchart TB
     WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
   end
   AUTO["automation/<br/>claim · init_target · session lifecycle"]
-  HUNT["hunters / scanners<br/>(bring your own — e.g. bbflow)<br/>zero-LLM candidate generation"]
+  HUNT["bbflow tool layer<br/>(standalone install)<br/>zero-LLM candidate generation"]
 
   AUTO -->|scaffolds| TGT
   AUTO -->|scaffolds| WS
@@ -160,20 +160,22 @@ Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, repo
 
 The framework also recommends installing **22 third-party hunting skills** from `yaklang/hack-skills` (covering JWT/SSRF/XSS/IDOR/SAML/OAuth/business-logic/WAF-bypass and more). They are **not bundled** — install via `npx skills add` on a fresh clone. See `09 - Knowledge Base/Reference Card - External Skills Catalog.md` for the curated list, install commands, audit status, and the security considerations of running third-party skills.
 
-### Runnable scanner toolchain (bring your own)
+### Tool layer: bbflow
 
-The `bbflow/` directory in this framework is the **architecture-only flow spec** (gates, scope contract, output contract) — it intentionally ships **no payloads, no hunters, no real detection templates**. To run actual scans, plug in any toolchain that satisfies the contract. One reference implementation is the standalone `guan4tou2/bbflow` CLI (zero-LLM, BBOT/Osmedeus + pattern hunters + Nuclei templates). See `bbflow/TOOLS.md` for the sanitized inventory of what that reference implementation provides and where each tool fits in the flow.
+The framework's tool layer (Ring 2) **is** the standalone [`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow) CLI (zero-LLM, BBOT/Osmedeus + pattern hunters + Nuclei templates). Install it separately and establish it with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). The dependency is one-directional: **bbflow runs standalone without this framework, but this framework expects bbflow.** A different scanner is a fallback only if it satisfies the same [output contract](bbflow/output-contract.md).
+
+The `bbflow/` **directory in this repo** is *not* that tool — it is the **architecture-only flow spec** (gates, scope contract, output contract) and intentionally ships **no payloads, no hunters, no real detection templates**. Real templates live in the standalone tool, never here. See `bbflow/TOOLS.md` for the sanitized inventory.
 
 **Important distinction** — same name, four different things:
 
 | Name | What it is | Where real templates live |
 |------|-----------|---------------------------|
 | `bbflow/` (this dir) | Architecture spec — gates, scope, output contract | ❌ No real templates |
-| `guan4tou2/bbflow` (standalone) | Runnable CLI implementation | ✅ Ships its own templates |
-| Private LLM-agent tool layer | Subprocess wrappers on top of any CLI | ✅ Stays private |
+| `guan4tou2/bbflow` (standalone) | The tool layer — runnable CLI | ✅ Ships its own templates |
+| Private LLM-agent tool layer | Subprocess wrappers on top of the CLI | ✅ Stays private |
 | Obsidian read-only ops plugin | Vault visualization | — |
 
-This framework is the spec. Bring your own implementation.
+This repo is the spec; the standalone `guan4tou2/bbflow` is the implementation it expects.
 
 ## Knowledge Base
 

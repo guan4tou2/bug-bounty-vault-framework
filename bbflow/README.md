@@ -4,7 +4,7 @@
 
 This directory is a framework-only placeholder for connecting an optional automation runtime to the vault workflow.
 
-It is intentionally bring your own tools. It defines the shape of the workflow, the scope guard, the expected output contract, and the knowledge capture hook.
+It defines the shape of the workflow, the scope guard, the expected output contract, and the knowledge capture hook. The contract is intentionally open — but the framework's **default implementation is the standalone `guan4tou2/bbflow` CLI** (`bb-tool-setup` / `setup.md`). An alternative scanner is a fallback only if it conforms to this contract.
 
 ## What Is Included
 
