@@ -106,6 +106,7 @@ def test_claude_skills_exist():
         "bb-triage-response",
         "bb-incident-response",
         "bb-scope-safety-check",
+        "bb-exploit-chain",
         "bb-attack-chain-review",
         "bb-evidence-readiness",
         "bb-attempt-recorder",

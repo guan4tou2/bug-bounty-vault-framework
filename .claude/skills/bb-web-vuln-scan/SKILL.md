@@ -23,7 +23,7 @@ Run when actively testing a web target's endpoints/parameters:
 2. **Hit a WAF → attempt bypass, do not give up.** Identify the WAF, find a documented bypass, test its coverage (different paths/params may have different rules).
 3. **Cover every OWASP Top 10 category** — not just A03 + A05.
 4. **Do not hardcode lists.** The paths / parameter names / payloads here are a starting point. For each target, expand dynamically from the tech stack and a real wordlist.
-5. **Any finding → trigger `bb-attack-chain-review`** before moving to the next system.
+5. **Any finding → trigger `bb-exploit-chain`** (the 6-question chain) before moving to the next system.
 
 ## Anti-patterns (forbidden)
 
@@ -117,7 +117,7 @@ All of these must hold before claiming exhaustion:
 2. Every crawled endpoint is in a terminal state (Dead End or Finding).
 3. Every discovered version was CVE-checked.
 4. Any WAF encountered had a bypass attempt.
-5. Every finding ran `bb-attack-chain-review`.
+5. Every finding ran `bb-exploit-chain` (the 6-question chain).
 6. Every ⏳ is genuinely auth-blocked, not skipped.
 
 You **cannot** claim exhaustion while any non-auth ⏳ remains, any endpoint is still untested, any finding skipped the chain review, or any WAF was left untried.
@@ -141,7 +141,8 @@ Use whatever browser-automation and request-interception tools your setup provid
 - `bb-surface-mapping` (prerequisite gate — map before you scan)
 - `bb-scope-safety-check` (gate before any write/active operation)
 - `bb-version-cve-precheck` (firmware/software pre-check SOP)
-- `bb-attack-chain-review` (run on every finding)
+- `bb-exploit-chain` (the 6-question chain — run on every finding)
+- `bb-attack-chain-review` (candidate-lifecycle chain-assessment gate)
 - `09 - Knowledge Base/` Pattern notes (IDOR / SSRF / XSS / SQLi / SSTI / …)
 - `09 - Knowledge Base/Reference Card - Vulnerability Type Classification.md`
 - `docs/architecture-closed-loop.md`

@@ -52,12 +52,12 @@ When a Surface Map hypothesis becomes a Finding, tag it `discovery_mode: explora
 A completed Surface Map **must** flow into a testing phase. "Mapped, therefore done" is not allowed:
 
 ```text
-bb-surface-mapping → bb-web-vuln-scan → [finding]    → bb-attack-chain-review → chain DAG
+bb-surface-mapping → bb-web-vuln-scan → [finding]    → bb-exploit-chain → chain DAG
                                        → [no finding] → mark Exhausted
 ```
 
 1. Load `bb-web-vuln-scan` — OWASP Top 10 coverage + injection matrix + version→CVE + WAF bypass.
-2. On any finding → load `bb-attack-chain-review` before moving to the next system.
+2. On any finding → run `bb-exploit-chain` (the 6-question chain) before moving to the next system.
 3. Persist chain results as an Exploit Chain DAG so every path is tracked to ✅ or ❌.
 
 ## Cross-References

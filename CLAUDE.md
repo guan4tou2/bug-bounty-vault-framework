@@ -25,6 +25,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-triage-response** | "N/A"; "Duplicate"; "Triaged"; "Accepted"; "vendor replied" | `.claude/skills/bb-triage-response/SKILL.md` |
 | **bb-incident-response** | "Service disruption"; "502/503 persistent"; "unintended impact" | `.claude/skills/bb-incident-response/SKILL.md` |
 | **bb-scope-safety-check** | Before scan/fuzz/payload/POST/PUT/DELETE/bbflow hunt | `.claude/skills/bb-scope-safety-check/SKILL.md` |
+| **bb-exploit-chain** | Found a vuln/leak; "what can this chain into"; "what next"; "dig deeper" — run the 6-question chain before the next system | `.claude/skills/bb-exploit-chain/SKILL.md` |
 | **bb-attack-chain-review** | Candidate may chain into higher impact; "deep dive"; "chain" | `.claude/skills/bb-attack-chain-review/SKILL.md` |
 | **bb-evidence-readiness** | Before creating Finding/Submission/FORM; "evidence ready?" | `.claude/skills/bb-evidence-readiness/SKILL.md` |
 | **bb-attempt-recorder** | Failed test; false positive; blocked; negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
