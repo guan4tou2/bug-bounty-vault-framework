@@ -20,7 +20,9 @@ Backports the private vault's most-emphasized discipline — map the attack surf
 - `README.md` — architecture diagram shows the hunter ring (bring-your-own, e.g. bbflow) and the front gates; skill count 13 → 16; tool-layer setup pointer
 - `docs/workflow.md` — added a "Tool Layer (Ring 2)" section + tool-layer gate so candidates are actually generated before hunting
 - `.claude/agents/bbflow-runner.md` — Step 0 checks the tool layer exists and routes to `bb-tool-setup` instead of blindly failing on a fresh machine
-- `tests/test_public_skeleton.py` — guards the three new skills
+- `tests/test_public_skeleton.py` — guards the new skills
+- **Repositioned as LLM-agent-operated by design** — README intro + LLM Integration section now present agent operation as the primary mode (manual Obsidian = fallback), since the skills/gates are the operating interface
+- Added a rendered **mermaid four-ring loop diagram** to README and `docs/architecture-closed-loop.md` (closing ④→① edge highlighted); the ASCII version is kept as a collapsible plain-text fallback
 - Regenerated `.codex` / `.gemini` mirrors via `automation/sync_codex_skills.py`
 
 ## v0.1.2 — 2026-06-02
