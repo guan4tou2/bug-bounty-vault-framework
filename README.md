@@ -17,24 +17,26 @@ flowchart TB
     KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
   end
   subgraph LLM["Optional LLM layer"]
-    SK[".claude / .codex / .gemini<br/>13 skills + 6 agents"]
+    SK[".claude / .codex / .gemini<br/>15 skills + 6 agents"]
   end
   subgraph LOCAL["workspace/ (gitignored, local only)"]
     WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
   end
   AUTO["automation/<br/>claim · init_target · session lifecycle"]
+  HUNT["hunters / scanners<br/>(bring your own — e.g. bbflow)<br/>zero-LLM candidate generation"]
 
   AUTO -->|scaffolds| TGT
   AUTO -->|scaffolds| WS
-  WS -->|"reviewed candidates"| TGT
+  HUNT -->|"raw candidates"| WS
+  WS -->|"surface-map + OWASP gates<br/>then reviewed candidates"| TGT
   TGT -->|"Finding → Submission → FORM"| DASH
   TGT -->|"reusable lessons"| KB
-  KB -->|"informs hunting"| TGT
+  KB -->|"informs hunting + new surface hypotheses"| TGT
   TPL -.->|"creates notes in"| TGT
   SK -.->|"drives the flow (optional)"| TGT
 ```
 
-See [docs/architecture.md](docs/architecture.md) for the layer-by-layer map and [docs/workflow.md](docs/workflow.md) for the candidate lifecycle flow.
+See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the four-ring closed loop (wiki ⇄ hunters ⇄ hunting ⇄ learning) and the repo-boundary map, [docs/architecture.md](docs/architecture.md) for the layer-by-layer view, and [docs/workflow.md](docs/workflow.md) for the candidate lifecycle flow.
 
 ## What This Is
 
@@ -144,7 +146,7 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
-| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 13 skills + 6 agents |
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 15 skills + 6 agents |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
