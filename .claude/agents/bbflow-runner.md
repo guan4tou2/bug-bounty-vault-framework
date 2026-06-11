@@ -11,7 +11,7 @@ Optionally: specific hunters to run (e.g., `--only git-exposed,sms-static-cred`)
 
 ## Step 0 — Confirm the tool layer exists (Ring 2)
 
-The tool layer is bring-your-own and not bundled. Before anything else, confirm it is established:
+The tool layer is bbflow — a separate install, not bundled. Before anything else, confirm it is established:
 
 ```bash
 command -v bbflow >/dev/null && bbflow list >/dev/null 2>&1 && echo "bbflow ready" || echo "NO TOOL LAYER"
