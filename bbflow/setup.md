@@ -21,22 +21,33 @@ Either way the tool layer stays a **separate repo/process** — never copy hunte
 
 ## Option A — install the bbflow tool
 
+The tool is a standalone CLI installed **outside** this framework repo (it is a sibling, never a subdir). Two install paths — flags below match the tool at time of writing; always confirm with `bbflow --help` / `bbflow doctor`.
+
 ```bash
-# 1. Clone the tool repo OUTSIDE this framework repo (it is a sibling, not a subdir)
+# Fastest — Docker (zero local deps)
+docker pull ghcr.io/guan4tou2/bbflow:latest
+curl -sO https://raw.githubusercontent.com/guan4tou2/bbflow/main/bbflow-docker.sh && chmod +x bbflow-docker.sh
+./bbflow-docker.sh doctor
+
+# Or native install
 git clone https://github.com/guan4tou2/bbflow.git ../bbflow
-
-# 2. Make the CLI reachable (adjust to your shell)
-export BBFLOW_HOME="$(cd ../bbflow && pwd)"
-alias bbflow="$BBFLOW_HOME/bbflow.sh"
-
-# 3. Point its output at this vault's gitignored workspace
-export BBFLOW_WORKSPACE="$(pwd)/workspace"   # candidates land in workspace/workshop/<target>/
-
-# 4. Verify the CLI responds
-bbflow list        # should print available hunters
+( cd ../bbflow && ./install.sh --check )   # see what is missing; then ./install.sh --all
+alias bbflow="$(cd ../bbflow && pwd)/bbflow.sh"
+bbflow doctor && bbflow list               # deps OK + list available hunters
 ```
 
-Persist the `export`/`alias` lines in your shell profile so future sessions and the `bbflow-runner` agent find the CLI.
+Point the tool's output at this vault's gitignored workspace, then run a scope-gated hunt:
+
+```bash
+export BBFLOW_WORKSPACE="$(pwd)/workspace"          # products land in workspace/workshop/<target>/
+
+bbflow init <target>                                 # creates workshop/<target>/SCOPE.md (fill it in)
+bbflow hunt <target> --scope-file workshop/<target>/SCOPE.md            # all hunters (default)
+bbflow hunt <target> --scope-file workshop/<target>/SCOPE.md --only cors,ssrf,graphql   # subset
+bbflow flow <target> --scope-file workshop/<target>/SCOPE.md            # recon + hunt + report
+```
+
+bbflow emits the machine-readable integration contract (`run_manifest.json`, `candidates.jsonl`, `scope_contract.json`) into `workshop/<target>/` — exactly the artifacts this framework's [output contract](output-contract.md) expects. Persist the `export`/`alias` lines in your shell profile so future sessions and the `bbflow-runner` agent find the CLI.
 
 > Noisy/active operations (`recon`, `hunt`, `flow`) should run on an isolated runner / VPS, not your main host. See [safety-boundary.md](safety-boundary.md) and the `bb-scope-safety-check` skill.
 

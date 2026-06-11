@@ -42,28 +42,26 @@ Note any out-of-scope domains/IPs. Never run hunters against out-of-scope target
 
 ## Step 3 — Run hunters
 
-bbflow is a CLI tool that runs on a VPS or isolated runner (see `tools/README.md` — do not call `tools/bbflow.sh`, it does not exist). Run hunters via the bbflow CLI:
+bbflow is a zero-LLM CLI that should run on a VPS or isolated runner for noisy/active work. A scope file is **mandatory**. (Flags below match the tool at time of writing — confirm with `bbflow --help`.)
 
 ```bash
-bbflow hunt <target> --hunters all
+bbflow list                                                    # list available hunters
+bbflow hunt <target> --scope-file workspace/workshop/<target>/SCOPE.md          # all hunters (default)
 ```
 
-Or with specific hunters:
+Or a subset with `--only`:
 ```bash
-bbflow hunt <target> --hunters <hunter1>,<hunter2>
+bbflow hunt <target> --scope-file workspace/workshop/<target>/SCOPE.md --only cors,ssrf,graphql
 ```
 
-To list available hunters first:
-```bash
-bbflow list
-```
-
-To generate a report after the hunt completes:
+To generate a human report after the hunt:
 ```bash
 bbflow report <target>
 ```
 
-> Note: `bbflow hunt` and `bbflow report` must be run on the VPS/isolated runner per `tools/README.md`. Do not run these commands against live targets from your local machine.
+The hunt writes the machine-readable contract (`candidates.jsonl`, `run_manifest.json`, `scope_contract.json`) into `workspace/workshop/<target>/`; consume `candidates.jsonl` for the lifecycle (each row's `suggested_skill` routes it).
+
+> Note: `bbflow hunt` / `recon` / `flow` are noisy — run them on the VPS/isolated runner via `bb-scope-safety-check`, not against live targets from your local machine.
 
 ## Step 4 — Parse results
 
