@@ -9,13 +9,17 @@ Backports the private vault's most-emphasized discipline — map the attack surf
 **Added:**
 - `.claude/skills/bb-surface-mapping` — vuln-agnostic attack-surface mapping, the FRONT gate of the hunting ring (counters the streetlight effect)
 - `.claude/skills/bb-web-vuln-scan` — OWASP Top 10 coverage + injection matrix + version→CVE + WAF-bypass discipline (runs after surface mapping)
+- `.claude/skills/bb-tool-setup` — establishes the Ring 2 tool layer (clone the bbflow tool or wire your own scanner) and verifies its `candidates.jsonl` actually feeds the loop; makes "bring your own tools" an AI-actionable, do-it-now step instead of a passive note
+- `bbflow/setup.md` — step-by-step, agent-followable guide for establishing the tool layer and wiring its output into the candidate lifecycle
 - `docs/architecture-closed-loop.md` — the four-ring loop (wiki ⇄ hunters ⇄ hunting ⇄ learning), the explore-first rationale, the framework-vs-tool-vs-private-vault repo boundary, and the public←private migration direction
 
 **Changed:**
 - `docs/workflow.md` — candidate lifecycle now shows the surface-map front gate + coverage gate between Recon and Candidate; gate list and lifecycle steps updated
 - `docs/architecture.md` — added the "explore-first hunting (anti-streetlight)" design principle
-- `README.md` — architecture diagram shows the hunter ring (bring-your-own, e.g. bbflow) and the front gates; skill count 13 → 15
-- `tests/test_public_skeleton.py` — guards the two new skills
+- `README.md` — architecture diagram shows the hunter ring (bring-your-own, e.g. bbflow) and the front gates; skill count 13 → 16; tool-layer setup pointer
+- `docs/workflow.md` — added a "Tool Layer (Ring 2)" section + tool-layer gate so candidates are actually generated before hunting
+- `.claude/agents/bbflow-runner.md` — Step 0 checks the tool layer exists and routes to `bb-tool-setup` instead of blindly failing on a fresh machine
+- `tests/test_public_skeleton.py` — guards the three new skills
 - Regenerated `.codex` / `.gemini` mirrors via `automation/sync_codex_skills.py`
 
 ## v0.1.2 — 2026-06-02

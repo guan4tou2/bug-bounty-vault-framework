@@ -96,6 +96,7 @@ def test_claude_skills_exist():
     assert skills_dir.is_dir()
     expected = [
         "bb-version-cve-precheck",
+        "bb-tool-setup",
         "bb-surface-mapping",
         "bb-web-vuln-scan",
         "bb-dedup-finding",
