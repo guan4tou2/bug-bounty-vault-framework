@@ -15,6 +15,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | Skill | Trigger | Path |
 |-------|---------|------|
 | **bb-version-cve-precheck** | Obtained firmware/binary/app; "start analyzing X"; "init target"; "download firmware" | `.claude/skills/bb-version-cve-precheck/SKILL.md` |
+| **bb-tool-setup** | Tool layer not set up; "set up scanner"; "establish tool layer"; "configure bbflow"; first "run hunters"; no candidates.jsonl | `.claude/skills/bb-tool-setup/SKILL.md` |
 | **bb-surface-mapping** | Start of any target, after recon, before any pattern/hunter/scan; "start hunting"; "explore"; "map attack surface" (anti-streetlight FRONT gate) | `.claude/skills/bb-surface-mapping/SKILL.md` |
 | **bb-web-vuln-scan** | Testing a web target; "scan"; "test"; "pentest"; "find vulns" (after surface mapping) | `.claude/skills/bb-web-vuln-scan/SKILL.md` |
 | **bb-dedup-finding** | Before new Finding/FORM; "wasn't this already found"; "same vulnerability" | `.claude/skills/bb-dedup-finding/SKILL.md` |

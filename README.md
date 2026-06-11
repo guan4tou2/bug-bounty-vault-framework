@@ -17,7 +17,7 @@ flowchart TB
     KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
   end
   subgraph LLM["Optional LLM layer"]
-    SK[".claude / .codex / .gemini<br/>15 skills + 6 agents"]
+    SK[".claude / .codex / .gemini<br/>16 skills + 6 agents"]
   end
   subgraph LOCAL["workspace/ (gitignored, local only)"]
     WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
@@ -44,7 +44,7 @@ See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the
 - A complete **Finding → Submission → FORM** pipeline with templates and frontmatter schema
 - **Session lifecycle management** with claim/release concurrency control
 - **LLM agent integration** for Claude Code, Codex CLI, and Gemini CLI
-- **Scanner config seeds** for Nuclei, Osmedeus, and BBOT (bring your own tools)
+- **Scanner config seeds** for Nuclei, Osmedeus, and BBOT — bring your own tools; establish the tool layer with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md)
 - A **Knowledge Base** framework for cross-target pattern capture
 - A **workspace scaffold** for local-only operational data (.gitignored)
 
@@ -146,7 +146,7 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
-| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 15 skills + 6 agents |
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 16 skills + 6 agents |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 

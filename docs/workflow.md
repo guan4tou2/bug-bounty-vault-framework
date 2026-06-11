@@ -6,6 +6,15 @@ The generic lifecycle is:
 Target -> Recon -> Finding -> Review -> Knowledge Capture
 ```
 
+## Tool Layer (Ring 2) — establish it before automated hunting
+
+The zero-LLM candidate generator (scanners/hunters) is **bring-your-own and not bundled**. Establish it once per machine **before** the first automated run, or the loop has nothing to consume. Use `bb-tool-setup` (full steps in [`bbflow/setup.md`](../bbflow/setup.md)):
+
+- **Option A** — clone + install the bbflow tool (`guan4tou2/bbflow`) as a sibling repo and point `BBFLOW_WORKSPACE` at `workspace/`.
+- **Option B** — wire any scanner to emit `candidates.jsonl` per [`bbflow/output-contract.md`](../bbflow/output-contract.md).
+
+The tool writes `candidates.jsonl` into `workspace/workshop/<target>/` (gitignored). Those candidates are **leads, not findings** — they enter the lifecycle below through the surface-map front gate, never as confirmed Findings. This is Ring 2 of the [closed loop](architecture-closed-loop.md).
+
 ## Candidate Lifecycle
 
 Every candidate passes the same gates before becoming a submission. Each gate maps to an optional LLM skill (named in parentheses) and can also be run by hand.
@@ -40,6 +49,10 @@ flowchart TD
 ## Gates
 
 Each gate can be performed manually or via the corresponding LLM skill.
+
+### Tool-layer gate (`bb-tool-setup`)
+
+Before the first automated hunter/scanner run, confirm Ring 2 exists: a configured tool (bbflow or your own scanner), a filled `scope.yaml`, and `candidates.jsonl` landing in the ignored `workspace/`. If absent, establish it — a documented but unbuilt tool layer means the loop never receives candidates.
 
 ### Surface mapping gate — FRONT gate (`bb-surface-mapping`)
 

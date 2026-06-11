@@ -24,6 +24,7 @@ Generated wrappers:
 | `bb-scope-safety-check` | `.gemini/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.gemini/skills/bb-submission-readiness/SKILL.md` |
 | `bb-surface-mapping` | `.gemini/skills/bb-surface-mapping/SKILL.md` |
+| `bb-tool-setup` | `.gemini/skills/bb-tool-setup/SKILL.md` |
 | `bb-triage-response` | `.gemini/skills/bb-triage-response/SKILL.md` |
 | `bb-version-cve-precheck` | `.gemini/skills/bb-version-cve-precheck/SKILL.md` |
 | `bb-web-vuln-scan` | `.gemini/skills/bb-web-vuln-scan/SKILL.md` |

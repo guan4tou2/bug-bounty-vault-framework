@@ -9,6 +9,16 @@ You are a bug bounty automation agent. Your job is to run bbflow hunters against
 User provides: target name (e.g., `acme-corp`, `example-iot`)
 Optionally: specific hunters to run (e.g., `--only git-exposed,sms-static-cred`)
 
+## Step 0 — Confirm the tool layer exists (Ring 2)
+
+The tool layer is bring-your-own and not bundled. Before anything else, confirm it is established:
+
+```bash
+command -v bbflow >/dev/null && bbflow list >/dev/null 2>&1 && echo "bbflow ready" || echo "NO TOOL LAYER"
+```
+
+If the tool layer is missing, **stop and run `bb-tool-setup`** (full steps in `bbflow/setup.md`) — do not blindly call `bbflow hunt`, it will fail. Only continue once `bbflow list` works or your own scanner is wired to emit `candidates.jsonl`.
+
 ## Step 1 — Pre-run deduplication check
 
 Read these files first to know what is already discovered:

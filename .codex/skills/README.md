@@ -24,6 +24,7 @@ Generated wrappers:
 | `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.codex/skills/bb-submission-readiness/SKILL.md` |
 | `bb-surface-mapping` | `.codex/skills/bb-surface-mapping/SKILL.md` |
+| `bb-tool-setup` | `.codex/skills/bb-tool-setup/SKILL.md` |
 | `bb-triage-response` | `.codex/skills/bb-triage-response/SKILL.md` |
 | `bb-version-cve-precheck` | `.codex/skills/bb-version-cve-precheck/SKILL.md` |
 | `bb-web-vuln-scan` | `.codex/skills/bb-web-vuln-scan/SKILL.md` |

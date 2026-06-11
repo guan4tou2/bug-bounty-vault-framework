@@ -5,6 +5,7 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | Skill | Trigger | Path |
 |---|---|---|
 | `bb-version-cve-precheck` | Software / firmware / SaaS analysis before hands-on work; latest version and CVE/advisory pre-checks | `.claude/skills/bb-version-cve-precheck/SKILL.md` |
+| `bb-tool-setup` | Tool layer (Ring 2) not yet established; first hunter/scanner run, bbflow/scanner not found, or no candidates.jsonl produced | `.claude/skills/bb-tool-setup/SKILL.md` |
 | `bb-surface-mapping` | Start of any target, after recon and before any pattern/hunter/scan; vuln-agnostic full attack-surface mapping (anti-streetlight FRONT gate) | `.claude/skills/bb-surface-mapping/SKILL.md` |
 | `bb-web-vuln-scan` | Testing a web target's endpoints/params; OWASP Top 10 coverage, injection matrix, version→CVE, WAF bypass (runs after surface mapping) | `.claude/skills/bb-web-vuln-scan/SKILL.md` |
 | `bb-dedup-finding` | Opening a new Finding/FORM or deciding whether evidence is a duplicate | `.claude/skills/bb-dedup-finding/SKILL.md` |

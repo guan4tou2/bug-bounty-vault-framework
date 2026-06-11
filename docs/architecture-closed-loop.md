@@ -112,6 +112,7 @@ private vault  ──(sanitize)──▶  this public framework  ──(clone)�
 
 ## 6. Is your loop actually closed? (checklist)
 
+- [ ] Ring 2 is **established** (tool configured via `bb-tool-setup` / [`bbflow/setup.md`](../bbflow/setup.md)) and its `candidates.jsonl` lands in `workspace/` — a documented-but-unbuilt tool layer feeds nothing.
 - [ ] Ring 3 started with a surface map, not a scanner run.
 - [ ] OWASP coverage was completed (or items honestly marked auth-blocked) before "no findings".
 - [ ] Every finding ran the chain review before the next system.
