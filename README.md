@@ -1,8 +1,8 @@
 # Bug Bounty Vault Framework
 
-An Obsidian-based vault system for organizing authorized security research — from recon through disclosure.
+An Obsidian vault that an **LLM coding agent operates** as a bug-bounty control plane — recon through disclosure. The skills, agents, and gates *are* the operating interface; the Markdown vault is the shared state the agent reads and writes.
 
-Clone, open in Obsidian, and start hunting. No target data, no findings, no secrets included.
+**LLM-first:** point an agent (Claude Code / Codex CLI / Gemini CLI) at `CLAUDE.md` / `CODEX.md` / `GEMINI.md` and start hunting. It still works by hand in plain Obsidian if you prefer — that is the fallback, not the default. No target data, no findings, no secrets included.
 
 This repository is a **public seed** for building your own private vault: start from the framework, collect your own target notes and lessons, and let it become a **self-updating private vault** over time.
 
@@ -36,14 +36,32 @@ flowchart TB
   SK -.->|"drives the flow (optional)"| TGT
 ```
 
-See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the four-ring closed loop (wiki ⇄ hunters ⇄ hunting ⇄ learning) and the repo-boundary map, [docs/architecture.md](docs/architecture.md) for the layer-by-layer view, and [docs/workflow.md](docs/workflow.md) for the candidate lifecycle flow.
+### The operating loop
+
+The agent runs a four-ring loop. The blue edge (④ → ①) is what makes it a *loop* and not a throwaway pipeline: lessons feed back into the wiki so each pass is stronger.
+
+```mermaid
+flowchart LR
+  W["① Wiki<br/>09-KB patterns · lessons"]
+  T["② bbflow tool layer<br/>candidates.jsonl"]
+  H["③ Hunting<br/>surface-map → scan → chain<br/>front gate = explore-first"]
+  L["④ Learning<br/>bb-knowledge-capture"]
+  W -->|cites checks| T
+  T -->|candidates as leads| H
+  H -->|Finding → Submission| L
+  L -.->|"backfill ↺ — closes the loop"| W
+  W -.->|informs hunting| H
+  linkStyle 3 stroke:#2563eb,stroke-width:2.5px,color:#2563eb
+```
+
+See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the four-ring closed loop in full (ring responsibilities, the explore-first rationale, the repo-boundary map), [docs/architecture.md](docs/architecture.md) for the layer-by-layer view, and [docs/workflow.md](docs/workflow.md) for the candidate lifecycle flow.
 
 ## What This Is
 
+- **LLM-agent-operated by design** — Claude Code / Codex CLI / Gemini CLI drive it via trigger-activated skills and gates; manual operation is the fallback
 - An **Obsidian vault as the top-level control plane** — not a flat file tree
 - A complete **Finding → Submission → FORM** pipeline with templates and frontmatter schema
 - **Session lifecycle management** with claim/release concurrency control
-- **LLM agent integration** for Claude Code, Codex CLI, and Gemini CLI
 - **Tool layer is [bbflow](https://github.com/guan4tou2/bbflow)** — a standalone zero-LLM scanner CLI you install as a dependency (not bundled); establish it with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). Any contract-conforming scanner is a fallback.
 - A **Knowledge Base** framework for cross-target pattern capture
 - A **workspace scaffold** for local-only operational data (.gitignored)
@@ -140,9 +158,9 @@ Finding → Submission → FORM
 
 All three share the same `finding_id`. Templates in `07 - Templates/` provide the frontmatter schema. See AGENTS.md §3 for the full specification.
 
-## LLM Integration
+## LLM Integration (primary operating mode)
 
-LLM use is optional. The vault works as plain Markdown + Obsidian, and also includes optional entrypoints for three LLM CLI tools:
+This repo is **built to be driven by an LLM agent**: the skills are trigger-activated procedures and the gates enforce discipline, so the agent — not a human clicking through Obsidian — does the operating. Point one of three CLI agents at its entrypoint:
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
@@ -150,7 +168,7 @@ LLM use is optional. The vault works as plain Markdown + Obsidian, and also incl
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
-Choose Claude Code, Codex, Gemini, another assistant, or no LLM. The workflow documents are written so the vault can still be operated manually.
+The agent reads `CLAUDE.md` / `AGENTS.md`, loads a skill when its trigger fires, and writes results back into the Markdown vault. Manual Markdown + Obsidian operation still works as a **fallback**, but the skills/agents/gates are the intended interface.
 
 Skills: version-cve-precheck, tool-setup, surface-mapping, web-vuln-scan, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, exploit-chain, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
 

@@ -11,7 +11,23 @@ This document exists to prevent two recurring confusions:
 
 ## 1. The four rings
 
-The system is not a pipeline with an end — it is a loop whose output makes the next pass better.
+The system is not a pipeline with an end — it is a loop whose output makes the next pass better. The blue edge (④ → ①) is what closes it: without it you have a line that throws work away; with it the loop compounds.
+
+```mermaid
+flowchart LR
+  W["① Wiki<br/>09-KB patterns · lessons"]
+  T["② bbflow tool layer<br/>candidates.jsonl"]
+  H["③ Hunting<br/>surface-map → scan → chain<br/>front gate = explore-first"]
+  L["④ Learning<br/>bb-knowledge-capture"]
+  W -->|cites checks| T
+  T -->|candidates as leads| H
+  H -->|Finding → Submission → KC| L
+  L -.->|"backfill ↺ — closes the loop"| W
+  W -.->|informs hunting| H
+  linkStyle 3 stroke:#2563eb,stroke-width:2.5px,color:#2563eb
+```
+
+<details><summary>Plain-text version (for terminals / LLM reading)</summary>
 
 ```text
             ┌──────────────────────────────────────────────────────────────┐
@@ -35,6 +51,8 @@ The system is not a pipeline with an end — it is a loop whose output makes the
    │ (bbflow — standalone CLI) │ ◀────────────────── │ candidate gate pipeline │
    └──────────────────────────┘   scope.yaml / scale └────────────────────────┘
 ```
+
+</details>
 
 Each ring owns one thing and hands off cleanly:
 
