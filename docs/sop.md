@@ -5,8 +5,12 @@
 1. Create a target note from `templates/target.md`.
 2. Create a private workspace folder outside git.
 3. Add scope and authorization references.
-4. Run the safety and dedupe gates.
-5. Start a recon note before storing raw outputs.
+4. Establish the tool layer once if not already done (`bb-tool-setup` — install bbflow or a contract-conforming scanner).
+5. **Map the attack surface vuln-agnostically first** (`bb-surface-mapping`, the front gate) — do not start from a scanner/pattern library.
+6. Test with full OWASP coverage (`bb-web-vuln-scan`); chain any finding (`bb-exploit-chain`) before the next system.
+7. Run the safety and dedupe gates, and start a recon note before storing raw outputs.
+
+See [architecture-closed-loop.md](architecture-closed-loop.md) for why the front gate comes first.
 
 ## New Recon Note
 

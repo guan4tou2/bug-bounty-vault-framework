@@ -430,14 +430,14 @@ def test_public_seed_positioning_and_post_clone_checklist():
         assert required in readme, f"README missing public positioning: {required}"
 
     for required in (
-        "Optional LLM setup",
+        "LLM setup",
         "Claude Code",
         "Codex",
         "Gemini",
-        "No LLM",
-        "Optional scanner setup",
-        "VPS is recommended",
-        "not required",
+        "no LLM",
+        "Tool layer setup",
+        "VPS",
+        "Local-only use is enough",
         "Pearclean / AppCleaner / CleanMyMac",
         "bash automation/setup_workspace.sh",
         "bash automation/init_target.sh <target>",

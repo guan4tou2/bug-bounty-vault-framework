@@ -28,7 +28,7 @@ The repo root **is** the Obsidian vault — you inherit this layout on clone (se
   07 - Templates/              # Obsidian (Templater) templates
   09 - Knowledge Base/         # Patterns, Playbooks, Checklists, Lessons
   10 - Meta/                   # Meta notes
-  .claude/ .codex/ .gemini/    # Optional LLM skills + agents
+  .claude/ .codex/ .gemini/    # LLM skills + agents (primary operating interface)
   automation/  _automation/    # Session lifecycle + lint
   docs/  bbflow/  tools/
   workspace/                   # gitignored runtime scratch
