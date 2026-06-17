@@ -31,6 +31,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-attempt-recorder** | Failed test; false positive; blocked; negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
 | **bb-submission-readiness** | Final gate before Submission/FORM creation | `.claude/skills/bb-submission-readiness/SKILL.md` |
 | **bb-knowledge-capture** | New technique/lesson/tool behavior to capture in KB | `.claude/skills/bb-knowledge-capture/SKILL.md` |
+| **bb-cvss-score** | "score CVSS"; "CVSS vector"; "what severity" — CVSS 3.1 for a Finding (stateless, inline) | `.claude/skills/bb-cvss-score/SKILL.md` |
 
 **Trigger matched -> immediately load skill -> strictly follow skill content.**
 
