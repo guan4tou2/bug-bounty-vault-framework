@@ -27,5 +27,5 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 - Keep frontmatter to exactly `name` and `description`.
 - Make `description` start with `Use when` and describe triggers only.
 - Add the skill to this registry and `CLAUDE.md` in the same change.
-- Regenerate the Codex/Gemini mirrors with `python3 automation/sync_codex_skills.py`.
+- Regenerate the Codex/Gemini mirrors with `python3 automation/sync_codex_skills.py`. The `.codex/` and `.gemini/` skill sets are **supersets**, not pure mirrors — they carry every Claude skill **plus** a generated `bb-agent-prompts` router skill (CLI-only, points back at `.claude/agents/`). The generator must preserve that extra skill, not prune it (`test_codex_skills_mirror_claude` allows exactly this one extra via `MIRROR_EXTRA`).
 - Verify with `pytest tests/test_public_skeleton.py -q`.
