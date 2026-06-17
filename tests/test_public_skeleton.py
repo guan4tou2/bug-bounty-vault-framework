@@ -85,10 +85,11 @@ def test_obsidian_config_exists():
 def test_claude_agents_exist():
     agents_dir = ROOT / ".claude" / "agents"
     assert agents_dir.is_dir()
-    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "cvss-auto-scorer.md", "pre-recon.md", "report-writer.md", "vault-sync.md"]
+    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "pre-recon.md", "report-writer.md", "vault-sync.md"]
     for name in expected:
         assert (agents_dir / name).exists(), f"Missing agent: {name}"
     assert not (agents_dir / "submit-form.md").exists(), "Public framework should use generic report-writer agent"
+    assert not (agents_dir / "cvss-auto-scorer.md").exists(), "CVSS scoring is the bb-cvss-score skill (stateless transform), not an agent"
 
 
 def test_claude_skills_exist():
@@ -112,6 +113,7 @@ def test_claude_skills_exist():
         "bb-attempt-recorder",
         "bb-submission-readiness",
         "bb-knowledge-capture",
+        "bb-cvss-score",
     ]
     for name in expected:
         assert (skills_dir / name / "SKILL.md").exists(), f"Missing skill: {name}"

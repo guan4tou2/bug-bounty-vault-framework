@@ -21,6 +21,7 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-attempt-recorder` | Failed hypothesis, false positive, blocked test, or useful negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-submission-readiness` | Final gate before Submission / FORM creation or ready_to_submit status | `.claude/skills/bb-submission-readiness/SKILL.md` |
 | `bb-knowledge-capture` | Reusable learning from finding candidate, attempt, chain review, tool result, or triage reply | `.claude/skills/bb-knowledge-capture/SKILL.md` |
+| `bb-cvss-score` | CVSS 3.1 vector + base score for a Finding (stateless desc→vector transform; was the cvss-auto-scorer agent) | `.claude/skills/bb-cvss-score/SKILL.md` |
 
 ## Maintenance
 

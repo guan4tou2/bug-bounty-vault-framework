@@ -1,6 +1,6 @@
 ---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync, or to mirror bug bounty agent behavior in Codex.
+description: Use when asked to use project Claude agents, attack-chain-deep-dive, bbflow-runner, pre-recon, report-writer, vault-sync, or to mirror bug bounty agent behavior in Codex.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -13,7 +13,6 @@ Codex does not run Claude Code workspace agents natively. This skill makes their
 |---|---|
 | `attack-chain-deep-dive` | `.claude/agents/attack-chain-deep-dive.md` |
 | `bbflow-runner` | `.claude/agents/bbflow-runner.md` |
-| `cvss-auto-scorer` | `.claude/agents/cvss-auto-scorer.md` |
 | `pre-recon` | `.claude/agents/pre-recon.md` |
 | `report-writer` | `.claude/agents/report-writer.md` |
 | `vault-sync` | `.claude/agents/vault-sync.md` |

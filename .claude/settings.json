@@ -9,6 +9,15 @@
             "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/protect_critical_writes.sh\"'"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/surface_map_gate.sh\"'"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -19,6 +28,26 @@
             "type": "command",
             "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/audit_workspace.sh\" meta >/dev/null 2>&1 || true'",
             "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'echo \"[session-end] Loop close-out is NOT automatic — run: bash automation/session_end_checklist.sh <target> (Knowledge Capture + audit + lock release). Skipping leaves the 4-ring learning loop open.\"'"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/check_active_sessions.sh\" 2>/dev/null | head -15; echo \"[session-start] claim your scope (automation/claim.sh <scope>) + run pre-recon dedup before hunting.\"'"
           }
         ]
       }

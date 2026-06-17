@@ -20,6 +20,8 @@ Run this at the very start of working a target — after recon enumeration, befo
 
 A target that has discovered endpoints but an **empty Attack Surface Map is incomplete**. Do not proceed to pattern-matching, scanning, or close a session by skipping this. If your vault has an audit/lint step, it should fail this condition (the reference automation does — a target with Discovered Paths and an empty Surface Map is a hard violation).
 
+**Scan-time block:** the reference automation ships `automation/surface_map_gate.sh`, a `PreToolUse(Bash)` hook that **blocks the scan in real time** — `bbflow hunt <target>` / `hunt-*.sh <target>` exits 2 when that target's RECON_DB has Discovered Paths but an empty Surface Map. Loud override: prefix with `BB_SKIP_SURFACE_GATE=1`.
+
 ## Method
 
 0. **Run a recon floor first** (do not skip). Recon tool output is the raw material for the Surface Map; manual browsing alone does not count. At minimum: subdomain enumeration + live-host probing + historical URL mining (e.g. wayback/CDX) + crawl + a known-vuln scan pass + JS analysis. See `Playbook - Recon`.

@@ -16,6 +16,7 @@ Generated wrappers:
 | `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-context-handoff` | `.codex/skills/bb-context-handoff/SKILL.md` |
 | `bb-cve-citation` | `.codex/skills/bb-cve-citation/SKILL.md` |
+| `bb-cvss-score` | `.codex/skills/bb-cvss-score/SKILL.md` |
 | `bb-dedup-finding` | `.codex/skills/bb-dedup-finding/SKILL.md` |
 | `bb-evidence-readiness` | `.codex/skills/bb-evidence-readiness/SKILL.md` |
 | `bb-exploit-chain` | `.codex/skills/bb-exploit-chain/SKILL.md` |
