@@ -1,37 +1,31 @@
-id: info-disclosure-common
+# SHAPE-ONLY EXAMPLE — demonstrates Nuclei template STRUCTURE, not a runnable detector.
+# All paths/matchers below are placeholders. Real, runnable info-disclosure templates
+# (real sensitive paths + secret signatures) live ONLY in the standalone tool
+# guan4tou2/bbflow (nuclei-templates/bb-recon/) — never in this architecture-only repo.
+id: info-disclosure-common-example
 
 info:
-  name: Common Information Disclosure
+  name: Common Information Disclosure (example shape)
   author: bug-bounty-vault
   severity: low
-  description: Detects common information disclosure patterns in HTTP responses
-  tags: info,disclosure,recon
+  description: |
+    STRUCTURE EXAMPLE ONLY. Shows the path-list + matchers-condition + word/status
+    matcher shape of an info-disclosure template. Replace the EXAMPLE placeholders
+    with your own sensitive paths and secret signatures in a PRIVATE toolchain.
+  tags: info,disclosure,recon,example-shape
 
 http:
   - method: GET
     path:
-      - "{{BaseURL}}/.env"
-      - "{{BaseURL}}/.git/config"
-      - "{{BaseURL}}/robots.txt"
-      - "{{BaseURL}}/sitemap.xml"
-      - "{{BaseURL}}/.well-known/security.txt"
-      - "{{BaseURL}}/server-status"
-      - "{{BaseURL}}/server-info"
+      - "{{BaseURL}}/EXAMPLE-sensitive-config-path"
+      - "{{BaseURL}}/EXAMPLE-vcs-metadata-path"
 
     matchers-condition: or
     matchers:
       - type: word
         words:
-          - "DB_PASSWORD"
-          - "APP_KEY"
-          - "SECRET_KEY"
+          - "EXAMPLE_CREDENTIAL_SIGNATURE"
         condition: or
-
-      - type: word
-        words:
-          - "[core]"
-          - "repositoryformatversion"
-        condition: and
 
       - type: status
         status:
