@@ -1,28 +1,27 @@
-id: oauth-redirect-validation
+# SHAPE-ONLY EXAMPLE — demonstrates Nuclei template STRUCTURE, not a runnable test.
+# The redirect_uri variants below are placeholders, NOT real bypass payloads. Real,
+# runnable OAuth templates live ONLY in the standalone tool guan4tou2/bbflow
+# (nuclei-templates/bb-recon/oauth-redirect-uri.yaml) — never in this architecture-only repo.
+id: oauth-redirect-validation-example
 
 info:
-  name: OAuth Redirect URI Validation Check
+  name: OAuth Redirect URI Validation Check (example shape)
   author: bug-bounty-vault
   severity: medium
-  description: Tests for weak redirect_uri validation in OAuth flows (prefix matching, subdomain bypass)
-  tags: oauth,redirect,misconfig
+  description: |
+    STRUCTURE EXAMPLE ONLY. Shows how a variable-driven OAuth template is shaped
+    (var-parameterised path list + status/word matcher + Location extractor).
+    Replace the EXAMPLE redirect variants with real test cases in a PRIVATE toolchain.
+  tags: oauth,redirect,misconfig,example-shape
   reference:
     - https://datatracker.ietf.org/doc/html/rfc6749#section-10.6
-
-# Usage: Set variables for the target OAuth endpoint
-# nuclei -t oauth-misconfig.yaml -var client_id=YOUR_CLIENT_ID -var redirect_base=https://app.example.com/callback
 
 http:
   - method: GET
     path:
-      # Exact match (baseline)
-      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}"
-      # Path addition bypass
-      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}/evil"
-      # Query injection bypass
-      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}?next=https://evil.com"
-      # String prefix bypass (no path boundary)
-      - "{{BaseURL}}/oauth/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_base}}evil"
+      # placeholder shape only — real bypass variants belong in a private toolchain
+      - "{{BaseURL}}/EXAMPLE-oauth-authorize?client_id={{client_id}}&redirect_uri={{redirect_base}}"
+      - "{{BaseURL}}/EXAMPLE-oauth-authorize?client_id={{client_id}}&redirect_uri={{redirect_base}}EXAMPLE-variant"
 
     matchers-condition: and
     matchers:
@@ -34,9 +33,7 @@ http:
       - type: word
         part: header
         words:
-          - "authorize"
-          - "consent"
-          - "allow"
+          - "EXAMPLE-consent-marker"
         condition: or
 
     extractors:

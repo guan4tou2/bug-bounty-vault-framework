@@ -331,6 +331,36 @@ def test_tool_configs_exist():
         assert (ROOT / path).exists(), f"Missing tool config: {path}"
 
 
+def test_nuclei_templates_are_shape_only_no_live_payloads():
+    """tools/nuclei/templates/ are architecture-only SHAPE examples — they must not
+    carry runnable detection payloads (real sensitive paths or exploit variants).
+    Real templates live in the standalone guan4tou2/bbflow repo. This guard is what
+    keeps a future 'helpful' real template from landing in the public seed."""
+    import re
+    tdir = ROOT / "tools" / "nuclei" / "templates"
+    # runnable-payload signatures that must never appear in the public seed
+    forbidden = [
+        r"\{\{BaseURL\}\}/\.env",
+        r"\{\{BaseURL\}\}/\.git",
+        r"redirect_uri=\{\{redirect_base\}\}/evil",
+        r"next=https://evil",
+        r"/etc/passwd",
+        r"DB_PASSWORD",
+        r"APP_KEY",
+        r"SECRET_KEY",
+    ]
+    offenders = []
+    for f in tdir.glob("*.yaml"):
+        body = f.read_text(encoding="utf-8")
+        for pat in forbidden:
+            if re.search(pat, body):
+                offenders.append(f"{f.name}: {pat}")
+    assert not offenders, (
+        "Live detection payloads found in architecture-only nuclei templates "
+        "(move real templates to guan4tou2/bbflow): " + "; ".join(offenders)
+    )
+
+
 # ── Automation ───────────────────────────────────────────────────────────────
 
 
