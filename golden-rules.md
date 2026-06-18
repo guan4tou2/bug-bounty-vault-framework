@@ -24,6 +24,12 @@
 - **R2** Platform-neutral only: no named-bounty/CVD-platform-specific report content or field mappings anywhere in the repo; generic `bb-form-writer` + `report-writer` only. → `test_public_framework_uses_platform_neutral_report_writing` (it greps the whole repo for forbidden platform tokens — including this file, so do not name platforms here)
 - **R3** Public/private boundary documented; generic methodology flows private→public after sanitization, never operational data. → `docs/public-vs-private.md`
 
+## Loop-health checks (capability — advisory, run at the right moment)
+Heuristic reports that strengthen the three core loops (LLM judges; not hard gates):
+- **Hunting** — `automation/check_pattern_coverage.sh`: KB Patterns lacking a bbflow hunter/template → expansion backlog (skips gracefully if bbflow isn't installed).
+- **Templating** — `automation/check_report_quality.sh <FORM>`: anti-exaggeration + no-internal-IDs (hard) + impact/PoC/severity (warn). Run before every submission (also via `bb-submission-readiness`).
+- **Knowledge** — `automation/check_kb_health.sh`: lessons-index completeness, orphan patterns, near-duplicate titles → merge/cleanup backlog.
+
 ## How to use
 - Before a structural change / at session end: `bash automation/check_harness_invariants.sh`
 - A failure prints the exact fix. Fix, re-run, then commit.
