@@ -29,6 +29,7 @@ Run before:
 | Severity | CVSS / severity reasoning exists when needed |
 | Channel fit | The intended downstream channel accepts this asset / vuln class / evidence type |
 | Report hygiene | No internal IDs, no unverified CVEs, no theoretical overclaim |
+| **Quality gate (mechanical)** | Run `bash automation/check_report_quality.sh <FORM/Submission.md>` — must have 0 ❌ (exaggeration words + internal IDs). Catches what hygiene review misses. |
 | Knowledge capture | New reusable learning routed to KB / Lessons / Pattern |
 
 ## Output Format
