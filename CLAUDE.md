@@ -130,6 +130,8 @@ Paste at the end of subagent prompts:
 
 ```bash
 python3 automation/check_vault.py
+# after skill/agent/hook/structural changes — the single harness-invariant gate:
+bash automation/check_harness_invariants.sh   # enforces golden-rules.md
 ```
 
 ---
