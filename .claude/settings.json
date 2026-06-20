@@ -16,6 +16,10 @@
           {
             "type": "command",
             "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/surface_map_gate.sh\"'"
+          },
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/static_only_gate.sh\"'"
           }
         ]
       }

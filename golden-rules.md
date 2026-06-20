@@ -18,6 +18,7 @@
 ## Flow / gates
 - **F1** Surface-map before scan: `bbflow hunt <t>` / `hunt-*.sh <t>` blocked when the target RECON_DB has Discovered Paths but an empty Attack Surface Map. → `automation/surface_map_gate.sh` (PreToolUse); override `BB_SKIP_SURFACE_GATE=1`
 - **F2** Lifecycle hooks present: Stop (close-out reminder) + SessionStart (claim/dedup). → `.claude/settings.json`
+- **F4** Static-only mode: when `automation/.static_only` exists (or `BB_STATIC_ONLY=1`), live/network Bash actions (scanners, hunt/flow/recon, outbound curl/wget) are blocked — for source/static audits where no live traffic is wanted. Per-command override `BB_ALLOW_LIVE=1`. → `automation/static_only_gate.sh` (PreToolUse Bash) + `check_harness_invariants.sh` (F4)
 
 ## Public-seed boundary (the framework's reason to exist)
 - **R1** `tools/nuclei/templates/` are shape-only examples — NO live payloads (real paths, secrets, exploit variants). Real templates live in `guan4tou2/bbflow`. → `tests/test_public_skeleton.py::test_nuclei_templates_are_shape_only_no_live_payloads`
@@ -28,7 +29,10 @@
 Heuristic reports that strengthen the three core loops (LLM judges; not hard gates):
 - **Hunting** — `automation/check_pattern_coverage.sh`: KB Patterns lacking a bbflow hunter/template → expansion backlog (skips gracefully if bbflow isn't installed).
 - **Templating** — `automation/check_report_quality.sh <FORM>`: anti-exaggeration + no-internal-IDs (hard) + impact/PoC/severity (warn). Run before every submission (also via `bb-submission-readiness`).
-- **Knowledge** — `automation/check_kb_health.sh`: lessons-index completeness, orphan patterns, near-duplicate titles → merge/cleanup backlog.
+- **Knowledge** — `automation/check_kb_health.sh`: lessons-index completeness, orphan patterns, near-duplicate titles, Pattern-Index membership → merge/cleanup backlog.
+- **Tooling** — `automation/check_orphan_scripts.sh`: skills/agents have invariants forcing them wired; the `automation/` layer doesn't, so this flags scripts with zero references from any real consumer (corpus excludes the README index; manual utils allowlisted).
+- **Learning-capture** — `automation/check_learning_capture.sh`: correlates Finding/Attempt/Submission activity vs KB capture (Lesson/Pattern/Playbook) over a commit window; activity>0 & capture==0 → flags forgotten backfill, proportional to activity.
+- **Hunter quality** — `automation/check_hunter_quality.sh`: aggregates the hunter-report corpus into per-hunter hit-rate + yield; flags dead-weight (≥N runs, 0 hits) and noisy (mass FP-prone output) hunters for tuning/retirement in the standalone tool repo (advisory; a miss may be environmental).
 
 ## How to use
 - Before a structural change / at session end: `bash automation/check_harness_invariants.sh`

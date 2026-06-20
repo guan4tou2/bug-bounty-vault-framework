@@ -44,6 +44,25 @@ done
 [ "$orphans" -gt 0 ] && issues=$((issues+1))
 echo ""
 
+# 2b — patterns NOT registered in Pattern Index (distinct from orphan: a pattern
+#      can have backlinks yet be missing from the index MOC, so check membership).
+echo "Patterns missing from Pattern Index MOC:"
+notidx=0
+idx_file="$KB/Pattern Index.md"
+if [ -f "$idx_file" ]; then
+  indexed=$(grep -oE "\[\[Pattern - [^]]+\]\]" "$idx_file" | sed 's/\[\[Pattern - //;s/\]\]//' | sort -u)
+  for p in "$KB/Pattern - "*.md; do
+    [ -f "$p" ] || continue
+    name=$(basename "$p" .md | sed 's/^Pattern - //')
+    printf '%s\n' "$indexed" | grep -qxF "$name" || { echo "  - $name"; notidx=$((notidx+1)); }
+  done
+  [ "$notidx" = 0 ] && echo "  (none — index complete)"
+  [ "$notidx" -gt 0 ] && issues=$((issues+1))
+else
+  echo "  [warn] Pattern Index.md not found"
+fi
+echo ""
+
 # 3 — near-duplicate pattern titles (heuristic: same first 2 significant words)
 echo "Near-duplicate Pattern titles (review for merge — heuristic):"
 dups=$(for p in "$KB/Pattern - "*.md; do
