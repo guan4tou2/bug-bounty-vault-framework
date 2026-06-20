@@ -63,6 +63,13 @@ else
   fail "F2 lifecycle hooks missing" "add Stop + SessionStart hooks to .claude/settings.json"
 fi
 
+# F4 — static-only gate installed + wired
+if [ -x automation/static_only_gate.sh ] && grep -q static_only_gate.sh .claude/settings.json 2>/dev/null; then
+  pass "F4 static-only gate wired (PreToolUse Bash)"
+else
+  fail "F4 static-only gate missing/unwired" "ensure automation/static_only_gate.sh exists + referenced in .claude/settings.json PreToolUse Bash"
+fi
+
 echo "──"
 if [ "$fails" -eq 0 ]; then
   echo "✅ all harness invariants hold"
