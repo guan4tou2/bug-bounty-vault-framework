@@ -83,6 +83,7 @@ bash automation/session_end_brief.sh <scope>
 | Discovery Log 5 columns | AGENTS.md section 3b | Time, source IP, target IP, audit ref, action+result |
 | KB lookup 3 triggers | AGENTS.md section 0c | Before research / during hunting / before reporting |
 | KB backfill 6 types | AGENTS.md Knowledge Capture | technique / decision tree / chain / stop-loss / pitfall / checklist |
+| Target Work DAG | AGENTS.md §0e / `automation/dag_gaps.sh` | dynamic recon / validation / decision / pentest / chain edge tracking |
 | Anti-exaggeration + severity | AGENTS.md sections 5 + 8 | Theoretical chains not written as facts; severity matches evidence |
 | Triage response | AGENTS.md section 9 | Submission + Kanban + KB sync on vendor reply |
 | Incident response | bb-incident-response skill | Stop testing, document, apologize, disclose |

@@ -22,7 +22,8 @@ Every candidate passes the same gates before becoming a submission. Each gate ma
 ```mermaid
 flowchart TD
   R["Recon<br/>(Playbook - Recon)"] --> SM["Surface map — FRONT gate<br/>(bb-surface-mapping)<br/>vuln-agnostic, explore-first"]
-  SM --> WV["Web vuln scan<br/>(bb-web-vuln-scan)<br/>OWASP coverage + version→CVE + WAF bypass"]
+  SM --> DAG["Target Work DAG<br/>recon · validation · decision · pentest routes"]
+  DAG --> WV["Web vuln scan<br/>(bb-web-vuln-scan)<br/>OWASP coverage + version→CVE + WAF bypass"]
   WV --> C{"Candidate?"}
   C -->|"not yet"| WV
   C -->|"surface exhausted"| EX["Mark Exhausted<br/>(record + stop)"]
@@ -57,6 +58,10 @@ Before the first automated hunter/scanner run, confirm Ring 2 exists: a configur
 ### Surface mapping gate — FRONT gate (`bb-surface-mapping`)
 
 After recon and **before any pattern/hunter/scan**, map the full attack surface vuln-agnostically: one row per surface element (endpoint, parameter, role, state transition, trust boundary, integration, dependency, file/upload, business flow, anomaly), each with a free-text "how could this break?" hypothesis. A target with discovered endpoints but an empty surface map is incomplete. This counters the streetlight effect — patterns are a post-mapping checklist, not the search starting point.
+
+### Target Work DAG
+
+For targets with branching recon, multiple validation criteria, decision gates, pentest routes, or potential exploit chains, keep a four-column DAG (`from | edge | to | status`). It is a working state map for improving coverage, exploitable-path discovery, evidence decisions, and stop conditions. It grows as new surfaces and capabilities appear. Use `bash automation/dag_gaps.sh <target>` to list pending `⏳` edges.
 
 ### Coverage gate (`bb-web-vuln-scan`)
 
@@ -97,12 +102,13 @@ When a candidate fails any gate, record the negative result to prevent repeated 
 3. Run recon in an external workspace.
 4. Record a recon note with tools, scope, decisions, and outputs.
 5. **Map the attack surface vuln-agnostically** (front gate) before any pattern/scan.
-6. **Test with full OWASP coverage** (version→CVE, injection matrix, WAF bypass); mark Exhausted only when coverage is complete.
-7. Promote validated issues into findings.
-8. Review findings for evidence quality, risk, and duplicate likelihood.
-9. Record the review decision in a review note.
-10. Optionally create a platform-neutral submission or form bundle for private downstream use.
-11. Feed reusable lessons back into the LLM Wiki.
+6. Maintain a Target Work DAG when the route branches or uncertainty remains.
+7. **Test with full OWASP coverage** (version→CVE, injection matrix, WAF bypass); mark Exhausted only when coverage is complete.
+8. Promote validated issues into findings.
+9. Review findings for evidence quality, risk, and duplicate likelihood.
+10. Record the review decision in a review note.
+11. Optionally create a platform-neutral submission or form bundle for private downstream use.
+12. Feed reusable lessons back into the LLM Wiki.
 
 ## Close-Out
 

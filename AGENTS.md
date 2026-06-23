@@ -40,6 +40,20 @@ Query the KB at three moments:
 python3 automation/end_session.py <scope>
 ```
 
+### §0e Target Work DAG
+
+Use `07 - Templates/Template - Target Work DAG.md` when a target has multiple surfaces, validation branches, decision gates, pentest routes, or exploit-chain candidates. The DAG is effectiveness-first: it should improve coverage, exploitable-path discovery, evidence decisions, and stop conditions. Token savings are secondary.
+
+The contract is a four-column edge list: `from | edge | to | status`. DAGs grow dynamically as new surfaces, capabilities, evidence, and blockers appear. Do not prune high-impact or high-uncertainty edges just to keep the file short. At session start, use:
+
+```bash
+bash automation/dag_gaps.sh <target>
+bash automation/dag_gaps.sh <target> --kind recon
+bash automation/dag_gaps.sh <target> --kind decision
+```
+
+Pick the highest-ROI or uncertainty-reducing `⏳` edges first. The legacy `chain_gaps.sh` command is a compatibility wrapper for exploit-chain DAGs.
+
 ### §0g Version + CVE Pre-flight
 
 **Before any software/firmware/SaaS analysis:**
@@ -113,6 +127,7 @@ The full path runs through the four-ring loop (see [docs/architecture-closed-loo
 
 # per target — hunting phase (Ring 3), order matters
 → bb-surface-mapping        # FRONT gate: vuln-agnostic attack-surface map (explore-first)
+→ Target Work DAG          # recon/validation/decision/pentest route state, grows as findings appear
 → bb-web-vuln-scan          # OWASP Top 10 coverage + version→CVE + WAF bypass
 
 candidate found            # a scanner hit is a LEAD here, not a Finding

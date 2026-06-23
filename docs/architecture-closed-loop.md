@@ -17,7 +17,7 @@ The system is not a pipeline with an end — it is a loop whose output makes the
 flowchart LR
   W["① Wiki<br/>09-KB patterns · lessons"]
   T["② bbflow tool layer<br/>candidates.jsonl"]
-  H["③ Hunting<br/>surface-map → scan → chain<br/>front gate = explore-first"]
+  H["③ Hunting<br/>surface-map → DAG routes → scan → chain<br/>front gate = explore-first"]
   L["④ Learning<br/>bb-knowledge-capture"]
   W -->|cites checks| T
   T -->|candidates as leads| H
@@ -60,7 +60,7 @@ Each ring owns one thing and hands off cleanly:
 |---|---|---|---|
 | **1 — Wiki** | Reusable commands, payload references, checklists, decision trees | Target decisions, raw data | Read by humans + LLM |
 | **2 — Hunters** | Scanner runtime, scope enforcement, machine-readable candidate output | Vault schema, report prose | cron / manual / agent |
-| **3 — Hunting** | Surface mapping, coverage testing, candidate verification, Finding/Submission/FORM | Raw scan logs, tool state | LLM + human |
+| **3 — Hunting** | Surface mapping, Target Work DAG routes, coverage testing, candidate verification, Finding/Submission/FORM | Raw scan logs, tool state | LLM + human |
 | **4 — Learning** | Lessons, Patterns, Checklists, Wiki backfill | Report prose, target decisions | Session-end gate |
 
 The loop is only "closed" when **Ring 4 actually runs**. A session that produces findings but skips knowledge capture has left the loop open — the next pass learns nothing.
