@@ -55,6 +55,8 @@ Summarizes HANDOFF, FINDINGS_QUICK_REF, RECON_DB highlights. Only deep-read full
 
 Software/firmware/SaaS targets: run AGENTS.md section 0g version + CVE/advisory pre-flight before analysis.
 
+For multi-surface, branching validation, decision-gate, or pentest-route work, create `07 - Templates/Template - Target Work DAG.md` and start with `bash automation/dag_gaps.sh <target>`. The DAG is for improving hunting and penetration effectiveness first; compact reading is secondary.
+
 ### Session End
 
 ```bash

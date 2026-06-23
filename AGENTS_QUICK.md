@@ -80,6 +80,7 @@ Failed candidates → `bb-attempt-recorder` (preserves negative results).
 - **KB lookup**: Query the Knowledge Base before researching a topic, during hunting, and before writing reports
 - **VPS for risky ops**: Run bbflow, osmedeus, and any aggressive scanning on the VPS, not locally
 - **Operation log**: Record manual curl/POST operations in RECON_DB.md under `## Operation Log`
+- **Target Work DAG**: For multi-surface or branching work, use `07 - Templates/Template - Target Work DAG.md`; run `bash automation/dag_gaps.sh <target>` and pick the highest-ROI `⏳` edges first.
 
 ## Session End
 
