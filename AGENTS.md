@@ -44,6 +44,8 @@ python3 automation/end_session.py <scope>
 
 Use `07 - Templates/Template - Target Work DAG.md` when a target has multiple surfaces, validation branches, decision gates, pentest routes, or exploit-chain candidates. The DAG is effectiveness-first: it should improve coverage, exploitable-path discovery, evidence decisions, and stop conditions. Token savings are secondary.
 
+Delegate verbose, self-contained nodes to convention-injected subagents (main loop = orchestrator + judge, node = disposable worker): exploration noise stays in the worker's context, the main loop records only `status` + evidence path. This bounds main-loop tokens, prevents over-long sessions, and lets state be rebuilt from the DAG after compaction. Trivial checks stay inline; judgment (reproducibility / anti-exaggeration / dedup) stays central; cross-node nuance goes in the template's Carry-state ledger. See the template's "Subagent 委派" section + AGENTS.md Subagent Convention Injection.
+
 The contract is a four-column edge list: `from | edge | to | status`. DAGs grow dynamically as new surfaces, capabilities, evidence, and blockers appear. Do not prune high-impact or high-uncertainty edges just to keep the file short. At session start, use:
 
 ```bash
