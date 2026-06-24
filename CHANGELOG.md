@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.1.4 — 2026-06-24
+
+### KB effect loop (measure retrieval, not just capture)
+
+Adds the reverse loop the seed was missing: capture was one-directional, so there
+was no evidence for which KB/templates actually help hunting. Three measurements —
+`kb_roi.sh` (Finding `helped_by:` provenance → credited vs prune-candidate KB),
+`surface_kb.sh` (tech fingerprint → point-of-need Pattern/Playbook), and
+`check_shelfware.sh` (template instance count → unused-template detection). Finding
+template gains a `helped_by:` field; AGENTS.md §Knowledge-Capture documents the loop;
+`session_brief.sh` surfaces `surface_kb` at session start. Mechanical detection, LLM
+judgment — nothing auto-deletes.
+
 ## v0.1.3 — 2026-06-11
 
 ### Explore-first front gate + closed-loop architecture doc

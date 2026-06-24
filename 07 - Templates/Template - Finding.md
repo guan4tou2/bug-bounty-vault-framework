@@ -20,6 +20,7 @@ chain: false
 related_recon: []
 related_attempts: []
 related_pattern: []
+helped_by: []   # which KB artifacts led to this finding (Pattern/Playbook/Checklist/LL ids); empty = original. Effect loop, see automation/kb_roi.sh
 related_submission: ""
 dedupe_checked_at: <% tp.date.now("YYYY-MM-DD HH:mm") %>
 dedupe_query: ""

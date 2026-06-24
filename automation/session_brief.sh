@@ -155,5 +155,10 @@ if [ -d "$COMPLETED_DIR" ]; then
 fi
 [ "$hcount" -eq 0 ] && echo "  (none)"
 
+# Point-of-need KB — after picking a target, let the right KB surface itself.
+echo
+echo "▶ Point-of-need KB"
+echo "  After picking a target: bash automation/surface_kb.sh <target> (fingerprint -> relevant Pattern/Playbook)"
+
 echo
 echo "════════════════════════════════════════════════════════════"
