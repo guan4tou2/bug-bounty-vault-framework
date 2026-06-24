@@ -50,7 +50,7 @@ flowchart LR
   T -->|candidates as leads| H
   H -->|Finding → Submission| L
   L -.->|"backfill ↺ — closes the loop"| W
-  W -.->|informs hunting| H
+  W -.->|"informs hunting · measured by effect loop"| H
   linkStyle 3 stroke:#2563eb,stroke-width:2.5px,color:#2563eb
 ```
 
