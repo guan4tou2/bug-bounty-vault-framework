@@ -232,6 +232,23 @@ When vendor responds:
 | Pitfall (Lesson) | Preventable error |
 | Checklist | Reusable verification steps |
 
+### Effect Loop (measure retrieval, not just capture)
+
+Capture (session -> KB -> template -> gate) is one-directional. Without a reverse
+loop you cannot tell which KB/templates actually help hunting, so artifacts grow
+unbounded with no evidence to prune. Close the loop with three measurements:
+
+| Gap | Tool | Measures |
+|-----|------|----------|
+| Did a KB artifact produce a finding? | `automation/kb_roi.sh` + Finding `helped_by:` | credited (keep) vs uncredited (prune evidence) |
+| Did the right KB surface at point of need? | `automation/surface_kb.sh <target>` | tech fingerprint -> relevant Pattern/Playbook |
+| Which templates are shelf-ware? | `automation/check_shelfware.sh` | instance count per template; 0 = unused |
+
+On confirming a finding, fill its `helped_by:` with the KB ids that led to it.
+Forward measurement beats retro-mining: shelf-ware shows up immediately instead
+of being discovered after dozens of unused sessions. Mechanical detection, LLM
+judgment — uncredited/0-instance is a prune *candidate*, not an auto-delete.
+
 ---
 
 ## Subagent Convention Injection
