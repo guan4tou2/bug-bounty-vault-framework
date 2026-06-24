@@ -74,6 +74,25 @@ last_updated: "{{date}}"
 | leaked internal endpoint | IDOR | other user's data | ⏳ |
 | leaked version | CVE / advisory precheck | known-N-day decision | ⏳ |
 
+## Subagent 委派（node → worker）— 控 token / 防 session 過長
+
+> DAG 讓「主 loop = orchestrator + judge，node = 拋棄式 worker」這個分工自然成立。
+> 探索噪音（大 response、整段源碼、fuzz 輸出、payload 嘗試）關進 subagent 的 context，
+> 主 loop 只看回傳的 `status` + evidence 路徑 → context 不脹、compaction 砍掉也能從 DAG 重建。
+
+- **何時委派**：edge 探索**verbose 且自足**（審一個 module、跑一次完整 exploit、fuzz 一個 param）→ 派 subagent。**trivial 檢查**主 loop 自己做，spawn 成本 > 任務。
+- **委派什麼**：依層級注入 convention（見 AGENTS.md「Subagent Convention Injection」，subagent 不繼承 CLAUDE.md/AGENTS）。
+- **回傳什麼**：只回 `edge status + evidence 檔路徑 + 1-2 行理由`，**不回 raw transcript**；PoC/evidence 寫 `workspace/workshop/<target>/poc/`，回路徑不 inline。
+- **判斷留中央**：worker **採集證據**，主 loop（或專責 verify subagent）**做判斷**（reproducibility / anti-exaggeration / dedup 需全局視角）。
+- **adaptive 不是 fan-out**：edge 邊挖邊長 → 主 loop 互動式派 subagent；只有已知批次（測這 N 個端點）才用 deterministic workflow。
+- **跨 node nuance 進 Carry-state**（下方），別塞進 4 欄表也別只留在 worker context。
+
+## Carry-state ledger（跨 node 必須保留的 nuance + evidence 路徑）
+
+> 只記「下個 node 會用到、但塞進 status 欄太長」的東西。空著代表沒有跨 node 依賴。
+
+- （append…）
+
 ## Automation
 
 ```bash
