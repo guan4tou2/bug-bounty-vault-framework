@@ -192,6 +192,7 @@ GET-first governs *safety* (don't execute unknown consequences); this governs *t
 - **High-output / retry-prone / persistent** calls (broad scans, fuzzing, crawls, subdomain enum, large responses) → narrow scope + state the rationale *before* firing. Tool noise dwarfs thinking tokens, and it is re-read on every later turn (cross-turn compounding); narrowing once saves many times. A failed call is double waste (input + error output + a re-run).
 - **Trivial deterministic** calls (read a known path, one CVE lookup, single-param GET) → just call; writing reasoning for them is pure overhead.
 - **Isolation beats thinking-longer for token savings**: push verbose exploration to a disposable subagent (see §0e Target Work DAG delegation). The main loop reasons only about *what to delegate and at what scope* and ingests only `status` + evidence path. A main loop that thinks, runs, and eats raw output is triple-charged (and the reasoning is re-read across turns).
+- **Raw logs are for humans; distilled state is for the LLM.** Keep raw action/audit logs in files (out of git, out of session-start context); the agent reads distilled state instead (e.g. RECON_DB's tested/excluded/to-verify attack-surface table). Never read a human action log back at session start. And do not mechanically classify status codes into state (`404`→excluded, `200`→confirmed): WAF/auth-gating make `404` unreliable and SPA catch-alls return `200` for everything — distillation is an LLM judgment, not a `grep`.
 
 ### §6c Isolated Runner Boundary
 
