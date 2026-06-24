@@ -183,6 +183,16 @@ Check before creating: `FINDINGS_QUICK_REF.md` + `RECON_DB.md` Known Artifacts.
 - Bulk delete / truncate / drop
 - Endpoints that trigger Email / SMS notifications
 
+### §6b2 Tool-call token economics (narrow before you fire)
+
+GET-first governs *safety* (don't execute unknown consequences); this governs *tokens* (don't flood context with noise). Same root, different goal.
+
+**Core: think-depth scales with the cost of wrong parameters, not with tool complexity.**
+
+- **High-output / retry-prone / persistent** calls (broad scans, fuzzing, crawls, subdomain enum, large responses) → narrow scope + state the rationale *before* firing. Tool noise dwarfs thinking tokens, and it is re-read on every later turn (cross-turn compounding); narrowing once saves many times. A failed call is double waste (input + error output + a re-run).
+- **Trivial deterministic** calls (read a known path, one CVE lookup, single-param GET) → just call; writing reasoning for them is pure overhead.
+- **Isolation beats thinking-longer for token savings**: push verbose exploration to a disposable subagent (see §0e Target Work DAG delegation). The main loop reasons only about *what to delegate and at what scope* and ingests only `status` + evidence path. A main loop that thinks, runs, and eats raw output is triple-charged (and the reasoning is re-read across turns).
+
 ### §6c Isolated Runner Boundary
 
 **Recommended isolated runner/VPS:** bbflow, nuclei, ffuf, sqlmap, osmedeus, bbot, and automated scanning.
