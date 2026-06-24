@@ -82,9 +82,19 @@ last_updated: "{{date}}"
 
 - **何時委派**：edge 探索**verbose 且自足**（審一個 module、跑一次完整 exploit、fuzz 一個 param）→ 派 subagent。**trivial 檢查**主 loop 自己做，spawn 成本 > 任務。
 - **委派什麼**：依層級注入 convention（見 AGENTS.md「Subagent Convention Injection」，subagent 不繼承 CLAUDE.md/AGENTS）。
-- **回傳什麼**：只回 `edge status + evidence 檔路徑 + 1-2 行理由`，**不回 raw transcript**；PoC/evidence 寫 `workspace/workshop/<target>/poc/`，回路徑不 inline。
-- **判斷留中央**：worker **採集證據**，主 loop（或專責 verify subagent）**做判斷**（reproducibility / anti-exaggeration / dedup 需全局視角）。
+- **回傳鎖死 schema（瓶頸在這，不在 worker）**：subagent 分出工作**不會**自動縮主 session —— 縮的是「回來的資訊被壓縮」。worker 最終訊息**只回結構化 JSON**，不回 raw transcript；主 loop 只吃 ~50-100 token 摘要。回傳介面沒鎖 = 把 worker 的垃圾倒回主 loop，比不拆更糟。
+
+  ```json
+  {"task":"<one line>","new_findings":0,
+   "findings":[{"path":"/x","type":"IDOR","severity":"high","evidence":"workspace/workshop/<t>/poc/x.txt","one_line":"..."}],
+   "dead_ends":[{"item":".env","why":"404 (not SPA catch-all, compared)"}],
+   "next_suggested":["test TRACE"],"carry_state":"needs X-Forwarded-Host spoof"}
+  ```
+  Enforce via the workflow's structured-output/schema mechanism, or paste the schema into an interactive subagent prompt ("final message = this JSON only"). PoC/evidence to `workspace/workshop/<target>/poc/`, return paths not inline.
+- **依任務選模型**：judgment / chain reasoning / **verification** = strongest model (**never downgrade**); source read / template-fill reporting = mid; result-classification / extraction / summary = cheap; CVE/version diff = no LLM (`grep`). Downgrade only bounded tasks a weak model can reliably finish (rework costs more — see AGENTS §6b2).
+- **判斷留中央**：worker **採集證據 + 暫定分類**，主 loop re-judges（severity / dead_ends re-judged; `404≠excluded`, SPA catch-all returns `200`; reproducibility / anti-exaggeration / dedup need global view; never let a worker self-certify a finding）。
 - **adaptive 不是 fan-out**：edge 邊挖邊長 → 主 loop 互動式派 subagent；只有已知批次（測這 N 個端點）才用 deterministic workflow。
+- **主 session 自身紀律**：對話歷史只留決策不留中間推理（推理放 extended thinking）；每 3-5 輪 worker 回來 → snapshot 進 Carry-state/RECON_DB → compact 前面細節。
 - **跨 node nuance 進 Carry-state**（下方），別塞進 4 欄表也別只留在 worker context。
 
 ## Carry-state ledger（跨 node 必須保留的 nuance + evidence 路徑）
