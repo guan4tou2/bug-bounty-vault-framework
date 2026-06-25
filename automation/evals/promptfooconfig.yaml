@@ -1,0 +1,57 @@
+# promptfoo eval suite (reference skeleton) — scoped to structured-output skills.
+#
+# Purpose (two, not "improve prompt wording"):
+#   1. regression — a prompt edit must not break known-good cases.
+#   2. model-tiering validation — run the same prompt across model tiers and
+#      compare pass-rate + cost, turning the downgrade decision ("can a cheaper
+#      model do this task?") from a guess into a measured answer.
+#
+# Scope rule: only skills with an "input -> checkable output" contract belong
+# here (CVSS scoring, classification, structured-JSON return). Behavioral /
+# multi-step skills (surface mapping, exploit chaining, scope-safety) do NOT —
+# they have side effects and need the full tooled runtime; an isolated API eval
+# has too little fidelity. Cover those with your gates + real-target runs.
+#
+# This skeleton ships CVSS cases against bb-cvss-score. Add your own
+# structured-output skills as new tests; keep the scope rule.
+#
+# Run: see README.md (needs your own ANTHROPIC_API_KEY).
+
+description: structured-output skills — regression + model-tiering validation
+
+prompts:
+  - file://prompts/skill_runner.js
+
+# Example provider tiers — replace IDs with the models you use.
+providers:
+  - id: anthropic:messages:claude-opus-4-8
+    label: strong (judgment tier)
+  - id: anthropic:messages:claude-sonnet-4-6
+    label: mid (understand tier)
+  - id: anthropic:messages:claude-haiku-4-5-20251001
+    label: cheap (mechanical tier)
+
+tests:
+  - description: cvss · IDOR read other user (auth)
+    vars:
+      skill_file: .claude/skills/bb-cvss-score/SKILL.md
+      input: "Authenticated user reads another user's PII via /api/users/{id} (no extra privilege). Give CVSS 3.1 vector + base score."
+    assert:
+      - { type: contains, value: "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N" }
+      - { type: contains, value: "6.5" }
+
+  - description: cvss · unauth RCE
+    vars:
+      skill_file: .claude/skills/bb-cvss-score/SKILL.md
+      input: "Unauthenticated remote code execution via a deserialization endpoint; code runs in a shared container. Give CVSS 3.1 vector + base score."
+    assert:
+      - { type: contains, value: "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H" }
+      - { type: contains, value: "10.0" }
+
+  - description: cvss · unauth SQLi data leak
+    vars:
+      skill_file: .claude/skills/bb-cvss-score/SKILL.md
+      input: "Unauthenticated SQL injection allowing reading the full users table (no write demonstrated). Give CVSS 3.1 vector + base score."
+    assert:
+      - { type: contains, value: "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N" }
+      - { type: contains, value: "7.5" }

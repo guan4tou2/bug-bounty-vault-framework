@@ -55,3 +55,8 @@ memory/
 
 # Claude local settings
 .claude/settings.local.json
+
+# promptfoo eval run artifacts/cache
+automation/evals/output/
+**/.promptfoo/
+.promptfoo/
