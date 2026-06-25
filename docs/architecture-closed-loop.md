@@ -155,3 +155,4 @@ If any box is unchecked, the loop is open — close it before ending the session
 - [public-vs-private.md](public-vs-private.md) — the public/private boundary table
 - `bbflow/` — the automation contract (scope, output, safety boundary)
 - `.claude/skills/bb-surface-mapping`, `.claude/skills/bb-web-vuln-scan`, `.claude/skills/bb-knowledge-capture`
+- `automation/evals/` — optional promptfoo skeleton: regression + model-tiering validation for structured-output skills (the "measure" half applied to your prompts)
