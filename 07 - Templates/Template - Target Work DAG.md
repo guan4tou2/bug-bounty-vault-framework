@@ -90,7 +90,7 @@ last_updated: "{{date}}"
    "dead_ends":[{"item":".env","why":"404 (not SPA catch-all, compared)"}],
    "next_suggested":["test TRACE"],"carry_state":"needs X-Forwarded-Host spoof"}
   ```
-  Enforce via the workflow's structured-output/schema mechanism, or paste the schema into an interactive subagent prompt ("final message = this JSON only"). PoC/evidence to `workspace/workshop/<target>/poc/`, return paths not inline.
+  Enforce via the workflow's structured-output/schema mechanism, or paste the schema into an interactive subagent prompt ("final message = this JSON only"). Do NOT rely on the prompt instruction alone — pure-JSON compliance is format-following, not capability, and an eval found even the strongest model adds a preamble while cheaper models returned clean JSON. Enforce structure mechanically. PoC/evidence to `workspace/workshop/<target>/poc/`, return paths not inline.
 - **依任務選模型**：judgment / chain reasoning / **verification** = strongest model (**never downgrade**); source read / template-fill reporting = mid; result-classification / extraction / summary = cheap; CVE/version diff = no LLM (`grep`). Downgrade only bounded tasks a weak model can reliably finish (rework costs more — see AGENTS §6b2).
 - **判斷留中央**：worker **採集證據 + 暫定分類**，主 loop re-judges（severity / dead_ends re-judged; `404≠excluded`, SPA catch-all returns `200`; reproducibility / anti-exaggeration / dedup need global view; never let a worker self-certify a finding）。
 - **adaptive 不是 fan-out**：edge 邊挖邊長 → 主 loop 互動式派 subagent；只有已知批次（測這 N 個端點）才用 deterministic workflow。
