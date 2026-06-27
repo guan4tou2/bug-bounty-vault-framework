@@ -12,7 +12,7 @@ added: 2026-06-06
 
 > **目的:** 列出 vault 推薦安裝的第三方 skill 套件,讓新 clone / 接手者知道**哪些 skill 不是 vault 自帶,需要自己跑 `npx skills add`**。
 > 
-> **安全提醒:** 安裝任何第三方 skill = 在自己 Claude session 載入別人寫的 SKILL.md,跟 [[LL-144-mcp-skill-執行可被-prompt-injection-觸發-system-prompt-外洩|教訓 #144]] 同類風險。skills.sh 有第三方 audit(Gen / Socket / Snyk),不過 Snyk 對攻擊 payload 教學常誤判 Critical,**Gen audit 是最可靠指標**。
+> **安全提醒:** 安裝任何第三方 skill = 在自己 Claude session 載入別人寫的 SKILL.md，屬「MCP/skill 執行可被 prompt-injection 觸發、導致 system-prompt 外洩」同類風險。skills.sh 有第三方 audit(Gen / Socket / Snyk),不過 Snyk 對攻擊 payload 教學常誤判 Critical,**Gen audit 是最可靠指標**。
 
 ---
 
@@ -173,10 +173,10 @@ bash automation/lint_workspace_skills.sh
 
 ## 從這份文件衍生的 KB 連結
 
-- [[Reference Card - Promotion Ladder]] §1 T4 — 外部 skill 在 ladder 哪一層
-- [[LL-144-mcp-skill-執行可被-prompt-injection-觸發-system-prompt-外洩|教訓 #144]] — 第三方 skill 安全風險
-- [[Playbook - Reusable Workflows]] §0 — 用 yaklang skill 跑 workflow 的注意事項
-- CLAUDE.md 「🔌 External Skills」表 — 22 個 yaklang skill 的 trigger 詞
+- 外部 skill 在 promotion ladder 的位置 — 見 Promotion Ladder 參考卡(若已安裝)
+- 第三方 skill 安全風險 — prompt-injection → system-prompt 外洩同類風險
+- 用 yaklang skill 跑大型 workflow 的注意事項 — 見 Reusable Workflows playbook(若已安裝)
+- CLAUDE.md 「🔌 External Skills」表 — yaklang skill 的 trigger 詞
 
 ## 升級維護
 
