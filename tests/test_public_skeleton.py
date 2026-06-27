@@ -605,7 +605,7 @@ def test_no_private_or_target_specific_data():
         "138.2.59.206",
         "138.2.37.19",
         "64.110.106.138",
-        "younglee.tw5",
+        "guantou",
         "t112c53033",
     ]
     for needle in cs_forbidden:
