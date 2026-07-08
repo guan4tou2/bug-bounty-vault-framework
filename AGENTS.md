@@ -200,7 +200,7 @@ The main conversation is the **commander**: keep only **decisions, synthesis, us
 
 - **Delegate by default.** Reading multiple files, cross-repo diffs, scanning a large file (more than a few hundred lines), batch verification, semantic extraction, and broad searches all go to a subagent. Do not Read large files into the main context — ingest only the distilled result.
 - **Fan out in one message.** Independent heavy nodes dispatch as parallel subagents in a single turn, not one after another.
-- **Plan as a DAG.** For any multi-step task, lay out a task list with dependencies and delegate each heavy node; the main thread is the join point where results are merged and judged.
+- **Plan as a DAG.** For any multi-step task, lay out a task list with dependencies and delegate each heavy node; the main thread is the join point where results are merged and judged. The hunting DAG (recon→exploit) works the same way: **every `⏳` edge is one delegation unit** and independent edges fan out in parallel. **A decision gate is a delegation point too** — fan out the evidence a branch depends on (fingerprint, reproducibility check, advisory lookup) to subagents, but keep the **branch choice itself in the main loop** (delegating the legwork is not delegating the decision; see §Subagent delegation in `07 - Templates/Template - Target Work DAG.md`, and pairs with verify-not-self-verify below).
 - **Why.** A bloated main context costs tokens and cache misses, and mixing many files' raw detail degrades judgment — the two failure modes compound across turns.
 - **Pairs with verify-not-self-verify.** Route every "done / correct" conclusion to a fresh-context agent to check, rather than confirming your own work in the same context that produced it.
 
