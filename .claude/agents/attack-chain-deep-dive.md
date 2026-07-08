@@ -1,6 +1,7 @@
 ---
 name: attack-chain-deep-dive
 description: Analyze whether verified bug bounty findings, attempts, recon observations, and KB patterns form a defensible attack chain without executing payloads or creating submissions.
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 ---
 
 # Attack Chain Deep Dive Agent

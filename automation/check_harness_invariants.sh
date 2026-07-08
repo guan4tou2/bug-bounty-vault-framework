@@ -44,11 +44,21 @@ else
        "align .claude/skills/README.md + CLAUDE.md skill table with .claude/skills/bb-*/"
 fi
 
+# A gate counts as "wired" if referenced directly in settings.json, OR routed
+# through the low-frequency wrapper (which delegates to the expensive gates only
+# on commit/session-close/verify commands).
+gate_wired() {
+  local gate="$1"
+  grep -q "$gate" .claude/settings.json 2>/dev/null && return 0
+  grep -q low_frequency_gates.sh .claude/settings.json 2>/dev/null \
+    && grep -q "$gate" automation/low_frequency_gates.sh 2>/dev/null
+}
+
 # F1 — surface-map scan-time gate installed + wired
-if [ -x automation/surface_map_gate.sh ] && grep -q surface_map_gate.sh .claude/settings.json 2>/dev/null; then
-  pass "F1 surface-map scan-time gate wired (PreToolUse Bash)"
+if [ -x automation/surface_map_gate.sh ] && gate_wired surface_map_gate.sh; then
+  pass "F1 surface-map scan-time gate wired (PreToolUse Bash, direct or via low_frequency_gates.sh)"
 else
-  fail "F1 surface-map gate missing/unwired" "ensure automation/surface_map_gate.sh + reference it in .claude/settings.json"
+  fail "F1 surface-map gate missing/unwired" "ensure automation/surface_map_gate.sh exists + referenced in .claude/settings.json PreToolUse (directly or via low_frequency_gates.sh)"
 fi
 
 # F2 — lifecycle hooks present
@@ -64,10 +74,10 @@ else
 fi
 
 # F4 — static-only gate installed + wired
-if [ -x automation/static_only_gate.sh ] && grep -q static_only_gate.sh .claude/settings.json 2>/dev/null; then
-  pass "F4 static-only gate wired (PreToolUse Bash)"
+if [ -x automation/static_only_gate.sh ] && gate_wired static_only_gate.sh; then
+  pass "F4 static-only gate wired (PreToolUse Bash, direct or via low_frequency_gates.sh)"
 else
-  fail "F4 static-only gate missing/unwired" "ensure automation/static_only_gate.sh exists + referenced in .claude/settings.json PreToolUse Bash"
+  fail "F4 static-only gate missing/unwired" "ensure automation/static_only_gate.sh exists + referenced in .claude/settings.json PreToolUse Bash (directly or via low_frequency_gates.sh)"
 fi
 
 echo "──"

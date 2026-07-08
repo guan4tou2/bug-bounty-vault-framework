@@ -35,6 +35,18 @@ A target that has discovered endpoints but an **empty Attack Surface Map is inco
 
 Every input/parameter · every role (auth matrix) · every state transition (multi-step flow) · every trust boundary · every integration / third party · every dependency / framework · every file / upload path · every business flow — plus the **anomaly sweep** (anything homegrown or non-standard).
 
+## Feature-abuse probe list (design-layer question bank)
+
+After mapping the 8 dimensions, run each business-flow / integration / data-export element through this list. These are legitimate features used for unintended purposes — design bugs that pattern/hunter scanners cannot find, all black-box testable.
+
+- **Export/Backup as exfil**: A low-privilege account triggers an export/snapshot/backup — does the output contain cross-tenant, deleted, draft, or revision-history data that should have been purged? → cross-user data leak (an IDOR variant)
+- **Import/Restore as injection**: Does import/restore apply the same permission model as the UI? Can it overwrite existing data, create validation-bypassing records, or write into a collection you have no permission for? → access-control bypass / data tampering
+- **Search/Filter/Sort as oracle**: Can search/filter confirm the existence of content you cannot access directly? Can sorting by a hidden field let you infer its value? → indirect information disclosure
+- **Enumeration via side effects**: Do "does not exist" vs "no permission" differ in error message / response time / size / status code? Can reset / invite / register be used to enumerate users? → user/resource enumeration
+- **Preview/Draft/Staging leakage**: Does a preview token unlock only one item or a wider scope? Can drafts be discovered via sitemap / RSS / API listing? Can cache headers make a CDN serve private content publicly? → unauthorized access / CDN cache leak
+- **Notification/Webhook as SSRF**: Will the server fetch a user-controlled notification / webhook / callback URL? Does it block internal ranges? Does it **re-validate after a redirect** (blocking only the first hop = bypassable)? → SSRF (hand off to your installed SSRF skill — see `Reference Card - External Skills Catalog`)
+- **API-not-frontend**: For every endpoint ask "the frontend would never call it this way, but does the API allow it?" — extra/missing params, changed method, undocumented param/header? → hidden functionality / broken access control
+
 ## Anti-gaming
 
 - Map at the **element level, not the dimension level** — you cannot satisfy this by pasting 8 boilerplate lines.
