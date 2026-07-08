@@ -22,6 +22,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/claude_audit_log.sh\"'",
+            "async": true
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit",
         "hooks": [
           {

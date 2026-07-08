@@ -218,6 +218,22 @@ Record in `RECON_DB.md ## Operation Log` **before** executing:
 
 Update `Result` immediately after.
 
+### §6f Audit Log
+
+**Purpose.** A `PostToolUse` Bash hook (`automation/claude_audit_log.sh`) appends every Bash tool call — `CMD:` plus the first ~2KB of the response, with secrets redacted — to `workspace/logs/claude_audit_YYYYMMDD.log`. It is a tamper-evident record of what actually ran, not a state store.
+
+**`[audit:ref]` format.** The audit-log reference cited in the §3b Discovery Log is `[audit:YYYYMMDD#N]` — date of the log file plus the entry number within it (each entry begins `[timestamp] [session:xxxxxxxx]`). Use `[audit:static]` when a step used no live command and produced no log entry.
+
+**Raw log is for grep, not session start.** These logs are machine-local and git-ignored. Search them after the fact (`grep` for a command or endpoint); never read one back into context at session start — the agent works from distilled state (RECON_DB), not raw action history (see §6b2).
+
+**Three logs, three jobs:**
+
+| Log | Answers | Granularity |
+|---|---|---|
+| Audit log (`workspace/logs/`) | *What syntax ran?* | Every Bash command, automatic |
+| Operation Log (`RECON_DB §6d`) | *What action was taken, and why?* | Deliberate probes, manual |
+| Discovery Log (Finding §3b) | *What is the narrative of the finding?* | Evidence steps, manual |
+
 ---
 
 ## §8 Severity Calibration
