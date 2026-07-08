@@ -1,6 +1,6 @@
 ---
 name: bb-attempt-recorder
-description: Use when a test, hypothesis, attack chain idea, payload, endpoint, scan result, or verification path does not produce a Finding but should be recorded as a negative result or stop condition.
+description: Use when a test, hypothesis, attack chain idea, payload, endpoint, scan result, or verification path does not produce a Finding but should be recorded as a raw negative result or stop condition for THIS target. — distinct from bb-knowledge-capture: this logs a target-specific negative outcome as-is; that promotes a generalizable, reusable lesson or pattern to the KB.
 ---
 
 # Bug Bounty — Attempt Recorder

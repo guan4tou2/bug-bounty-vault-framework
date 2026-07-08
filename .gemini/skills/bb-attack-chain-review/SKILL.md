@@ -1,6 +1,6 @@
 ---
 name: bb-attack-chain-review
-description: Use when a new finding candidate, interesting observation, info leak, auth bug, IDOR, CORS, SSRF, token leak, debug endpoint, source map, or unauth API may chain into higher impact.
+description: Use when a new finding candidate, interesting observation, info leak, auth bug, IDOR, CORS, SSRF, token leak, debug endpoint, source map, or unauth API may chain into higher impact — the lightweight review AFTER dedup that decides whether a candidate warrants escalating to the attack-chain-deep-dive agent. — distinct from bb-exploit-chain: that is the inline 6-question reflex run the moment a vuln is found; this runs after dedup to gate escalation.
 ---
 
 # Bug Bounty — Attack Chain Review

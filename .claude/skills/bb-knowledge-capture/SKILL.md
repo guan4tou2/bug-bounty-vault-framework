@@ -1,6 +1,6 @@
 ---
 name: bb-knowledge-capture
-description: Use when a session, finding candidate, failed attempt, attack chain review, tool result, triage reply, or new observation teaches something reusable that should update Pattern, Lessons Learned, Checklist, Tool notes, or bbflow templates.
+description: Use when a session, finding candidate, failed attempt, attack chain review, tool result, triage reply, or new observation teaches something reusable that should update Pattern, Lessons Learned, Checklist, Tool notes, or bbflow templates — promotes a GENERALIZABLE lesson/pattern to the KB. — distinct from bb-attempt-recorder: that records a raw target-specific negative result; this promotes reusable knowledge across targets.
 ---
 
 # Bug Bounty — Knowledge Capture

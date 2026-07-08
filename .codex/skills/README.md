@@ -11,6 +11,7 @@ Generated wrappers:
 
 | Skill | Path |
 |---|---|
+| `bb-actuator-cloud-chain` | `.codex/skills/bb-actuator-cloud-chain/SKILL.md` |
 | `bb-agent-prompts` | `.codex/skills/bb-agent-prompts/SKILL.md` |
 | `bb-attack-chain-review` | `.codex/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
@@ -18,8 +19,10 @@ Generated wrappers:
 | `bb-cve-citation` | `.codex/skills/bb-cve-citation/SKILL.md` |
 | `bb-cvss-score` | `.codex/skills/bb-cvss-score/SKILL.md` |
 | `bb-dedup-finding` | `.codex/skills/bb-dedup-finding/SKILL.md` |
+| `bb-electron-audit` | `.codex/skills/bb-electron-audit/SKILL.md` |
 | `bb-evidence-readiness` | `.codex/skills/bb-evidence-readiness/SKILL.md` |
 | `bb-exploit-chain` | `.codex/skills/bb-exploit-chain/SKILL.md` |
+| `bb-firmware-audit` | `.codex/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.codex/skills/bb-form-writer/SKILL.md` |
 | `bb-incident-response` | `.codex/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |

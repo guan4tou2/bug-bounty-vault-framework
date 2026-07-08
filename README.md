@@ -170,9 +170,9 @@ This repo is **built to be driven by an LLM agent**: the skills are trigger-acti
 
 The agent reads `CLAUDE.md` / `AGENTS.md`, loads a skill when its trigger fires, and writes results back into the Markdown vault. Manual Markdown + Obsidian operation still works as a **fallback**, but the skills/agents/gates are the intended interface.
 
-Skills: version-cve-precheck, tool-setup, surface-mapping, web-vuln-scan, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, exploit-chain, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture.
+Skills: version-cve-precheck, tool-setup, surface-mapping, web-vuln-scan, dedup-finding, cve-citation, form-writer, context-handoff, triage-response, incident-response, scope-safety-check, exploit-chain, attack-chain-review, evidence-readiness, attempt-recorder, submission-readiness, knowledge-capture, cvss-score.
 
-Agents: attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync.
+Agents: attack-chain-deep-dive, bbflow-runner, pre-recon, report-writer, vault-sync.
 
 ### Recommended external skill packs
 

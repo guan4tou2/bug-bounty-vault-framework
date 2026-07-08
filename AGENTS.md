@@ -218,6 +218,33 @@ Record in `RECON_DB.md ## Operation Log` **before** executing:
 
 Update `Result` immediately after.
 
+### §6d.1 Payload Ledger
+
+The Operation Log is **per-target** and lives with the disclosure trail (not the KB). But some syntaxes are worth remembering across targets: a payload that is **stably blocked**, a trick that **reliably bypasses** a class of defense, or a probe that is a **dependable oracle** for a technology class. Those get appended — sanitized, class-level — to a per-class Knowledge Base ledger: `09 - Knowledge Base/Ledger - <class> Tried.md`.
+
+This closes the feedback gap between the payload arsenal (INPUT only — "what to try") and actual outcomes ("how that class of defense responds"). The next session picks payloads that have historically bypassed and skips the ones that stably fail.
+
+| | Operation Log (§6d) | Payload Ledger (§6d.1) |
+|---|---|---|
+| Scope | Per-target / per-disclosure | Class-level / reusable |
+| Home | `RECON_DB.md` (not KB) | `09 - Knowledge Base/` (KB) |
+| Purpose | Auditable action trail for the vendor | Arsenal → outcome feedback loop |
+| Abstraction | Concrete host/IP/URL | Sanitized, `${VAR}` placeholders, no target names |
+
+**Row schema** (one file per vuln class):
+
+```markdown
+| payload/command | target class (sanitized) | result | date | source ref |
+```
+
+- `payload/command` — the exact, copy-pasteable syntax; replace real values with `${VAR}` placeholders (`${HOST}`, `${TOKEN}`, `${REGISTERED_URI}`).
+- `target class (sanitized)` — the defense/tech class only (e.g. `Spring Boot actuator (exposed)`, `Node URL-fetch backend`); **no** target names, hostnames, or IPs.
+- `result` — normalized enum: `blocked` / `200` / `bypassed` / `error` / `filtered` / `WAF-403` / `no-effect`.
+- `date` — `YYYY-MM-DD` (first observation).
+- `source ref` — back-link to the source arsenal or `Pattern - <class>`.
+
+**Sanitization** is identical to KB purity: only class-level entries; if a row cannot be abstracted to a class it stays in the per-target Operation Log. See `09 - Knowledge Base/Ledger - Tried Commands and Payloads (Index).md` for the full norm and skill hooks (`bb-attempt-recorder` appends on blocked/false-positive results; `bb-knowledge-capture` reconciles ledger rows against patterns at session end).
+
 ### §6f Audit Log
 
 **Purpose.** A `PostToolUse` Bash hook (`automation/claude_audit_log.sh`) appends every Bash tool call — `CMD:` plus the first ~2KB of the response, with secrets redacted — to `workspace/logs/claude_audit_YYYYMMDD.log`. It is a tamper-evident record of what actually ran, not a state store.

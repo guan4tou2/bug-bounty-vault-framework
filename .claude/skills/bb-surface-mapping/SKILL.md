@@ -105,6 +105,12 @@ bb-surface-mapping → bb-web-vuln-scan → [finding]    → bb-exploit-chain �
 2. On any finding → run `bb-exploit-chain` (the 6-question chain) before moving to the next system.
 3. Persist chain results as an Exploit Chain DAG so every path is tracked to ✅ or ❌.
 
+### Target Work DAG — XL targets only (do not build by default)
+
+The `Template - Target Work DAG` is a **records** artifact, not a **decision-driver**. Build it **only for XL targets** — a target that is **multi-system OR has ≥2 chainable findings** and where you keep losing track of the next step across sessions.
+
+**For single-finding or small targets, SKIP it.** The inline `bb-exploit-chain` gate (step 2 above) already covers the "what can this chain into?" reasoning, and a full Work DAG on a small target is overhead nobody maintains. ROI scales with target size: applying the DAG broadly turns it into low-adoption shelfware, so gate it to the XL cases where the cross-session tracking actually pays off. (The Exploit Chain DAG in step 3 is separate and stays mandatory once a chain exists.)
+
 ## Cross-References
 
 - `09 - Knowledge Base/Playbook - Recon.md` (the recon floor that feeds this map)
