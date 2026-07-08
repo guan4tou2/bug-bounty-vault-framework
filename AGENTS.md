@@ -194,6 +194,16 @@ GET-first governs *safety* (don't execute unknown consequences); this governs *t
 - **Isolation beats thinking-longer for token savings**: push verbose exploration to a disposable subagent (see §0e Target Work DAG delegation). The main loop reasons only about *what to delegate and at what scope* and ingests only `status` + evidence path. A main loop that thinks, runs, and eats raw output is triple-charged (and the reasoning is re-read across turns).
 - **Raw logs are for humans; distilled state is for the LLM.** Keep raw action/audit logs in files (out of git, out of session-start context); the agent reads distilled state instead (e.g. RECON_DB's tested/excluded/to-verify attack-surface table). Never read a human action log back at session start. And do not mechanically classify status codes into state (`404`→excluded, `200`→confirmed): WAF/auth-gating make `404` unreliable and SPA catch-alls return `200` for everything — distillation is an LLM judgment, not a `grep`.
 
+### §6b3 Commander stays out of the weeds (delegate aggressively)
+
+The main conversation is the **commander**: keep only **decisions, synthesis, user-facing communication, and small targeted edits** in it. Every heavy operation belongs in a fresh-context subagent whose *conclusion* — not its working noise — comes back.
+
+- **Delegate by default.** Reading multiple files, cross-repo diffs, scanning a large file (more than a few hundred lines), batch verification, semantic extraction, and broad searches all go to a subagent. Do not Read large files into the main context — ingest only the distilled result.
+- **Fan out in one message.** Independent heavy nodes dispatch as parallel subagents in a single turn, not one after another.
+- **Plan as a DAG.** For any multi-step task, lay out a task list with dependencies and delegate each heavy node; the main thread is the join point where results are merged and judged.
+- **Why.** A bloated main context costs tokens and cache misses, and mixing many files' raw detail degrades judgment — the two failure modes compound across turns.
+- **Pairs with verify-not-self-verify.** Route every "done / correct" conclusion to a fresh-context agent to check, rather than confirming your own work in the same context that produced it.
+
 ### §6c Isolated Runner Boundary
 
 **Recommended isolated runner/VPS:** bbflow, nuclei, ffuf, sqlmap, osmedeus, bbot, and automated scanning.
