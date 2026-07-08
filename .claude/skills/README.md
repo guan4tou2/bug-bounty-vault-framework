@@ -8,6 +8,9 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-tool-setup` | Tool layer (Ring 2) not yet established; first hunter/scanner run, bbflow/scanner not found, or no candidates.jsonl produced | `.claude/skills/bb-tool-setup/SKILL.md` |
 | `bb-surface-mapping` | Start of any target, after recon and before any pattern/hunter/scan; vuln-agnostic full attack-surface mapping (anti-streetlight FRONT gate) | `.claude/skills/bb-surface-mapping/SKILL.md` |
 | `bb-web-vuln-scan` | Testing a web target's endpoints/params; OWASP Top 10 coverage, injection matrix, version→CVE, WAF bypass (runs after surface mapping) | `.claude/skills/bb-web-vuln-scan/SKILL.md` |
+| `bb-electron-audit` | Static audit of an Electron / desktop app: asar, shell.openExternal, preload/contextIsolation, custom scheme (10-min grade → 3-tier defense → delivery-chain gate) | `.claude/skills/bb-electron-audit/SKILL.md` |
+| `bb-firmware-audit` | Router / IoT / camera firmware or embedded binary: unpack → triage → grep-hunt → graded report, with stop-loss and quality gates | `.claude/skills/bb-firmware-audit/SKILL.md` |
+| `bb-actuator-cloud-chain` | Exposed Spring Boot management endpoints (Actuator/Eureka/Jolokia/Nacos) → config/credential disclosure → cloud-metadata audit chain | `.claude/skills/bb-actuator-cloud-chain/SKILL.md` |
 | `bb-dedup-finding` | Opening a new Finding/FORM or deciding whether evidence is a duplicate | `.claude/skills/bb-dedup-finding/SKILL.md` |
 | `bb-cve-citation` | Writing CVE, NVD, GHSA, vendor advisory, disclosed report, or prior disclosure references | `.claude/skills/bb-cve-citation/SKILL.md` |
 | `bb-form-writer` | Creating or editing platform-neutral disclosure forms, submission bundles, and report packages | `.claude/skills/bb-form-writer/SKILL.md` |
