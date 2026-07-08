@@ -7,6 +7,8 @@ last_updated: "{{date}}"
 
 # {{name}} — Target Work DAG
 
+> [!warning] Build only for XL multi-system / multi-finding targets; skip for single-finding targets — the DAG records, it doesn't drive decisions, and ROI scales with target size (broad use → low adoption).
+
 > 用於 recon / validation / decision gates / pentest route / exploit-chain bridge 的效果優先 DAG。
 > **何時用：多 surface、多入口、多驗證分支、或 session 之間容易忘記下一步時。單一 request / 單一 finding 可跳過。**
 > **Automation contract：只維護四欄表格 `from | edge | to | status`；第 4 欄 `status` 有 `⏳` 才會被 `automation/dag_gaps.sh` 視為未測 edge。**

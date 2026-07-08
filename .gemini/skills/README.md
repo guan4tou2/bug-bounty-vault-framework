@@ -11,6 +11,7 @@ Generated wrappers:
 
 | Skill | Path |
 |---|---|
+| `bb-actuator-cloud-chain` | `.gemini/skills/bb-actuator-cloud-chain/SKILL.md` |
 | `bb-agent-prompts` | `.gemini/skills/bb-agent-prompts/SKILL.md` |
 | `bb-attack-chain-review` | `.gemini/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.gemini/skills/bb-attempt-recorder/SKILL.md` |
@@ -18,8 +19,10 @@ Generated wrappers:
 | `bb-cve-citation` | `.gemini/skills/bb-cve-citation/SKILL.md` |
 | `bb-cvss-score` | `.gemini/skills/bb-cvss-score/SKILL.md` |
 | `bb-dedup-finding` | `.gemini/skills/bb-dedup-finding/SKILL.md` |
+| `bb-electron-audit` | `.gemini/skills/bb-electron-audit/SKILL.md` |
 | `bb-evidence-readiness` | `.gemini/skills/bb-evidence-readiness/SKILL.md` |
 | `bb-exploit-chain` | `.gemini/skills/bb-exploit-chain/SKILL.md` |
+| `bb-firmware-audit` | `.gemini/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.gemini/skills/bb-form-writer/SKILL.md` |
 | `bb-incident-response` | `.gemini/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.gemini/skills/bb-knowledge-capture/SKILL.md` |

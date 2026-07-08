@@ -28,7 +28,7 @@ Skills are functionally identical to the Claude versions. See [CLAUDE.md](CLAUDE
 
 ## Agents
 
-Claude Code ships 6 specialized agents in `.claude/agents/` (attack-chain-deep-dive, bbflow-runner, cvss-auto-scorer, pre-recon, report-writer, vault-sync). Codex CLI does not run these natively, but their prompts are plain Markdown you can load on demand. The generated `bb-agent-prompts` skill routes common requests (e.g. "run hunters", "pre-recon", "score CVSS") to the right agent prompt under `.claude/agents/*.md`.
+Claude Code ships 5 specialized agents in `.claude/agents/` (attack-chain-deep-dive, bbflow-runner, pre-recon, report-writer, vault-sync). Codex CLI does not run these natively, but their prompts are plain Markdown you can load on demand. The generated `bb-agent-prompts` skill routes common requests (e.g. "run hunters", "pre-recon") to the right agent prompt under `.claude/agents/*.md`; CVSS / severity scoring routes to the `bb-cvss-score` skill (`.claude/skills/bb-cvss-score/SKILL.md`), not an agent.
 
 **Subagent convention:** if you spawn subagents, they do **not** inherit this file or `AGENTS.md`. Inject the relevant rules into the subagent prompt by task tier (recon / analysis / output) — see the *Subagent Convention Injection* table and quick template in [CLAUDE.md](CLAUDE.md).
 

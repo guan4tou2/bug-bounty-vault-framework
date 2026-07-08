@@ -1,6 +1,6 @@
 ---
 name: bb-evidence-readiness
-description: Use when creating or reviewing a Finding, Submission, FORM, attack chain, or report evidence to verify reproducibility, Discovery Log completeness, audit references, and anti-overclaim discipline.
+description: Use when creating or reviewing a Finding, Submission, FORM, attack chain, or report evidence to verify reproducibility, Discovery Log completeness, audit references, and anti-overclaim discipline — the SUBSET check of whether the evidence alone is complete and reproducible. — distinct from bb-submission-readiness: that is the SUPERSET final gate (dedupe + scope + evidence + chain + severity + hygiene); this covers only the evidence portion inside it.
 ---
 
 # Bug Bounty — Evidence Readiness
