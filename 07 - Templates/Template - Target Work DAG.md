@@ -57,6 +57,8 @@ last_updated: "{{date}}"
 | exposed version | current vendor advisory covers root cause | abort-known / proceed-zero-day | ⏳ |
 | write-capable endpoint | scope and safety allow mutation test | VPS verification / stop at read-only evidence | ⚠️ |
 
+> **Fan out each decision's evidence-gathering:** the facts a branch depends on (fingerprint, reproducibility check, advisory lookup) are self-contained → dispatch independent ones as parallel subagents; the branch choice itself (which `to`) stays in the main loop (see §Subagent delegation, "judgment stays central"). A decision gate is a delegation point — don't run all the evidence inline before deciding. Likewise every `⏳` edge is one delegation unit (node → worker).
+
 ## Pentest Route DAG
 
 > 目標：追蹤從目前 access / capability 到下一個 foothold 的路徑，不只追單一漏洞類型。
