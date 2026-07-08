@@ -341,10 +341,25 @@ else
   fail ".gitignore 未排除 audit log（避免誤 commit）"
 fi
 
-# 90 天舊 log（§6f.8）
-old_logs=$(find "$LOGS_ROOT" -name 'claude_audit_*.log' -mtime +90 2>/dev/null | wc -l | tr -d ' ')
-if [ "$old_logs" -gt 0 ]; then
-  warn "$old_logs 個 audit log > 90 天 → find logs/ -name 'claude_audit_*.log' -mtime +90 -delete"
+# 90 天舊 log（§6f.8）—— 壓縮歸檔，不直接刪除（證據可回復）
+ARCHIVE_DIR="$LOGS_ROOT/archive"
+old_logs=$(find "$LOGS_ROOT" -maxdepth 1 -name 'claude_audit_*.log' -mtime +90 2>/dev/null)
+if [ -n "$old_logs" ]; then
+  mkdir -p "$ARCHIVE_DIR"
+  archived=0; failed=0
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    base=$(basename "$f")
+    if gzip -c "$f" > "$ARCHIVE_DIR/${base}.gz" 2>/dev/null; then
+      rm -f "$f"; archived=$((archived+1))
+    else
+      failed=$((failed+1))
+    fi
+  done <<< "$old_logs"
+  [ "$archived" -gt 0 ] && ok "$archived 個 audit log > 90 天已壓縮進 $ARCHIVE_DIR/（原檔移除，.gz 永久保留）"
+  [ "$failed" -gt 0 ] && fail "$failed 個 audit log 壓縮失敗 — 檢查 $ARCHIVE_DIR/ 寫入權限"
+else
+  ok "無 > 90 天的 audit log 需歸檔"
 fi
 fi
 
