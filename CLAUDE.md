@@ -18,6 +18,9 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-tool-setup** | Tool layer not set up; "set up scanner"; "establish tool layer"; "configure bbflow"; first "run hunters"; no candidates.jsonl | `.claude/skills/bb-tool-setup/SKILL.md` |
 | **bb-surface-mapping** | Start of any target, after recon, before any pattern/hunter/scan; "start hunting"; "explore"; "map attack surface" (anti-streetlight FRONT gate) | `.claude/skills/bb-surface-mapping/SKILL.md` |
 | **bb-web-vuln-scan** | Testing a web target; "scan"; "test"; "pentest"; "find vulns" (after surface mapping) | `.claude/skills/bb-web-vuln-scan/SKILL.md` |
+| **bb-electron-audit** | Electron / desktop app static audit; asar / shell.openExternal / preload / contextIsolation / custom scheme (ELECTRON-SPECIFIC audit procedure) | `.claude/skills/bb-electron-audit/SKILL.md` |
+| **bb-firmware-audit** | Router / IoT / camera firmware or embedded binary; binwalk / CGI injection / default creds / authorized_keys backdoor (after version-cve-precheck) | `.claude/skills/bb-firmware-audit/SKILL.md` |
+| **bb-actuator-cloud-chain** | Exposed Spring Boot management endpoints (actuator / eureka / nacos / jolokia) → config/credential → cloud-metadata audit chain | `.claude/skills/bb-actuator-cloud-chain/SKILL.md` |
 | **bb-dedup-finding** | Before new Finding/FORM; "wasn't this already found"; "same vulnerability" | `.claude/skills/bb-dedup-finding/SKILL.md` |
 | **bb-cve-citation** | "Write CVE"; "NVD reference"; "prior disclosure" | `.claude/skills/bb-cve-citation/SKILL.md` |
 | **bb-form-writer** | "Create form"; "write report"; "disclosure draft" | `.claude/skills/bb-form-writer/SKILL.md` |
