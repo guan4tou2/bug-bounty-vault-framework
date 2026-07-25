@@ -6,6 +6,8 @@ Claude must read these files in order when starting work:
 2. This file -- Claude-specific supplements
 3. Deep-read [AGENTS.md](AGENTS.md) / [STRUCTURE.md](STRUCTURE.md) sections as triggered by task context
 
+> Keep this file lightweight: put only gotchas and non-obvious patterns, not what a session can reconstruct from the file tree. Before writing or editing any CLAUDE.md, skill, agent, or tool description, read [docs/context-engineering.md](docs/context-engineering.md) — and calibrate how much to constrain to your model's capability (strong models need fewer constraints; small/weaker models need more explicit scaffolding and guardrails).
+
 ---
 
 ## Workspace Skills (mandatory -- trigger fires, load immediately)
@@ -146,5 +148,6 @@ bash automation/check_harness_invariants.sh   # enforces golden-rules.md
 |-------|----------|
 | Full workflow rules | [AGENTS.md](AGENTS.md) |
 | Directory tree / naming / templates | [STRUCTURE.md](STRUCTURE.md) |
+| Context-engineering rules (how to write CLAUDE.md / skills / tools) | [docs/context-engineering.md](docs/context-engineering.md) |
 | Session lifecycle | [docs/session-lifecycle.md](docs/session-lifecycle.md) |
 | Workspace audit | `python3 automation/check_vault.py` |
