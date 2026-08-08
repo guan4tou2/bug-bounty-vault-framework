@@ -25,6 +25,11 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-submission-readiness` | Final gate before Submission / FORM creation or ready_to_submit status | `.claude/skills/bb-submission-readiness/SKILL.md` |
 | `bb-knowledge-capture` | Reusable learning from finding candidate, attempt, chain review, tool result, or triage reply | `.claude/skills/bb-knowledge-capture/SKILL.md` |
 | `bb-cvss-score` | CVSS 3.1 vector + base score for a Finding (stateless desc→vector transform; was the cvss-auto-scorer agent) | `.claude/skills/bb-cvss-score/SKILL.md` |
+| `bb-bucket-ownership` | Use when a LISTABLE/public cloud bucket (S3/GCS/Azure) is found; verify attribution to the target before reporting | `.claude/skills/bb-bucket-ownership/SKILL.md` |
+| `bb-gap-research` | Use when a knowledge gap is identified during hunting; triggered research to fill methodology gaps | `.claude/skills/bb-gap-research/SKILL.md` |
+| `bb-idor-coverage` | Use when testing or reporting IDOR; enforce full HTTP verb matrix (GET+PUT/PATCH/DELETE, cross-tenant) before marking complete | `.claude/skills/bb-idor-coverage/SKILL.md` |
+| `bb-multi-search` | Use when mid-hunting quick research is needed; parallel multi-source search and synthesis | `.claude/skills/bb-multi-search/SKILL.md` |
+| `bb-retest-gate` | Use when retesting vendor fixes; structured 6-phase verification methodology with regression scripts | `.claude/skills/bb-retest-gate/SKILL.md` |
 
 ## Maintenance
 

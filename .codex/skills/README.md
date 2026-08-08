@@ -15,6 +15,7 @@ Generated wrappers:
 | `bb-agent-prompts` | `.codex/skills/bb-agent-prompts/SKILL.md` |
 | `bb-attack-chain-review` | `.codex/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
+| `bb-bucket-ownership` | `.codex/skills/bb-bucket-ownership/SKILL.md` |
 | `bb-context-handoff` | `.codex/skills/bb-context-handoff/SKILL.md` |
 | `bb-cve-citation` | `.codex/skills/bb-cve-citation/SKILL.md` |
 | `bb-cvss-score` | `.codex/skills/bb-cvss-score/SKILL.md` |
@@ -24,8 +25,12 @@ Generated wrappers:
 | `bb-exploit-chain` | `.codex/skills/bb-exploit-chain/SKILL.md` |
 | `bb-firmware-audit` | `.codex/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.codex/skills/bb-form-writer/SKILL.md` |
+| `bb-gap-research` | `.codex/skills/bb-gap-research/SKILL.md` |
+| `bb-idor-coverage` | `.codex/skills/bb-idor-coverage/SKILL.md` |
 | `bb-incident-response` | `.codex/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |
+| `bb-multi-search` | `.codex/skills/bb-multi-search/SKILL.md` |
+| `bb-retest-gate` | `.codex/skills/bb-retest-gate/SKILL.md` |
 | `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.codex/skills/bb-submission-readiness/SKILL.md` |
 | `bb-surface-mapping` | `.codex/skills/bb-surface-mapping/SKILL.md` |

@@ -15,6 +15,7 @@ Generated wrappers:
 | `bb-agent-prompts` | `.gemini/skills/bb-agent-prompts/SKILL.md` |
 | `bb-attack-chain-review` | `.gemini/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.gemini/skills/bb-attempt-recorder/SKILL.md` |
+| `bb-bucket-ownership` | `.gemini/skills/bb-bucket-ownership/SKILL.md` |
 | `bb-context-handoff` | `.gemini/skills/bb-context-handoff/SKILL.md` |
 | `bb-cve-citation` | `.gemini/skills/bb-cve-citation/SKILL.md` |
 | `bb-cvss-score` | `.gemini/skills/bb-cvss-score/SKILL.md` |
@@ -24,8 +25,12 @@ Generated wrappers:
 | `bb-exploit-chain` | `.gemini/skills/bb-exploit-chain/SKILL.md` |
 | `bb-firmware-audit` | `.gemini/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.gemini/skills/bb-form-writer/SKILL.md` |
+| `bb-gap-research` | `.gemini/skills/bb-gap-research/SKILL.md` |
+| `bb-idor-coverage` | `.gemini/skills/bb-idor-coverage/SKILL.md` |
 | `bb-incident-response` | `.gemini/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.gemini/skills/bb-knowledge-capture/SKILL.md` |
+| `bb-multi-search` | `.gemini/skills/bb-multi-search/SKILL.md` |
+| `bb-retest-gate` | `.gemini/skills/bb-retest-gate/SKILL.md` |
 | `bb-scope-safety-check` | `.gemini/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.gemini/skills/bb-submission-readiness/SKILL.md` |
 | `bb-surface-mapping` | `.gemini/skills/bb-surface-mapping/SKILL.md` |

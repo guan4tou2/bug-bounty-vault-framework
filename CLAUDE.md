@@ -37,8 +37,45 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-submission-readiness** | Final gate before Submission/FORM creation | `.claude/skills/bb-submission-readiness/SKILL.md` |
 | **bb-knowledge-capture** | New technique/lesson/tool behavior to capture in KB | `.claude/skills/bb-knowledge-capture/SKILL.md` |
 | **bb-cvss-score** | "score CVSS"; "CVSS vector"; "what severity" — CVSS 3.1 for a Finding (stateless, inline) | `.claude/skills/bb-cvss-score/SKILL.md` |
+| **bb-bucket-ownership** | LISTABLE/public cloud bucket (S3/GCS/Azure) → verify attribution to target before reporting (LISTABLE ≠ owned) | `.claude/skills/bb-bucket-ownership/SKILL.md` |
+| **bb-gap-research** | "research gap"; "fill knowledge gap"; "study this technique" — triggered knowledge gap research | `.claude/skills/bb-gap-research/SKILL.md` |
+| **bb-idor-coverage** | Found/testing IDOR; before marking IDOR complete — enforce full verb matrix (GET+PUT/PATCH/DELETE, cross-tenant) | `.claude/skills/bb-idor-coverage/SKILL.md` |
+| **bb-multi-search** | Mid-hunting quick research; "look this up"; "any writeups"; "research this" — parallel multi-source search | `.claude/skills/bb-multi-search/SKILL.md` |
+| **bb-retest-gate** | "retest"; "verify fixes"; "check if patched"; "regression test" — structured 6-phase vendor fix verification | `.claude/skills/bb-retest-gate/SKILL.md` |
 
 **Trigger matched -> immediately load skill -> strictly follow skill content.**
+
+---
+
+## Workspace Agents (spawn via Agent tool)
+
+Agents live in `.claude/agents/<name>.md`. Use the Agent tool with `subagent_type` matching the agent name.
+
+| Agent | Trigger | Path |
+|-------|---------|------|
+| **pre-recon** | Session start; "start recon"; "check what we know about X" | `.claude/agents/pre-recon.md` |
+| **disclosed-report-researcher** | New target start; "pre-hunt research"; "any disclosed reports" | `.claude/agents/disclosed-report-researcher.md` |
+| **bbflow-runner** | Run pattern hunters / nuclei; "run hunters"; "run bbflow"; "scan target" | `.claude/agents/bbflow-runner.md` |
+| **web-hunter** | Live web app dynamic testing (Playwright / OWASP matrix); "full web scan" | `.claude/agents/web-hunter.md` |
+| **attack-chain-deep-dive** | After finding, "deep dive attack chain"; multi-hop chain analysis | `.claude/agents/attack-chain-deep-dive.md` |
+| **debug-leak-scanner** | Batch debug/diagnostic endpoint scan; "scan debug endpoints"; "actuator full scan" | `.claude/agents/debug-leak-scanner.md` |
+| **endpoint-interest-scorer** | Score/rank URL list by security interest; "prioritize endpoints"; "rank URLs" | `.claude/agents/endpoint-interest-scorer.md` |
+| **js-sourcemap-miner** | Source-map / JS bundle mining; "mine source maps"; "extract from .map" | `.claude/agents/js-sourcemap-miner.md` |
+| **cve-pattern-cross-gen** | Cross-generation CVE tracking; "same CVE on newer version"; "cross-gen CVE" | `.claude/agents/cve-pattern-cross-gen.md` |
+| **regression-tester** | Batch re-test parked/resolved findings; "regression test"; "re-test all" | `.claude/agents/regression-tester.md` |
+| **recon-diff** | RECON_DB snapshot diff; "what changed since last scan"; "new subdomains" | `.claude/agents/recon-diff.md` |
+| **submit-form** | Generate platform submission; "create form"; "write report for H1/Bugcrowd" | `.claude/agents/submit-form.md` |
+| **triage-classifier** | Vendor reply parsing; "vendor replied"; "got N/A"; "triage result" | `.claude/agents/triage-classifier.md` |
+| **lessons-miner** | Session-end retrospective; "extract lessons"; "retrospective" | `.claude/agents/lessons-miner.md` |
+| **report-writer** | Generate formatted report from Finding data | `.claude/agents/report-writer.md` |
+| **vault-sync** | Session-end sync; "sync vault"; "session end"; "checklist" | `.claude/agents/vault-sync.md` |
+| **cve-monitor** | Check CVEs for target tech stack; "check CVEs"; "new vulnerabilities"; "advisory check" | `.claude/agents/cve-monitor.md` |
+| **auto-poc-gen** | Generate PoC scripts from Findings; "generate PoC"; "create exploit script"; "reproduce this" | `.claude/agents/auto-poc-gen.md` |
+| **nuclei-template-gen** | Generate nuclei detection templates from Findings; "nuclei template"; "detection template" | `.claude/agents/nuclei-template-gen.md` |
+| **sandbox-replay** | Replay findings in Docker/QEMU sandbox; "replay in sandbox"; "digital twin"; "test environment" | `.claude/agents/sandbox-replay.md` |
+| **chain-tracker** | Persistent attack chain graph across sessions; "update chain"; "chain status"; "attack paths" | `.claude/agents/chain-tracker.md` |
+| **agent-team-orchestrator** | Multi-agent team hunting coordination; "team hunt"; "coordinate agents"; "parallel hunting" | `.claude/agents/agent-team-orchestrator.md` |
+| **skill-synthesizer** | Detect recurring patterns and propose new skills; "synthesize skills"; "skill gap analysis" | `.claude/agents/skill-synthesizer.md` |
 
 ---
 

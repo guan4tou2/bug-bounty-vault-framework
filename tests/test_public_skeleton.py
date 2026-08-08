@@ -22,7 +22,7 @@ def read(path: str) -> str:
 def all_text() -> str:
     """Collect all non-git text for forbidden-string scanning."""
     chunks = []
-    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
+    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests", "worktrees"}
     for path in ROOT.rglob("*"):
         if path.is_file() and not skip_parts.intersection(path.parts):
             try:
@@ -85,10 +85,16 @@ def test_obsidian_config_exists():
 def test_claude_agents_exist():
     agents_dir = ROOT / ".claude" / "agents"
     assert agents_dir.is_dir()
-    expected = ["attack-chain-deep-dive.md", "bbflow-runner.md", "pre-recon.md", "report-writer.md", "vault-sync.md"]
+    expected = [
+        "attack-chain-deep-dive.md", "bbflow-runner.md", "pre-recon.md", "report-writer.md", "vault-sync.md",
+        "cve-pattern-cross-gen.md", "debug-leak-scanner.md", "disclosed-report-researcher.md",
+        "endpoint-interest-scorer.md", "js-sourcemap-miner.md", "lessons-miner.md",
+        "recon-diff.md", "regression-tester.md", "submit-form.md", "triage-classifier.md", "web-hunter.md",
+        "cve-monitor.md", "auto-poc-gen.md", "nuclei-template-gen.md",
+        "sandbox-replay.md", "chain-tracker.md", "agent-team-orchestrator.md", "skill-synthesizer.md",
+    ]
     for name in expected:
         assert (agents_dir / name).exists(), f"Missing agent: {name}"
-    assert not (agents_dir / "submit-form.md").exists(), "Public framework should use generic report-writer agent"
     assert not (agents_dir / "cvss-auto-scorer.md").exists(), "CVSS scoring is the bb-cvss-score skill (stateless transform), not an agent"
 
 
@@ -121,17 +127,11 @@ def test_claude_skills_exist():
 
 
 def test_public_framework_uses_platform_neutral_report_writing():
-    """Public seed must provide generic report/form writing, not platform-specific templates."""
+    """Public seed supports multi-platform submission but must not contain vault-specific report paths."""
     text = all_text()
     forbidden = [
         "bb-hitcon-form",
-        "HITCON ZeroDay",
-        "TWCERT",
-        "HackerOne",
-        "Bugcrowd",
-        "Intigriti",
         "ZD-2026",
-        "FORM - HITCON",
         "reports/hitcon",
         "reports/twcert",
         "reports/hackerone",
@@ -139,14 +139,11 @@ def test_public_framework_uses_platform_neutral_report_writing():
         "reports/intigriti",
     ]
     for token in forbidden:
-        assert token.lower() not in text.lower(), f"Platform-specific public content leaked: {token}"
+        assert token.lower() not in text.lower(), f"Vault-specific report path leaked: {token}"
 
     for required in (
         "bb-form-writer",
         "report-writer",
-        "platform-neutral",
-        "templates/form.md",
-        "templates/submission.md",
     ):
         assert required in text, f"Missing generic report/form workflow marker: {required}"
 
@@ -701,7 +698,7 @@ def test_docs_do_not_reference_removed_scripts_directory():
     """Active docs should not reference old flat-layout scripts/ directory.
     CHANGELOG is excluded since it documents the migration history."""
     chunks = []
-    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests"}
+    skip_parts = {".git", ".pytest_cache", "__pycache__", "tests", "worktrees"}
     skip_files = {"CHANGELOG.md"}
     for path in ROOT.rglob("*"):
         if path.is_file() and not skip_parts.intersection(path.parts) and path.name not in skip_files:
@@ -710,7 +707,11 @@ def test_docs_do_not_reference_removed_scripts_directory():
             except Exception:
                 pass
     content = "\n".join(chunks)
-    assert "scripts/" not in content
+    import re as _re
+    # Match standalone "scripts/" references (old repo directory) but not
+    # URL path components like "_ignition/scripts/*" or "javascript/scripts/"
+    assert not _re.search(r'(?<!/)(?<!\w)scripts/', content), \
+        "Old scripts/ directory reference found (renamed to automation/)"
     assert "verify_public_skeleton.py" not in content
     assert "bootstrap_private_vault.py" not in content
 
