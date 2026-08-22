@@ -105,6 +105,11 @@ bash automation/claim.sh <scope> --takeover --owner=<new model>
 
 **If no In-Progress block exists:** use `claim.sh <scope>` for a normal claim (the previous session completed naturally; this is not a takeover scenario).
 
+**If HANDOFF.md itself is missing, empty, or looks truncated/corrupted** (previous session crashed mid-write, or context was reset before it could write a handoff block) — do not block and do not guess. This is a degraded-input case, not an error to stop on:
+1. Reconstruct minimal context yourself from durable sources instead: `RECON_DB.md` (Attack Surface section + tail of the Operation Log) and `git log --oneline --grep "<target>:" -20`.
+2. Proceed with a normal (non-takeover) `claim.sh <scope>` — there is no In-Progress block to take over.
+3. Say so explicitly in your first message to the user (Step 3 below), e.g. "No clean handoff found for `<target>` — reconstructed context from RECON_DB.md + git log instead," so the user knows a continuity gap exists rather than assuming a clean handoff happened.
+
 ### Step 3: First message to the user
 
 ```

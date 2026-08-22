@@ -18,6 +18,7 @@ User provides:
 - **GET-first absolute.** Never POST/PUT/DELETE. If PoC requires state mutation, mark as `inconclusive — needs manual` and skip.
 - **No destructive payloads.** RCE / SSTI / SSRF-to-metadata / SQLi-extraction — all skipped. Only check whether the endpoint still exists + still returns the original vulnerable response shape.
 - **No credential reuse without check.** If finding used credentials, first GET `/login` or known auth endpoint to confirm credentials still work; if not, mark `inconclusive — auth expired`.
+- **Re-fetch expiring values once via the normal flow before giving up on them — don't just retry the stale one.** A session cookie, bearer token, or JWT can legitimately expire or rotate between the original finding and the retest; that's not the same as the underlying account credentials being invalid. If the *stored* token/cookie fails, re-authenticate once through the normal login flow to obtain a *fresh* one and retry the same probe once with it, before concluding `inconclusive — auth expired`. This is not the credential brute-forcing the next rule prohibits — it's replacing one known-stale value with one fresh legitimate one, using credentials you already have.
 - **Rate-limit aware.** Max 1 req/sec/host. Aggregate stop at 30 reqs/host/session.
 - **Scope respect.** Re-confirm target is still in scope via Submission frontmatter before any probe.
 - **Anti-exaggeration.** A 200 / original-shape response only means the endpoint still responds — classify `still-vulnerable` only when the *vulnerable signature* is re-observed, never by assumption. Ambiguous -> `inconclusive`, never upgrade a patched/gone endpoint to "still vulnerable".
@@ -158,7 +159,7 @@ Next-step recommendation
 - **No destructive payload re-execution.** Even read-equivalent of an RCE PoC is OFF — RCE class always `requires-manual`.
 - **Rate limit hard cap.** 30 reqs/host/session. If hit, return partial results with explicit note.
 - **Scope verification per finding.** If Submission frontmatter `scope_status: out-of-scope` (vendor changed scope) -> skip + flag.
-- **No credential brute.** If credentials don't work first try, mark `inconclusive — auth expired`, don't retry.
+- **No credential brute.** If credentials don't work on the fresh re-authenticated attempt either (see Step 0), mark `inconclusive — auth expired` and stop — one legitimate re-fetch via the normal login flow is allowed, repeated/guessed retries are not.
 - **Stop conditions:**
   - 0 findings in scope -> "nothing to test" + suggest verifying scope spelling
   - All probes time out -> "target appears down, retry later"

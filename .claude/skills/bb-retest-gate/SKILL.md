@@ -37,6 +37,7 @@ Rules:
 - GET-first: POST/PUT/DELETE requires understanding consequences first
 - Log each test in the operation log
 - Unreachable endpoints -> immediately differentiate using CT telemetry + DNS: HOST GONE vs BLOCKED AT EDGE
+- **Persist before verifying further**: write each finding's Phase 1 verdict to the report table (and start its Phase 6 regression script) immediately after that finding's probe completes — do not wait until Phase 2/3 finish. Phase 2 (variant/bypass testing) is slower and more failure-prone (multiple payloads, WAF interaction, sibling-host enumeration); if it times out partway through, the already-durable Phase 1 verdicts are still usable instead of being lost with the rest of the session.
 
 ## Phase 2: Variant & Bypass Testing (Mandatory)
 

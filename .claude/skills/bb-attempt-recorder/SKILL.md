@@ -26,6 +26,7 @@ Run this when:
 - Hypothesis:
 - Action taken:
 - Evidence observed:
+- Tool/environment failure ruled out: <yes — how / no, could not rule out>
 - negative result:
 - Reason it did not become a Finding:
 - stop condition:
@@ -33,6 +34,8 @@ Run this when:
 - KB update needed:
 - Attempt note: created / updated / not needed
 ```
+
+**"Tool/environment failure ruled out" is not optional filler.** A timeout, an empty response body, a connection reset, a dead credential, or a tool call that silently returned nothing can look exactly like a genuine negative result. Before writing "negative result: technique doesn't work" or "target is clean," check the raw evidence for a failure signature (non-2xx transport error, 0-byte body, auth-expired response) — if you can't positively confirm the probe actually executed and returned a real response, the correct entry is `inconclusive — <reason>`, not a negative result. An inconclusive attempt should still get a `Revisit condition` (e.g. "retry once tool X is confirmed working" or "retry with a fresh session token").
 
 ## Attempt Note Criteria
 

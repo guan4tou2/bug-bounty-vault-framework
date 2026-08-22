@@ -35,6 +35,12 @@ Filter out:
 - Hosts on the operator's denylist (if exists)
 - Hosts already 100% covered by prior session (`last_scan` <7 days, same paths_profile)
 
+## Step 1.5 — Validate the method on one host before scaling to the batch
+
+Before firing the full concurrent batch (Steps 2-4) across all N hosts, run Steps 2-4 against exactly **one** representative in-scope host first, sequentially. Confirm the results look sane: status codes and signatures behave as expected, no proxy/WAF interstitial is swallowing every request into a false 200, no unexpected redirect chain is silently rewriting every probe to the same page. This is a **methodology check**, distinct from the per-host SPA catch-all filter in Step 2 (that guards against false positives on one host; this guards against a broken probe — wrong header, misconfigured proxy, blanket WAF block — that would otherwise waste the entire request budget across all N hosts before anyone notices).
+
+If the one-host validation looks wrong (e.g. every path returns identical 403s, or a "confirmed" signature matches on a path that should 404), stop and fix the method before scaling — do not burn the full batch on a broken probe. If it looks sane, proceed to the remaining hosts batched at `<=max_concurrency` (not one host at a time — batching, not serializing, is what keeps a multi-host scan efficient once the method is validated).
+
 ## Step 2 — SPA catch-all detection per host
 
 For each host, GET 2 URLs:
