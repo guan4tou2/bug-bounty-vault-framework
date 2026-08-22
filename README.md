@@ -204,6 +204,7 @@ The `09 - Knowledge Base/` folder holds cross-target reusable knowledge:
 - **Checklist** — Verification checklists (Pre-Submission Validation)
 - **Reference Card** — Quick rules (Testing Safety Rules, Knowledge Capture Rubric)
 - **Lessons Learned** — What worked, what didn't
+- **`wiki/`** — the operating manual for technique depth: 60+ self-contained deep-dive docs (copy-paste payloads, PoC walkthroughs, bypass matrices) per vuln class — request smuggling, race conditions, SSRF, SSTI, IDOR/BOLA, JWT, GraphQL, and more. Start at [`09 - Knowledge Base/wiki/README.md`](09 - Knowledge Base/wiki/README.md); its FAQ table routes "found X / suspect Y" straight to the matching doc.
 
 Seed content is included as a starting point. Add your own as you learn.
 

@@ -77,7 +77,7 @@ Failed candidates → `bb-attempt-recorder` (preserves negative results).
 
 - **Dedup gate**: Read `FINDINGS_QUICK_REF.md` before creating any new Finding
 - **GET-first**: Never send POST/PUT/PATCH/DELETE without understanding the consequences; when unsure, document but do not trigger
-- **KB lookup**: Query the Knowledge Base before researching a topic, during hunting, and before writing reports
+- **KB lookup**: Query the Knowledge Base before researching a topic, during hunting, and before writing reports. For technique depth ("I need payloads/PoCs for X"), go straight to `09 - Knowledge Base/wiki/README.md` — its FAQ table routes any vuln class to the matching `wiki/NN-*.md` deep-dive (60+ docs: request smuggling, race conditions, SSRF, SSTI, IDOR/BOLA, etc.), not just the skill's own starting-point payload list.
 - **VPS for risky ops**: Run bbflow, osmedeus, and any aggressive scanning on the VPS, not locally
 - **Operation log**: Record manual curl/POST operations in RECON_DB.md under `## Operation Log`
 - **Target Work DAG**: For multi-surface or branching work, use `07 - Templates/Template - Target Work DAG.md`; run `bash automation/dag_gaps.sh <target>` and pick the highest-ROI `⏳` edges first.

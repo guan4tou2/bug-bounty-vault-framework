@@ -31,7 +31,7 @@ First time on a machine, establish the tool layer (Ring 2) once via `bb-tool-set
 
 Query the KB at three moments:
 1. **Before research** — is there a Pattern for this tech stack?
-2. **During hunting** — has this technique been documented?
+2. **During hunting** — has this technique been documented? Start at `09 - Knowledge Base/wiki/README.md` — its FAQ table maps "found X / suspect Y" questions straight to the matching `wiki/NN-*.md` deep-dive (payload sets, PoC walkthroughs, bypass matrices go well beyond any skill's own starting-point examples).
 3. **Before reporting** — check Lessons Learned for triage calibration
 
 ### §0d Session End

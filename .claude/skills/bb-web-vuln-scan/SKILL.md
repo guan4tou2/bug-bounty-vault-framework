@@ -7,7 +7,7 @@ description: Use when testing a web target's endpoints/params for vulnerabilitie
 
 This skill enforces systematic testing **after** surface mapping (`bb-surface-mapping`). It prevents the common failure of testing only XSS + SQLi and missing LFI / SSRF / SSTI / CMDi / XXE / outdated-component exploits.
 
-Payloads below are canonical, publicly-documented OWASP WSTG test strings — they are a **starting point, not the full set**. Keep target-specific payloads, evasion, and real scanner output in your private vault / tool repo, never here.
+Payloads below are canonical, publicly-documented OWASP WSTG test strings — they are a **starting point, not the full set**. Keep target-specific payloads, evasion, and real scanner output in your private vault / tool repo, never here. When a technique needs more than the starting point (full payload sets, bypass matrices, PoC walkthroughs), go to `09 - Knowledge Base/wiki/README.md` — its FAQ table routes each vuln class in this checklist to a matching `wiki/NN-*.md` deep-dive.
 
 ## Trigger
 
@@ -145,4 +145,5 @@ Use whatever browser-automation and request-interception tools your setup provid
 - `bb-attack-chain-review` (candidate-lifecycle chain-assessment gate)
 - `09 - Knowledge Base/` Pattern notes (IDOR / SSRF / XSS / SQLi / SSTI / …)
 - `09 - Knowledge Base/Reference Card - Vulnerability Type Classification.md`
+- `09 - Knowledge Base/wiki/README.md` — per-class deep-dive playbooks (full payload sets, PoC walkthroughs, bypass matrices); use this, not just the checklist above, once a technique is worth pursuing
 - `docs/architecture-closed-loop.md`

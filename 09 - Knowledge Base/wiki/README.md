@@ -1,7 +1,7 @@
 ---
 type: wiki-index
 status: active
-last-updated: 2026-08-12
+last-updated: 2026-08-23
 ---
 
 # Bug Bounty Arsenal — Wiki
@@ -41,7 +41,7 @@ last-updated: 2026-08-12
 
 | # | Document | Description |
 |---|------|------|
-| **60** | [HTTP Request Smuggling](60-request-smuggling.md) | CL.TE / TE.CL / TE.TE / H2.CL / H2.TE + smuggler.py + Burp workflow |
+| **60** | [HTTP Request Smuggling](60-request-smuggling.md) | CL.TE / TE.CL / TE.TE / H2.CL / H2.TE + smuggler.py + Burp workflow + **2025 update**: 0.CL, chunk-extension desync, pause-based desync, CVE-2025-32094, HTTP Request Smuggler v3.0 |
 | **61** | [Race Condition / Single-Packet Attack](61-race-condition.md) | TOCTOU + Turbo Intruder + 8 classic patterns (coupon/MFA/withdraw/...) |
 | **62** | [File Upload Exploitation](62-file-upload-exploitation.md) | ext/MIME/magic/SVG/ZIP slip/polyglot + shells per language + ImageMagick/Ghostscript |
 | **63** | [Prototype Pollution](63-prototype-pollution.md) | Client-side gadgets + server-side via lodash/merge + DOM Invader + CVE table |
@@ -85,6 +85,8 @@ last-updated: 2026-08-12
 | **81** | [MCP Server Security](81-mcp-server-security.md) | MCP OAuth scope mismatch + tool injection + indirect prompt injection + BOLA + transport |
 | **82** | [AI / LLM Security](82-ai-llm-security.md) | OWASP LLM Top 10 + direct/indirect injection + output handling + jailbreaks + RAG poisoning |
 | **83** | [SAML / OIDC Attacks](83-saml-oidc-attacks.md) | 8 XSW variants + signature stripping + comment truncation + OIDC alg/kid/JWKS/state/nonce/PKCE |
+| **90** | [gRPC / Protobuf Attacks](90-grpc-protobuf-attacks.md) | grpcurl reflection enum + protoscope/buf/blackboxprotobuf schema recovery + gRPC-Web framing/proxy quirks + per-RPC IDOR/BFLA methodology |
+| **91** | [CI/CD Pipeline Supply-Chain Attacks](91-cicd-pipeline-attacks.md) | pull_request_target script injection + unpinned-action abuse (CVE-2025-30066) + self-hosted runner persistence + GITHUB_TOKEN scope + OIDC role-assumption misconfig + 2026 AI-agent prompt injection in CI |
 
 ## Operational (Workflow and Deep Tool Usage)
 
@@ -192,6 +194,8 @@ last-updated: 2026-08-12
 - **Q: What's the workflow to avoid dupes/N/A?** → [86-dupe-hunting-report-writing.md](86-dupe-hunting-report-writing.md)
 - **Q: Is this finding ready to submit / what state is it in?** → [87-finding-lifecycle-state-machine.md](87-finding-lifecycle-state-machine.md)
 - **Q: Writing a TWCERT firmware report?** → [88-twcert-firmware-report-rules.md](88-twcert-firmware-report-rules.md)
+- **Q: Target exposes gRPC / found a `.proto`-shaped binary POST?** → [90-grpc-protobuf-attacks.md](90-grpc-protobuf-attacks.md) (grpcurl reflection → schema recovery → per-RPC IDOR/BFLA)
+- **Q: In-scope target's `.github/workflows/` looks interesting, or they use an AI coding agent in CI?** → [91-cicd-pipeline-attacks.md](91-cicd-pipeline-attacks.md) (pull_request_target injection, unpinned actions, self-hosted runner PPE, OIDC trust misconfig, 2026 AI-agent prompt injection in CI)
 
 ## Related Resources
 
