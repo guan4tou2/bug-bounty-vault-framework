@@ -21,19 +21,19 @@ title: "Orchestrator Architecture — Model Routing, Subagent-First Dispatch, an
 | 4 DAG Job Schema | **proven** | Built in every multi-step hunting session |
 | 5 Return Contract | **proven** | Subagent conclusion+path pattern is stable |
 | 6a Cascade Escalation | **proven** | L2-to-L3 escalation path triggers routinely |
-| 6b Uniform-Result Trigger | **theoretical** | Concept derived from field lessons; the >80% threshold and auto-spawn logic are untested |
-| 6c L0 max-attempt=2 | **theoretical** | Reasonable but needs more case validation |
+| 6b Uniform-Result Trigger | **future work** | Concept valid (field lesson confirmed); the >80% threshold and auto-spawn logic are automation requirements, not manually testable — deferred to backlog |
+| 6c L0 max-attempt=2 | **reasonable default** | Reasonable default; L0 tasks rarely exceed 2 attempts in practice, but lacks large-scale statistical validation |
 | 7a Dispatch Flow | **proven** | Every subagent dispatch follows this |
 | 7b Skill Gate Pre-check | **proven** | Confirmed necessary after a session where skipping it led to incomplete recon |
-| 7c Prompt Three Elements | **theoretical** | Concept is sound; template not yet tested in real dispatch |
-| 7d Adaptive Probe Protocol | **theoretical/needs_tooling** | Feedback loop is manual judgment, not automated; academic citations are background knowledge |
+| 7c Prompt Three Elements | **ready to validate** | Concept is sound (field lesson confirmed); delegation templates exist, validate on next real dispatch |
+| 7d Adaptive Probe Protocol | **background reference** | Feedback loop is manual judgment, not automated; academic citations retained as design rationale, not executable spec — not scheduled for backlog |
 | 8 Token Budget Tracking | **proven** | Context handoff rules in daily use |
 | 8b Context Pinning & Compression | **partial** | P0/P1 tiers implicitly landed (system prompt + on-demand skill loading); DAG-aware eviction is design-stage |
 | 9 Concurrency Safety | **proven** | DAG depends_on in daily use |
 | 10b Graph Integration Scope | **proven** | [D]-only-into-graph rule is clear |
-| 10c Recon-in-Graph | **theoretical/needs_tooling** | Requires structured schema support; Phase 1 not yet started |
+| 10c Recon-in-Graph | **future work** | Requires structured schema support from graphify; 3-phase roadmap shelved — awaiting typed-node support or alternative tooling |
 
-> **How to read**: **proven** = trust and follow. **partial/theoretical** = concepts are sound but thresholds/templates need validation. **needs_tooling** = paper design that requires code to operationalize.
+> **How to read**: **proven** = trust and follow. **partial** = partially landed, details need validation. **reasonable default** / **ready to validate** = concepts are sound but thresholds/templates need validation. **future work** = deferred to backlog, retained but not occupying session context. **background reference** = design rationale retained, not executable spec. No **needs_tooling** items remain.
 
 ---
 
