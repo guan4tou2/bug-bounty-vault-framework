@@ -81,6 +81,16 @@ Agents live in `.claude/agents/<name>.md`. Use the Agent tool with `subagent_typ
 
 ## Session Start
 
+Not every session starts from recon. Pick your entry point by session type:
+
+| Session Type | Entry Point | Required Gates |
+|---|---|---|
+| New target hunting | claim → version/CVE precheck → pre-recon → surface mapping → hunting | All |
+| Handoff resume | Read HANDOFF.md → continue from breakpoint | dedup + evidence |
+| Submission / FORM | Read Finding → write FORM | evidence + submission-readiness |
+| Retest / verification | bb-retest-gate | retest gate only |
+| Tool development / harness | Start directly | audit + invariant check |
+
 ### Parallel Conflict Prevention + Dedup
 
 ```bash
@@ -144,7 +154,16 @@ Subagents **do not inherit** CLAUDE.md / AGENTS.md. When spawning a subagent, in
 
 ### Quick Injection Template (analysis + output tier)
 
-Paste at the end of subagent prompts:
+Paste at the end of subagent prompts. Set the `effort:` parameter to match the task (see AGENTS.md §6b4 Effort Level Guide):
+
+| Tier | Typical effort |
+|------|---------------|
+| Recon (grep, file lookup, mechanical rename) | `low` |
+| Recon (structured collection, light judgment) | `low`–`medium` |
+| Analysis (standard hunting, vuln verification) | `high` (default) |
+| Output (report writing, submission) | `high` |
+| Review (adversarial verification, second opinion) | `xhigh` |
+| Research (complex chain analysis, novel research) | `xhigh`–`max` |
 
 ```
 ## Rules (mandatory)

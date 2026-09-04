@@ -204,6 +204,25 @@ The main conversation is the **commander**: keep only **decisions, synthesis, us
 - **Why.** A bloated main context costs tokens and cache misses, and mixing many files' raw detail degrades judgment — the two failure modes compound across turns.
 - **Pairs with verify-not-self-verify.** Route every "done / correct" conclusion to a fresh-context agent to check, rather than confirming your own work in the same context that produced it.
 
+### §6b4 Effort Level Guide
+
+When spawning subagents, set `effort` to match the task's reasoning demands. The effort parameter controls how deeply the model reasons — it is behavioral, not a hard token cap.
+
+| Task Type | effort | Rationale |
+|---|---|---|
+| Grep / file lookup / mechanical rename | `low` | No judgment, speed matters |
+| Recon data collection | `low`–`medium` | Structured collection, light judgment |
+| Standard hunting / analysis | `high` (default) | Core work, full reasoning needed |
+| Report writing / submission | `high` | Accuracy critical |
+| Adversarial verification | `xhigh` | Must reason deeply to challenge findings |
+| Complex chain analysis / novel research | `xhigh`–`max` | Hardest judgment calls |
+
+**`max` warning:** `max` overthinks on structured output or low-reasoning-density tasks — do not use for FORM generation, template filling, or frontmatter updates. Reserve `max` for open-ended analysis that demands the deepest reasoning.
+
+**`low` trap [universal]:** effort controls thinking budget, not data sources. `low` biases the model toward skipping tool calls and answering from training data — same confident tone, stale content. Do not let `low` handle both "search" and "answer" — split into query (medium + require citations) and synthesis (low ok), or just use medium. Check if the response actually triggered search tools; no links/citations = unverified.
+
+**CVE / vulnerability judgment hard rule [universal]:** Any subagent doing CVE lookup, vulnerability judgment, or PoC design must use effort >= `medium`. The prompt must include: "Search public PoC/advisory/writeup first; no conclusion without search results; a failed self-made PoC does not mean the vulnerability doesn't exist." A response that reached a "no CVE" or "not exploitable" conclusion without triggering any search tool is unverified — escalate or re-run at higher effort.
+
 ### §6c Isolated Runner Boundary
 
 **Recommended isolated runner/VPS:** bbflow, nuclei, ffuf, sqlmap, osmedeus, bbot, and automated scanning.
@@ -319,8 +338,10 @@ judgment — uncredited/0-instance is a prune *candidate*, not an auto-delete.
 
 ## Subagent Convention Injection
 
-| Tier | Task Type | Must Inject |
-|------|-----------|-------------|
-| Recon | Scope, subdomain enum, fingerprint | GET-first, operation log |
-| Analysis | Vuln verification, PoC | + dedup, anti-exaggeration, VPS |
-| Output | Finding / Submission / FORM | + pipeline, discovery log, severity, no internal IDs |
+| Tier | Task Type | Recommended effort | Must Inject |
+|------|-----------|-------------------|-------------|
+| Recon | Scope, subdomain enum, fingerprint | `low`–`medium` | GET-first, operation log |
+| Analysis | Vuln verification, PoC | `high` | + dedup, anti-exaggeration, VPS; CVE/vuln judgment: effort >= `medium` + "search public PoC/advisory first" |
+| Output | Finding / Submission / FORM | `high` | + pipeline, discovery log, severity, no internal IDs |
+| Review | Adversarial verification, second opinion | `xhigh` | Fresh context (not the producer); find problems, do not confirm |
+| Research | Complex chain analysis, novel research | `xhigh`–`max` | + cross-verify from 2+ sources; `max` only for open-ended analysis, never FORM/template |
