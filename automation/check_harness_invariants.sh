@@ -80,6 +80,22 @@ else
   fail "F4 static-only gate missing/unwired" "ensure automation/static_only_gate.sh exists + referenced in .claude/settings.json PreToolUse Bash (directly or via low_frequency_gates.sh)"
 fi
 
+# F5 — inline-scan gate installed + wired as a REAL-TIME PreToolUse Bash hook
+# (must be registered DIRECTLY in settings.json, not via low_frequency_gates.sh, which
+#  early-exits on regular commands; this gate must fire on every Bash call)
+if [ -x automation/inline_scan_gate.sh ] && grep -q inline_scan_gate.sh .claude/settings.json 2>/dev/null; then
+  pass "F5 inline-scan gate wired (direct PreToolUse Bash — blocks hand-rolled inline HTTP loops)"
+else
+  fail "F5 inline-scan gate missing/unwired" "ensure automation/inline_scan_gate.sh exists (chmod +x) + referenced DIRECTLY in .claude/settings.json PreToolUse Bash matcher"
+fi
+
+# F6 — big-read gate installed + wired as a PreToolUse Read hook
+if [ -x automation/big_read_gate.sh ] && grep -q big_read_gate.sh .claude/settings.json 2>/dev/null; then
+  pass "F6 big-read gate wired (PreToolUse Read — blocks whole-file reads that flood main context)"
+else
+  fail "F6 big-read gate missing/unwired" "ensure automation/big_read_gate.sh exists (chmod +x) + referenced in .claude/settings.json PreToolUse Read matcher"
+fi
+
 echo "──"
 if [ "$fails" -eq 0 ]; then
   echo "✅ all harness invariants hold"

@@ -31,7 +31,7 @@ title: "Orchestrator Architecture — Model Routing, Subagent-First Dispatch, an
 | 8b Context Pinning & Compression | **partial** | P0/P1 tiers implicitly landed (system prompt + on-demand skill loading); DAG-aware eviction is design-stage |
 | 9 Concurrency Safety | **proven** | DAG depends_on in daily use |
 | 10b Graph Integration Scope | **proven** | [D]-only-into-graph rule is clear |
-| 10c Recon-in-Graph | **future work** | Requires structured schema support from graphify; 3-phase roadmap shelved — awaiting typed-node support or alternative tooling |
+| 10c Recon-in-Graph | **future work** | Requires structured schema support from the knowledge-graph indexing tool; 3-phase roadmap shelved — awaiting typed-node support or alternative tooling |
 
 > **How to read**: **proven** = trust and follow. **partial** = partially landed, details need validation. **reasonable default** / **ready to validate** = concepts are sound but thresholds/templates need validation. **future work** = deferred to backlog, retained but not occupying session context. **background reference** = design rationale retained, not executable spec. No **needs_tooling** items remain.
 
