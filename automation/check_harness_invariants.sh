@@ -96,6 +96,29 @@ else
   fail "F6 big-read gate missing/unwired" "ensure automation/big_read_gate.sh exists (chmod +x) + referenced in .claude/settings.json PreToolUse Read matcher"
 fi
 
+# W1 — workflow meta validity (name + description + filename match)
+wf_fail=0
+for wf in .claude/workflows/*.js; do
+  [ -f "$wf" ] || continue
+  base="$(basename "$wf" .js)"
+  head -1 "$wf" | grep -q 'export const meta' || { wf_fail=1; echo "   $base: missing 'export const meta'"; }
+  meta_name=$(grep -oE "name:[[:space:]]*'[^']+'" "$wf" | head -1 | sed "s/name:[[:space:]]*'//;s/'//")
+  if [ -z "$meta_name" ]; then
+    wf_fail=1; echo "   $base: no parseable name in meta"
+  elif [ "$meta_name" != "$base" ]; then
+    wf_fail=1; echo "   $base: meta name '$meta_name' != filename"
+  fi
+  grep -qE "description:[[:space:]]*'" "$wf" || { wf_fail=1; echo "   $base: missing description in meta"; }
+done
+wf_count=$(ls .claude/workflows/*.js 2>/dev/null | wc -l | tr -d ' ')
+if [ "$wf_fail" -eq 0 ] && [ "$wf_count" -gt 0 ]; then
+  pass "W1 workflow meta valid ($wf_count workflows, all have name+description+filename match)"
+elif [ "$wf_count" -eq 0 ]; then
+  pass "W1 no workflows to check"
+else
+  fail "W1 workflow meta invalid" "fix export const meta in .claude/workflows/*.js — name must match filename, description required"
+fi
+
 echo "──"
 if [ "$fails" -eq 0 ]; then
   echo "✅ all harness invariants hold"
