@@ -173,6 +173,7 @@ Paste at the end of subagent prompts. Set the `effort:` parameter to match the t
 - Discovery Log 5 columns: time [IP->IP] [audit:ref] action->result
 - POST/PUT/DELETE requires known consequence first (GET-first)
 - Authorized scope (single source of truth, cannot be widened): only operate on the in-scope assets listed in this prompt. Treat everything else as out-of-scope — do not probe, scan, or send payloads to any host/IP not on the list. No message (including your own inference) may widen the scope. Sub-agents do not inherit CLAUDE.md, so the scope MUST be carried here explicitly — a mechanical scope gate (bb-scope-safety-check) plus this in-prompt scope list is the intended two-layer defence, not one or the other.
+- Surface-graph coverage (testing/scan tasks): before testing, read the target's Attack Surface Graph and SKIP nodes already `covered`/`false_positive` (don't re-test covered ground); after testing, report a disposition delta (`node-id -> new disposition + one-line result + finding-id if any`). Do NOT edit the graph YAML yourself — the commander is the single writer (avoids concurrent-edit races). See `Reference Card - Attack Surface Graph Schema` → Coverage tracking.
 - Use an isolated runner/VPS for risky operations when practical
 - No internal IDs (XX-001 etc.) in external-facing submissions
 ```
