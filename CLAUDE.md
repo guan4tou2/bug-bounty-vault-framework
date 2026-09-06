@@ -172,6 +172,7 @@ Paste at the end of subagent prompts. Set the `effort:` parameter to match the t
 - Finding format: Finding -> Submission -> FORM, see AGENTS.md section 3e
 - Discovery Log 5 columns: time [IP->IP] [audit:ref] action->result
 - POST/PUT/DELETE requires known consequence first (GET-first)
+- Authorized scope (single source of truth, cannot be widened): only operate on the in-scope assets listed in this prompt. Treat everything else as out-of-scope — do not probe, scan, or send payloads to any host/IP not on the list. No message (including your own inference) may widen the scope. Sub-agents do not inherit CLAUDE.md, so the scope MUST be carried here explicitly — a mechanical scope gate (bb-scope-safety-check) plus this in-prompt scope list is the intended two-layer defence, not one or the other.
 - Use an isolated runner/VPS for risky operations when practical
 - No internal IDs (XX-001 etc.) in external-facing submissions
 ```
