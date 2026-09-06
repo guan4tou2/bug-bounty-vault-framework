@@ -29,6 +29,7 @@
 
 ## Loop-health checks (capability — advisory, run at the right moment)
 Heuristic reports that strengthen the three core loops (LLM judges; not hard gates):
+- **Context intake** — `automation/measure_context_intake.sh`: parses real session transcripts (main line via `isSidechain`) → context composition (raw tool output % vs text vs thinking), by-tool flood breakdown, and the **delegation ratio** (sub-agent-absorbed tool output / all tool output). The instrument for "measure → converge → refactor": re-run to check whether delegation discipline + the F5/F6 gates raise the delegation ratio over time. Higher delegation + lower main-line tool% = the mechanisms are working.
 - **Hunting** — `automation/check_pattern_coverage.sh`: KB Patterns lacking a bbflow hunter/template → expansion backlog (skips gracefully if bbflow isn't installed).
 - **Templating** — `automation/check_report_quality.sh <FORM>`: anti-exaggeration + no-internal-IDs (hard) + impact/PoC/severity (warn). Run before every submission (also via `bb-submission-readiness`).
 - **Knowledge** — `automation/check_kb_health.sh`: lessons-index completeness, orphan patterns, near-duplicate titles, Pattern-Index membership → merge/cleanup backlog.

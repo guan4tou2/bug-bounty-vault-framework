@@ -52,6 +52,8 @@ Edit `workspace/workshop/<target>/HANDOFF.md` and add:
 > Reason: <context-low / explicit-handoff / milestone>
 > Model: <claude-sonnet-4-6 / claude-opus-4-7>
 > Scope: <lock scope>
+> resume_state: <continue = mid-task, resume straight from "In progress → next" below | blocked = stuck on a blocker, clear the live-state/unfinished-checklist first | milestone-complete = milestone done, pick a new direction>
+> ↳ The takeover session's FIRST decision (resume / unblock / pick-new) is a one-line lookup here — don't re-read the whole file to infer it; pair it with "next" = a precise, copy-pasteable command. If the last action was "wait for the user to answer" and it was answered, mark milestone-complete so the takeover session doesn't re-ask.
 
 ### Completed (do not redo)
 - [x] ...
