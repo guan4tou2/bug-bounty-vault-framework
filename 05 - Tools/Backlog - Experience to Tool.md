@@ -49,15 +49,20 @@ tags: [tool, backlog, nuclei, scanner, crystallization]
 |---|---|---|---|---|---|---|
 | _(example)_ | Spring actuator `/env` unauth exposure | web/infra | GET `/actuator/env` → 200 + JSON with `systemProperties` | nuclei template | LL-xxx / FINDING | idea |
 
-## Drain (idea → deployed)
+## Drain (a template lifecycle — don't shortcut to "deployed")
+
+status flows through a lifecycle: `idea → draft → validate → null-case → canary → FP-review → promoted`.
+**Only `promoted` enters the default auto-run set** (never auto-run an un-canaried template against real targets).
 
 1. Pick the top backlog entries (high-reuse, clearly-ruled ones first).
-2. Author into the matching format (web → nuclei template; RE → `05 - Tools/` script).
-3. **Sanitize** — strip target-specific host/token/customer name ([[bb-knowledge-capture]] hard rule).
-4. Test locally: `nuclei -validate -t <file>`; with a true-positive sample, run one true-positive + at least one true-negative (avoid false positives).
-5. Deploy: move the artifact into your hunter set (portable, runs locally); mark `deployed`.
-6. Dedup: one row per root-cause pattern; don't add five hunters for the same thing.
+2. **draft** — author into the matching format (web → nuclei template; RE → a script). **Sanitize**
+   ([[bb-knowledge-capture]] hard rule). **Dedup first** — don't duplicate an existing template.
+3. **validate** — `nuclei -validate -t <file>`.
+4. **null-case** — run against `example.com` / a harmless host; must yield NO hit (no obvious false positive).
+5. **canary** — only on an authorized target, low rate-limit, single template.
+6. **FP-review → promote** — only after it passes: move into the default set, note it in your scanner's
+   CHANGELOG, flip status to `promoted`, and back-link the source Pattern.
 
-> The `build-hunters` workflow automates this drain (read backlog → author each → validate → report
-> which are ready to flip to deployed). This backlog makes "experience → an ever-growing scanner"
-> visible, trackable, and drainable, instead of rotting as prose notes scattered across sessions.
+> The `build-hunters` workflow automates **draft→validate→null-case** (output is a DRAFT); **canary +
+> FP-review + promote need a live target and stay manual**. This backlog makes "experience → an
+> ever-growing scanner" visible, trackable, and drainable, instead of rotting as prose notes.

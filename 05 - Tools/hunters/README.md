@@ -21,13 +21,17 @@ hunters/
 - Each artifact's `metadata.source-pattern` (nuclei) or header comment (script) points back to the
   `09 - Knowledge Base/Pattern - …` it was crystallized from, so it stays traceable.
 
-## Quality gate (before marking an entry `deployed`)
+## Lifecycle gate (before promoting into the auto-run set)
+
+A template flows `draft → validate → null-case → canary → FP-review → promoted`. Only `promoted`
+templates join the default auto-run set — never auto-run an un-canaried template against real targets.
 
 1. **Sanitize:** no target-specific host / token / customer name.
-2. **Tested:** `nuclei -validate -t nuclei/<slug>.yaml` passes; with a true-positive sample, run one
-   true-positive + at least one true-negative (avoid false positives).
-3. **Dedup:** one artifact per root-cause pattern.
-4. **Split rule:** only rule-detectable patterns belong here; judgment-needed ones stay in KB/DT.
+2. **Validate + null-case:** `nuclei -validate -t nuclei/<slug>.yaml` passes AND a run against
+   `example.com` yields no hit. (`build-hunters` automates up to here — output is a DRAFT.)
+3. **Canary + FP-review:** run on one authorized target, low rate-limit, review for false positives — manual.
+4. **Dedup:** one artifact per root-cause pattern; don't duplicate a template nuclei already ships.
+5. **Split rule:** only rule-detectable patterns belong here; judgment-needed ones stay in KB/DT.
 
 ## Running
 

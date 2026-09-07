@@ -132,7 +132,8 @@ a learning ── can a rule catch it?
   [[Backlog - Experience to Tool]].
 - **Format by domain:** web → nuclei template; multi-step recon → hunter; firmware/binary →
   `05 - Tools/` script. Portable, testable, **no infra coupling**.
-- **Drain:** backlog `idea → authored → deployed`; the `build-hunters` workflow automates it.
+- **Drain (a lifecycle):** `draft → validate → null-case → canary → FP-review → promoted`; `build-hunters`
+  automates up to null-case (a DRAFT), and canary + promote stay manual (never auto-run un-canaried).
 - **Split rule:** only "rule-detectable + portable + testable" becomes a tool; judgment-needed ones
   stay on the knowledge track, or the scanner drowns in false positives.
 
