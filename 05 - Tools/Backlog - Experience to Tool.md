@@ -42,8 +42,12 @@ tags: [tool, backlog, nuclei, scanner, crystallization]
 
 ## Backlog (the queue)
 
-> On session wrap-up, append one row for each new *rule-detectable* pattern. status: `idea` (just
-> logged) → `authored` (written, locally validated) → `deployed` (in your hunter set, runs daily).
+> On session wrap-up, append one row for each new *rule-detectable* pattern. The status column's
+> **first token is a canonical value** (so `build-hunters` can filter reliably):
+> `idea` (logged) → `draft` (artifact written) → `validated` (nuclei -validate + example.com null-case
+> both pass — the automatable ceiling) → `canary` (passed scoped canary + FP-review) → `promoted`
+> (in the auto-run set). `build-hunters` drains only `idea`/`draft` and produces `validated`; canary +
+> promote stay manual.
 
 | id | Catches (pattern) | domain | mechanizable signal | target format | source | status |
 |---|---|---|---|---|---|---|

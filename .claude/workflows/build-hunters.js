@@ -52,13 +52,15 @@ const READ_SCHEMA = {
 const parsed = await agent(
   [
     'Read the file "05 - Tools/Backlog - Experience to Tool.md" (use Read/grep).',
-    'Return every backlog table row whose status is NOT already promoted/deployed (i.e. idea / draft / authored).',
-    only ? `Restrict to these ids only: ${only.join(', ')}.` : 'Return all not-yet-promoted rows.',
-    'REPORT ONLY — do not modify the file. Parse id / what-it-catches / domain / signal / target-format / source / status.',
+    'The status column starts with a canonical token: idea | draft | validated | canary | promoted.',
+    'Return every backlog table row whose status token is `idea` or `draft` (not yet validated/canary/promoted).',
+    only ? `Restrict to these ids only: ${only.join(', ')}.` : 'Return all idea/draft rows.',
+    'REPORT ONLY — do not modify the file. Parse id / what-it-catches / domain / signal / target-format / source / status (status = the first token).',
   ].join('\n'),
   { label: 'read-backlog', phase: 'Read', schema: READ_SCHEMA, agentType: 'general-purpose' },
 )
-const entries = (parsed && parsed.entries || []).filter(e => !/promot|deploy/i.test(e.status || ''))
+// canonical status enum: idea → draft → validated → canary → promoted. Drain only idea/draft.
+const entries = (parsed && parsed.entries || []).filter(e => !/^\s*(validated|canary|promoted|deployed)\b/i.test(e.status || ''))
 log(`${entries.length} backlog entr(ies) to drain`)
 if (entries.length === 0) return { drained: 0, note: 'Backlog has no not-yet-promoted entries. Nothing to build.' }
 
@@ -69,7 +71,8 @@ const AUTHOR_SCHEMA = {
     id: { type: 'string' },
     slug: { type: 'string' },
     path: { type: 'string' },
-    validated: { type: 'boolean' },              // validate + null-case both passed
+    validated: { type: 'boolean' },              // `nuclei -validate` passed (syntax)
+    null_case: { type: 'boolean' },              // example.com null-case ran and produced NO hit
     authored: { type: 'boolean' },
     skip_reason: { type: 'string' },
     note: { type: 'string' },
@@ -87,9 +90,12 @@ function authorPrompt(e) {
     '',
     RULES,
     '',
-    'Then: write the artifact to the correct path, run `nuclei -validate` AND the example.com null-case,',
-    'and report validated=true only if both pass. If the entry actually needs semantic judgment, do NOT author:',
-    'set authored=false with a skip_reason. Return the structured result.',
+    'Then: write the artifact to the correct path. For a nuclei template run BOTH:',
+    '  - `nuclei -validate -t "<file>"` → report validated=true only if it passes;',
+    '  - `nuclei -t "<file>" -u https://example.com -silent` → report null_case=true only if it produces NO hit.',
+    'Report both separately and honestly; a template that validates but fires on example.com is NOT ready.',
+    'If the entry needs semantic judgment or is already covered (dedup), do NOT author: set authored=false with a skip_reason.',
+    'Return the structured result.',
   ].join('\n')
 }
 phase('Author')
@@ -97,7 +103,7 @@ const built = (await parallel(
   entries.map(e => () => agent(authorPrompt(e), { label: `author:${e.id}`, phase: 'Author', schema: AUTHOR_SCHEMA, agentType: 'general-purpose' })),
 )).filter(Boolean)
 
-const ready = built.filter(b => b.authored && b.validated)
+const ready = built.filter(b => b.authored && b.validated && b.null_case)
 const skipped = built.filter(b => !b.authored)
 log(`authored ${built.filter(b => b.authored).length} · validate+null-case ${ready.length} · skipped ${skipped.length}`)
 
