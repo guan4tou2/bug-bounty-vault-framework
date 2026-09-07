@@ -116,6 +116,31 @@ Examples:
 
 ---
 
+## 2b. The executable-tool track (parallel to the knowledge ladder — grow the scanner)
+
+T1–T7 above is the **knowledge / orchestration** ladder. A rule-detectable pattern has a **second,
+parallel destination: crystallize it into a runnable detection**, feeding your scanner from a frozen
+check set into one that keeps growing.
+
+```
+a learning ── can a rule catch it?
+  yes → knowledge track (KB/DT keep the judgment basis) + [tool track: nuclei template / hunter / RE script]
+  no  → knowledge track only (needs human/LLM judgment — do NOT make it a hunter)
+```
+
+- **Feed point:** the `tool crystallization` field at the end of [[bb-knowledge-capture]] → append to
+  [[Backlog - Experience to Tool]].
+- **Format by domain:** web → nuclei template; multi-step recon → hunter; firmware/binary →
+  `05 - Tools/` script. Portable, testable, **no infra coupling**.
+- **Drain:** backlog `idea → authored → deployed`; the `build-hunters` workflow automates it.
+- **Split rule:** only "rule-detectable + portable + testable" becomes a tool; judgment-needed ones
+  stay on the knowledge track, or the scanner drowns in false positives.
+
+> The knowledge track answers "where does it live"; the tool track answers "how does this lesson
+> become the next auto-catch". Run both and experience compounds.
+
+---
+
 ## 3. Demotion signals (move it down)
 
 | What you notice | Demote to |

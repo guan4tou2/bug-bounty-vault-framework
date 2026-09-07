@@ -26,7 +26,7 @@ Run this when:
 | `Checklist - *.md` | Repeatable review gate |
 | `Playbook - *.md` | Multi-step workflow |
 | `05 - Tools/` | Durable tool usage note or configuration rationale |
-| bbflow template / hunter idea | Automation can detect or triage the pattern later |
+| [[Backlog - Experience to Tool]] | Rule-detectable pattern → queue to crystallize into a nuclei template / hunter / RE script (the living-scanner feed point) |
 | Attempt note | The main value is a negative result for one target |
 
 ## Output Format
@@ -38,7 +38,7 @@ Run this when:
 - Destination:
 - New note needed: yes/no
 - Pattern / Lesson / Checklist update:
-- bbflow update idea:
+- tool crystallization (rule-detectable → append to [[Backlog - Experience to Tool]], tag domain + target format nuclei/hunter/RE; skip judgment-needed ones):
 - Recon note link:
 - Done:
 ```
