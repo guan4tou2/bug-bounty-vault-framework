@@ -3,14 +3,14 @@ type: reference
 category: Checklist
 tags: [checklist, idor, authz, write-path, verb-matrix, financial-api, deal-id, order-id, api-gateway, backend-authz, multi-role]
 last_updated: 2026-06-04
-source: Items #9, #10 (merged — same root cause), #11 — a multi-role ERP/SaaS session's tests, plus a trading API's observations. Converge on: testers stop at GET and miss higher-severity write-path IDOR. Lesson #50 covers file upload CRUD briefly; Playbook - IDOR Hunting (Burp) mentions verbs; no existing checklist item enforces this as a mandatory gate.
+source: "a multi-role ERP/SaaS session's tests, plus a trading API's observations. Converge on: testers stop at GET and miss higher-severity write-path IDOR. Prior lessons cover file upload CRUD briefly and Playbook - IDOR Hunting (Burp) mentions verbs; no existing checklist item enforced this as a mandatory gate."
 ---
 
 # Checklist — IDOR Test Coverage Matrix: Read AND Write Operations Required
 
 > **Purpose**: For every resource ID discovered during testing, enforce a full HTTP verb matrix check before closing the IDOR test for that resource. Testers who stop at GET (read own / read other) routinely miss PUT/PATCH/DELETE write-path IDOR — which carries higher severity and is frequently unguarded in a different way from the read path.
 >
-> **Root cause of this checklist**: Items 9, 10 (merged — same root cause), and 11 all converge on the same failure mode: testers confirm read-path IDOR and move on, missing that the write path is independently unguarded and higher severity. Lesson #50 (file upload CRUD) and Playbook - IDOR Hunting (Burp) cover parts of this, but no gate enforced full verb coverage as a mandatory stopping condition.
+> **Root cause of this checklist**: multiple session items converge on the same failure mode: testers confirm read-path IDOR and move on, missing that the write path is independently unguarded and higher severity. Prior lessons (file upload CRUD) and Playbook - IDOR Hunting (Burp) cover parts of this, but no gate enforced full verb coverage as a mandatory stopping condition.
 >
 > **When to use**: After discovering any resource ID (numeric, UUID, or structured token). Run before marking an IDOR test complete for that resource type. Applies to web, API, and financial/trading API targets.
 
@@ -123,7 +123,7 @@ For each resource ID type, test ALL five operations below. Mark each with PASS /
 - [ ] **Do not assume API gateway auth = backend authz.**
 
   Evidence of a split-layer architecture (check for these signals before starting):
-  - Swagger/OpenAPI spec shows `security: []` on some paths but not others (see Lesson #49)
+  - Swagger/OpenAPI spec shows `security: []` on some paths but not others (see lessons)
   - Different response times between authenticated and unauthenticated calls to the same path (gateway intercepts auth; slow path = forwarded to backend)
   - Error messages differ between 401 (gateway-level) and 403 (backend-level) on related endpoints
   - Some endpoints return gateway-formatted error JSON, others return backend-framework-formatted errors
@@ -282,5 +282,5 @@ For each resource ID type, test ALL five operations below. Mark each with PASS /
 - [[Pattern - IDOR Response Differential]] — how to confirm IDOR from response shape when status codes are identical
 - [[Playbook - IDOR Hunting (Burp)]] — Burp-based workflow for intercepting and replaying IDOR requests
 - [[Checklist - Web Vuln Technique Coverage]] — upstream checklist; IDOR is one item there; this checklist expands the IDOR row
-- [[Lessons Learned]] §Lesson #50 (A→B: unauthenticated file upload → test all CRUD operations on the same resource), §Lesson #106 (frontend RBAC = zero RBAC)
+- [[Lessons Learned]] — unauthenticated file upload → test all CRUD operations on the same resource; frontend RBAC = zero RBAC
 - [[Reference Card - Bug Bounty Workflow 2026]] — severity guidance: write-path IDOR typically P2–P3; financial write-path IDOR typically P1–P2

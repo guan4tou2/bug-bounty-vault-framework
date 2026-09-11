@@ -8,7 +8,7 @@ last_updated: 2026-06-25
 
 # Checklist — Enterprise /24 Subnet Recon
 
-> Expanding from a single known IP to a full subnet. Example from one engagement: 21 findings surfaced from 2 × /24 subnets.
+> Expanding from a single known IP to a full subnet, across one or more /24 subnets.
 
 ## Phase 0: Intelligence Gathering
 

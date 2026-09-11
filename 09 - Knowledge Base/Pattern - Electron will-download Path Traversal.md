@@ -13,7 +13,7 @@ precedents: CVE-2018-15685 (Electron downloadURL path traversal), Slack HackerOn
 
 ## TL;DR
 
-Electron apps that handle the `will-download` event and construct a save path with `path.join(saveDir, item.getFilename())` are vulnerable to path traversal when a server responds with a `Content-Disposition: attachment; filename="../../malicious"` header. `item.getFilename()` returns the raw filename string from the HTTP header — Electron does **not** sanitize it. An attacker who controls the download URL (via MITM, redirect, or an in-app feature that fetches attacker-supplied content) can write arbitrary file content to any user-writable path outside the intended save directory. Static-confirmed in a case study [Enterprise Messenger] app, `main.beautified.js:14906` (VENDOR-018, CWE-22).
+Electron apps that handle the `will-download` event and construct a save path with `path.join(saveDir, item.getFilename())` are vulnerable to path traversal when a server responds with a `Content-Disposition: attachment; filename="../../malicious"` header. `item.getFilename()` returns the raw filename string from the HTTP header — Electron does **not** sanitize it. An attacker who controls the download URL (via MITM, redirect, or an in-app feature that fetches attacker-supplied content) can write arbitrary file content to any user-writable path outside the intended save directory. Static-confirmed in a case study [Enterprise Messenger] app, `main.beautified.js:14906` (CWE-22).
 
 **Honest framing**: this is write-arbitrary-content to user-writable paths, not a direct OS command execution. Impact depends on what can be overwritten — shell startup scripts, application config, auto-loaded plugins, or scheduled task files are common escalation targets.
 
@@ -22,7 +22,7 @@ Electron apps that handle the `will-download` event and construct a save path wi
 ### Ingredient 1: `will-download` handler using raw `item.getFilename()`
 
 ```javascript
-// ❌ vulnerable — main.beautified.js:14906 ([Enterprise Messenger] VENDOR-018)
+// ❌ vulnerable — main.beautified.js:14906 ([Enterprise Messenger])
 app.on("will-download", (event, item, webContents) => {
   const saveDir = app.getPath("downloads");
   // item.getFilename() returns raw Content-Disposition filename — NOT sanitized
@@ -193,7 +193,7 @@ Note: `path.join` in Node.js does **not** decode percent-encoding — `%2F` is t
 
 | Vendor / App | Year | Variant | Sink | Note |
 |--------------|------|---------|------|------|
-| **[Enterprise Messenger]** (VENDOR-018) | 2026 | A (`../` Unix/Win) | `app.on("will-download") → path.join(saveDir, item.getFilename())` | Static-confirmed `main.beautified.js:14906`; no `path.basename()` call present |
+| **[Enterprise Messenger]** | 2026 | A (`../` Unix/Win) | `app.on("will-download") → path.join(saveDir, item.getFilename())` | Static-confirmed `main.beautified.js:14906`; no `path.basename()` call present |
 | **Electron** (CVE-2018-15685) | 2018 | A + B | `will-download` + `setSavePath` — upstream framework bug | Electron <= 1.8.2-beta.4, 1.7.12, 1.6.17 affected; fixed by enforcing `path.basename` in framework |
 | **Rocket.Chat Desktop** | 2020 | A | `will-download` handler used raw `getFilename()` | Reported via HackerOne; fixed in v3.0.0 by adding `path.basename()` |
 | **Slack Desktop** (HackerOne approx. #328607) | 2018 | A | Auto-download of shared files without sanitization | Bounty paid; patched to normalize download paths |
@@ -274,5 +274,5 @@ app.on("will-download", (event, item, webContents) => {
 - [[Pattern - shell.openExternal UNC RCE]] — sibling T1 sink; can chain "traversal write + UNC `.lnk` auto-open"
 - [[Pattern - JWT File-based Validation UNC NTLM Oracle]] — sibling T2 sink
 - [[Pattern - Electron Preload Injection Chain]]
-- Target vendor case study §VENDOR-018
+- Target vendor case study (see lessons)
 - [[Lessons Learned]] §Firmware vulnerability verification standards / §Bug bounty report anti-exaggeration rules

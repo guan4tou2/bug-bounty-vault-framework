@@ -4,7 +4,7 @@ title: Pattern - Firmware CGI Command Injection Grep
 tags: [pattern, cwe-78, firmware, cgi, command-injection, grep, iot, router, ip-camera, shell-script, qnap, dlink, acti, lilin, planet, bb-pattern]
 status: verified
 severity_range: P1-P2 (pre-auth) / P2-P3 (post-auth)
-precedents: consumer router firmware (10-30 CGI injections per image), D-Link consumer routers (RCE chain + inner_ CGI), NETGEAR RAX50/WAX620, Sapido RB-1732, LILIN/PLANET IP cameras (DDNS/PPPoE/NTP fields), ACTi (shell unquoted vars), QNAP (qnap_exec wrapper), Vivotek (text-redirect unauth paths)
+precedents: common on consumer router / IP-camera CGI stacks (10-30 CGI injections per image; DDNS/PPPoE/NTP fields on cameras; vendor exec wrappers and inner_ CGI auth-bypass routes)
 last_updated: 2026-06-04
 ---
 

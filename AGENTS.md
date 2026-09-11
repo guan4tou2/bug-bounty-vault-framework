@@ -262,7 +262,7 @@ This closes the feedback gap between the payload arsenal (INPUT only — "what t
 - `date` — `YYYY-MM-DD` (first observation).
 - `source ref` — back-link to the source arsenal or `Pattern - <class>`.
 
-**Sanitization** is identical to KB purity: only class-level entries; if a row cannot be abstracted to a class it stays in the per-target Operation Log. See `09 - Knowledge Base/Ledger - Tried Commands and Payloads (Index).md` for the full norm and skill hooks (`bb-attempt-recorder` appends on blocked/false-positive results; `bb-knowledge-capture` reconciles ledger rows against patterns at session end).
+**Sanitization** is identical to KB purity: only class-level entries; if a row cannot be abstracted to a class it stays in the per-target Operation Log. Create per-class `Ledger - <class> Tried.md` files under `09 - Knowledge Base/` as you accumulate them (the seed ships none — they are operator-grown). Skill hooks: `bb-attempt-recorder` appends on blocked/false-positive results; `bb-knowledge-capture` reconciles ledger rows against patterns at session end.
 
 ### §6f Audit Log
 

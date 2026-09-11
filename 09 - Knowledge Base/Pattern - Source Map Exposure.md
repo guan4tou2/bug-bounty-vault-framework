@@ -11,16 +11,6 @@ last_updated: 2026-04-05
 
 > This is a cross-target synthesis analysis page.
 
-## Observed Targets (Anonymized)
-
-| Target | Status | Notable Findings |
-|--------|--------|-----------------|
-| Target A (enterprise networking) | N/A | OAuth Client ID, New Relic (not sensitive) |
-| Target B (smart home) | Duplicate | OAuth CSRF, v-html XSS |
-| Target C (mesh networking) | Ready | 238 TS files, Sentry DSN, Shopify integration |
-| Target D (network security) | Submitted | 520 files |
-| Target E (IoT devices) | Out of Scope | OAuth clientSecret (server differential response confirmed valid) |
-
 ## What Is Worth Reporting
 
 **Worth reporting:**

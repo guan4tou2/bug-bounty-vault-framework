@@ -3,12 +3,12 @@ type: reference
 category: Checklist
 tags: [checklist, electron, shell.openExternal, static-analysis, triage, windows, unc, smb, ntlm, batch-audit]
 last_updated: 2026-06-04
-source: Items #27, #34, #37, #43 + Lesson #85, #86, #87, #93 + Pattern - shell.openExternal UNC RCE
+source: prior session items and lessons + Pattern - shell.openExternal UNC RCE
 ---
 
 # Checklist — Electron shell.openExternal Static Analysis Triage
 
-> **Purpose**: Prevent wasted hunts (Wire Lesson #37, Mattermost Lesson #40) and enforce consistent evidence standards before opening any Finding.
+> **Purpose**: Prevent wasted hunts (see lessons) and enforce consistent evidence standards before opening any Finding.
 >
 > **Scope**: Static analysis triage only. For dynamic verification SOP see [[Pattern - shell.openExternal UNC RCE]] § Live verification SOP.
 >
@@ -23,7 +23,7 @@ source: Items #27, #34, #37, #43 + Lesson #85, #86, #87, #93 + Pattern - shell.o
   - Search NVD: `site:nvd.nist.gov "openExternal" <appname>`
   - Search GitHub: `<org>/<repo>` releases + security advisories tab
   - Check whether fix is already in shipping version. If patched in current version → **stop** (no new finding; reference CVE in KB only).
-  - Known patched targets: Wire ≥ CVE-2020-15258 (was patched), Mattermost ≥ CVE-2024-37182 (BLOCKED_PROTOCOLS; check gaps before reopening).
+  - Known patched examples: some desktop messengers have already fixed openExternal issues (e.g., CVE-2020-15258, CVE-2024-37182 with a BLOCKED_PROTOCOLS list) — confirm whether the fix is in the shipping version and check for gaps before reopening.
 - [ ] **Binary / source obtainable**: installer or asar downloadable without account or payment. Closed-source with no binary → black-box only, static analysis not applicable → stop or flag as black-box target.
 - [ ] **Extract asar**:
   ```bash
@@ -74,7 +74,7 @@ For each file from sink discovery:
   | Protocol | Effect | Often missed? |
   |----------|--------|--------------|
   | `search-ms:` | 0-dialog NTLMv2 capture | Yes |
-  | `smb://` | 1-dialog NTLMv2 capture | Yes (Mattermost gap) |
+  | `smb://` | 1-dialog NTLMv2 capture | Yes (common blocklist gap) |
   | `ftp:` | FTP connection | Yes |
   | `ldap:` / `ldaps:` | LDAP auth leak | Yes |
   | `ms-msdt:` | Follina RCE (patched Win11) | Moot but check blocklist hygiene |
@@ -182,4 +182,4 @@ If `verified_evidence: static` → grade B → acceptable for HITCON ZD / TWCERT
 - [[Pattern - Electron Custom Scheme Handler Injection]] — common L1 input point
 - [[Pattern - Electron Preload Injection Chain]] — common L1 input point
 - [[Checklist - Web Vuln Technique Coverage]] — technique matrix for web-facing injection paths into Electron
-- [[Lessons Learned]] §Lesson #85 (three-layer filtering model), #86 (batch audit ROI), #87 (CVE incomplete fix), #93 (asar rapid grading method)
+- [[Lessons Learned]] — three-layer filtering model; batch audit ROI; CVE incomplete fix; asar rapid grading method

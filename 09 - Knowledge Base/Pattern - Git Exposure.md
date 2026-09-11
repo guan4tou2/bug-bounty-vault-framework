@@ -11,19 +11,6 @@ last_updated: 2026-04-29
 > The highest-ROI dork in the book. A single exposed `.git` directory can unravel an entire attack chain.
 > **Update**: even behind a WAF, URL encoding can sometimes bypass the block.
 
-## Success Cases (anonymized)
-
-| Target | Tool | Discovery | Result |
-|--------|------|-----------|--------|
-| Target A | git-dumper | SQL dump + credentials + an XSS chain | Submitted, rated Critical |
-| Target B (×7 related hosts) | git-dumper | MySQL credentials with ALL PRIVILEGES on 28 databases | Submitted, rated Critical |
-| Target C | git-dumper | Mailgun API key + SMTP credentials + a password-history diff | Submitted, rated High |
-| Target D | git-dumper | SMTP credentials | Submitted, rated High |
-| Target E | GitHack | `.env` + a SQL dump containing PII | Submitted, rated Critical |
-| Target F | GitTools | Backdoor authentication-bypass code | Ready to submit |
-| Target G | git-dumper | External MySQL credentials | Ready to submit |
-| Target H | curl with URL encoding | WAF blocked the literal path, but `%2e%67%69%74` bypassed it → revealed an internal GitLab URL + hostnames + a root-owned deployment | Submitted, rated High |
-
 ## Step 0: Bypass WAF Protection Before Reaching for Tools
 
 When `/.git/HEAD` returns **403** or **404**, **don't give up immediately**.
@@ -50,7 +37,7 @@ curl -s "https://target/%252e%252e/.git/HEAD"        # double encoding (rare)
 > so `%2e%67%69%74` doesn't look like `.git` to the WAF,
 > but Apache/Nginx decode it to the same path.
 
-**Real-world case (Target H)**:
+**Real-world case**:
 - `/.git/HEAD` → 403 (WAF/htaccess blocked)
 - `/%2e%67%69%74/HEAD` → **200**, `ref: refs/heads/prod_20251027`
 - Extracted: an internal GitLab hostname, internal server hostnames, and evidence of a root-owned deployment

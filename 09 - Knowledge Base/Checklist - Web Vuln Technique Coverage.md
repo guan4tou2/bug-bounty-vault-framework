@@ -4,7 +4,7 @@ title: "Web Vuln Technique Coverage"
 tags: [checklist, technique-coverage, injection, payload, methodology]
 status: active
 last_updated: 2026-06-03
-source: a large-scale government web application assessment (40 systems, unauthenticated)
+source: a large-scale government web application assessment (unauthenticated)
 ---
 
 # Checklist — Web Vuln Technique Coverage (technique / payload level)
@@ -22,7 +22,7 @@ source: a large-scale government web application assessment (40 systems, unauthe
 1. **A real browser-automation tool is a real weapon, not a lightweight browser extension**: unrestricted JS execution, network interception, XSS alert/dialog detection, auto form-filling, batch scanning. A lightweight extension gets blocked by page JS and misses dialogs.
 2. **Every param must actually be injected against**, not skipped just because "it's a form." Spider → extract params → inject each of `'`, `{{7*7}}`, `../etc/passwd`, `;id`, `php://filter` one by one.
 3. **Don't give up when hitting a WAF**: fingerprint the WAF type → search for public bypass payloads → test coverage. WAF rules have blind spots — one real case showed a WAF blocking XSS but not SQLi — being blocked on one technique ≠ everything is blocked; switch techniques and keep going.
-4. **Depth beats breadth**: scanning 40 systems across 6 shallow passes is worse than fully exploiting one system. Don't stop once you find one bug on a system — chase a SQLi→RCE chain to the end; shallow scanning only surfaces surface-level info disclosure.
+4. **Depth beats breadth**: scanning many systems across shallow passes is worse than fully exploiting one system. Don't stop once you find one bug on a system — chase a SQLi→RCE chain to the end; shallow scanning only surfaces surface-level info disclosure.
 5. **No account = half the attack surface gone**: CAPTCHA-gated / post-login functionality / auth systems become untestable. **Registering an account is the single most direct way to expand the attack surface** — prioritize it.
 
 ---
@@ -60,7 +60,7 @@ source: a large-scale government web application assessment (40 systems, unauthe
 
 ## Stop-loss point (confirmed ceiling)
 
-- **40 systems × no login/registration = every known web technique tested with zero new findings.** XSS/SQLi/LFI/SSRF/CMDi/SSTI/XXE/CORS/CRLF/Open Redirect/IDOR/Path Traversal/PHP wrapper/WAF bypass all attempted.
+- **Many systems × no login/registration = every known web technique tested with zero new findings.** XSS/SQLi/LFI/SSRF/CMDi/SSTI/XXE/CORS/CRLF/Open Redirect/IDOR/Path Traversal/PHP wrapper/WAF bypass all attempted.
 - Conclusion: on this class of unauthenticated government web app, the surface had already been swept clean by prior assessment rounds. To break through, either **register an account to open up the authenticated attack surface**, or dig deeply into a single system's homegrown logic.
 
 ---

@@ -5,9 +5,6 @@ description: Profile-picture / avatar / media upload takes a URL instead of a fi
 last_updated: 2026-04-22
 seen_in:
   - external_writeup_hacklido_1493_sagar_seagate_2026
-applies_to_in_progress:
-  - clear  # verified.example-target.com has /api/upload/image, /api/upload/video, /api/transcribe, /environment/{envId}/webhook_test_event
-  - example-target  # ai-chat.cp.example-target.com has same /api/upload/image + /api/upload/video + /api/transcribe
 tags:
   - bb-pattern
 ---
@@ -131,28 +128,6 @@ grep -E '(avatar|profile.*picture|picture.*upload|photo.*url|image.*url|upload.*
 
 ---
 
-## Pre-existing mapping in current targets
-
-### CLEAR — `verified.example-target.com` (in-scope Critical)
-Source map already revealed these candidate endpoints:
-- `/api/transcribe` — audio upload (may accept URL?)
-- `/api/upload/image` — image upload
-- `/api/upload/video` — video upload
-- `/environment/{envId}/webhook_config`
-- `/environment/{envId}/webhook_test_event` — **literally the "test" endpoint Sagar found!**
-
-**Next authenticated test**: intercept the upload flow with Burp and check if body contains URL. Also call `webhook_test_event` with Collaborator URL as the webhook target.
-
-### Dyson — `ai-chat.cp.example-target.com` (in-scope Critical wildcard)
-Same endpoint set:
-- `/api/transcribe`
-- `/api/upload/image`
-- `/api/upload/video`
-
-**Next authenticated test**: same — intercept during a real session and check if URL-based.
-
----
-
 ## See also
 
 - [[Pattern - SSRF Filter Bypass]] — once you have SSRF, bypass techniques for IPv4-mapped IPv6, parser confusion, redirect chain
@@ -162,4 +137,3 @@ Same endpoint set:
 ## Related
 
 - [[Pattern - SSRF Filter Bypass]]
-- [[Target - example-target]] (ai-chat upload endpoint)

@@ -3,14 +3,14 @@ type: reference
 category: Checklist
 tags: [checklist, firmware, static-analysis, quality-gate, PoC, TWCERT, stop-loss, verification-boundary, QEMU, chroot]
 last_updated: 2026-06-04
-source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + Lesson #7, #81, #99 — 10+ separate sessions with explicit corrections on static analysis over-statement, missing dynamic gates, large-session near-zero yield
+source: multiple separate sessions with explicit corrections on static analysis over-statement, missing dynamic gates, large-session near-zero yield
 ---
 
 # Checklist — Firmware Static Analysis Quality Gates
 
 > **Purpose**: Prevent static analysis findings from being over-stated, over-reported, or produced after sessions of near-zero yield. This checklist is mandatory at three stages: before analysis begins (pre-analysis gates), during binary examination (during analysis gates), and before any report output is produced (output gates).
 >
-> **Root cause of this checklist**: Items 8, 18, 28, 29, 31, 42, 53, 55, 63, 68 all express the same high-frequency pain in 10+ separate sessions — static results over-stated, dynamic confirmation gates missing, and large sessions concluding with only "binary confirmed as ELF." No existing checklist covered this. `bb-version-cve-precheck` handles pre-flight CVE lookup; this checklist handles everything from session scope-setting through report output quality.
+> **Root cause of this checklist**: many session items express the same high-frequency pain across separate sessions — static results over-stated, dynamic confirmation gates missing, and large sessions concluding with only "binary confirmed as ELF." No existing checklist covered this. `bb-version-cve-precheck` handles pre-flight CVE lookup; this checklist handles everything from session scope-setting through report output quality.
 >
 > **Time budget**: Pre-analysis gates 10 min / Per-binary analysis 90 min max / Output gates before any report creation.
 
@@ -71,7 +71,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + Lesson #7, #81, 
   [STOP-LOSS] Existing CVE <ID> covers this attack surface on version <X>. No new finding.
   Ref: <NVD URL>
   ```
-  Do not spend 6h confirming what a 5-minute search could have revealed. (Lesson QN-003 = CVE-2023-50358 lesson.)
+  Do not spend 6h confirming what a 5-minute search could have revealed. (See lessons; e.g. the CVE-2023-50358 case.)
 
 ### Gate 1.3 — Session Time-Box for Large Binaries
 
@@ -324,5 +324,5 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + Lesson #7, #81, 
 - [[bb-version-cve-precheck]] — skill for pre-flight CVE/advisory check (Gate 1.2)
 - [[Pattern - Firmware CGI Command Injection Grep]] — grep methodology for Gates 2.1–2.3
 - [[Reference Card - TWCERT CVE Form]] — Gate 3.2 verification boundary field placement
-- [[Lessons Learned]] §Lesson #7 (three must-dos for firmware analysis), #81 (static architectural conclusions must be dynamically verified), #99 (CGI command injection grep + trace back one layer)
+- [[Lessons Learned]] — three must-dos for firmware analysis; static architectural conclusions must be dynamically verified; CGI command injection grep + trace back one layer
 - [[Checklist - Attack Surface Coverage]] — upstream gate before firmware analysis begins

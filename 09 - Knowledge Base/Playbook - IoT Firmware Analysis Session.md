@@ -11,18 +11,14 @@ tags:
   - session-lifecycle
 last_updated: 2026-06-04
 precedents:
-  - Tenda W15E
-  - D-Link consumer routers
-  - NETGEAR WAX620/WAX630/RAX50
-  - "Camera vendors"
-  - Sapido RB-1732
+  - consumer routers and IP cameras
 ---
 
 # Playbook — IoT Firmware Analysis Session
 
 > **One-liner**: From vendor download page to TWCERT-ready report — a single-document session lifecycle for IoT/router firmware bug bounty.
 
-No existing playbook covers the end-to-end IoT firmware analysis workflow. This playbook consolidates the most repeated corrections across sessions (items 2, 5, 8, 15, 19, 21, 23, 24, 36, 37, 39, 40, 43, 57, 58, 62, 68) into a mandatory, gate-enforced flow. The existing [[Pattern - Firmware CGI Command Injection Grep]] covers detection; this playbook covers everything before and after it.
+No existing playbook covers the end-to-end IoT firmware analysis workflow. This playbook consolidates the most repeated corrections across sessions into a mandatory, gate-enforced flow. The existing [[Pattern - Firmware CGI Command Injection Grep]] covers detection; this playbook covers everything before and after it.
 
 ---
 
@@ -436,4 +432,4 @@ FIRMWARE SESSION GATE (run before marking session complete)
 - `bb-version-cve-precheck` skill — Phase 0a mandatory trigger
 - `bb-dedup-finding` skill — Phase 3 dedup gate before creating Findings
 - `bb-evidence-readiness` skill — Phase 4 pre-report evidence check
-- [[Lessons Learned]] #7, #15, #19, #21, #23, #24, #36, #37, #39, #40, #43, #57, #58, #62, #68, #99
+- [[Lessons Learned]] — firmware analysis corrections (see lessons)

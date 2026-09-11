@@ -5,7 +5,7 @@ tags: [pattern, meta-pattern, cwe-918, cwe-922, cwe-200, ntlm, smb, windows, pri
 status: active
 last_updated: 2026-04-27
 severity: varies — P3 6.0 (file-read NTLM oracle) to P1 9.6 (shell-execute UNC RCE)
-precedents: ACME-001/002 (shell.openExternal UNC), ACME-003 (JWT file-read UNC), ACME-004 (will-download Variant C), CVE-2024-27288 (Discord), Slack 2020 (HackerOne #783877), search-ms+SMB test round
+precedents: internal desktop-app cases (shell.openExternal UNC, JWT file-read UNC, will-download Variant C), CVE-2024-27288 (Discord), Slack 2020 (HackerOne #783877), search-ms+SMB test round
 ---
 
 # Pattern — Windows UNC Path Primitive
@@ -141,12 +141,12 @@ The NTLMv2 hash can then be offline-cracked (`hashcat -m 5600 hash.txt rockyou.t
 
 | Vendor | Year | Variant | Sink Tier | Pattern |
 |--------|------|---------|-----------|---------|
-| **Electron IM app A** (ACME-001) | 2026 | A | T1 (shell.openExternal) | [[Pattern - shell.openExternal UNC RCE]] |
-| **Electron IM app A** (ACME-002) | 2026 | A | T1 | Second independent sink, via a channel-type-injection path |
+| **Electron IM app A** | 2026 | A | T1 (shell.openExternal) | [[Pattern - shell.openExternal UNC RCE]] |
+| **Electron IM app A** | 2026 | A | T1 | Second independent sink, via a channel-type-injection path |
 | **Electron IM app A** (search-ms test) | 2026 | B | T4 (search-ms) | [[Pattern - shell.openExternal UNC RCE]] §Variant B |
-| **Electron IM app A** (ACME-003) | 2026 | C | T2 (fs.readFile) | [[Pattern - JWT File-based Validation UNC NTLM Oracle]] |
-| **Electron IM app A — partner build** (ACME-005) | 2026 | C | T2 (.NET File API) | [[Pattern - JWT File-based Validation UNC NTLM Oracle]] §Variant 2 |
-| **Electron IM app A** (ACME-004) | 2026 | A | T3 (will-download UNC save path) | [[Pattern - Electron will-download Path Traversal]] Variant C |
+| **Electron IM app A** | 2026 | C | T2 (fs.readFile) | [[Pattern - JWT File-based Validation UNC NTLM Oracle]] |
+| **Electron IM app A — partner build** | 2026 | C | T2 (.NET File API) | [[Pattern - JWT File-based Validation UNC NTLM Oracle]] §Variant 2 |
+| **Electron IM app A** | 2026 | A | T3 (will-download UNC save path) | [[Pattern - Electron will-download Path Traversal]] Variant C |
 | Discord (CVE-2024-27288) | 2024 | A | T1 | shell.openExternal validation bypass |
 | Slack ($1750, HackerOne #783877) | 2020 | A | T1 | `<a href>` UNC click |
 | Microsoft Outlook (CVE-2023-23397) | 2023 | C | T2 | Reminder sound `PidLidReminderFileParameter` UNC → NTLM |

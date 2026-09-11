@@ -6,7 +6,7 @@ status: verified
 first_seen: 2026-05-18
 last_updated: 2026-05-18
 category: Checklist
-precedents: 8 HITCON FORMs — all went from HARD BLOCK to ready in single session
+precedents: multiple HITCON FORMs went from HARD BLOCK to ready in a single session
 ---
 
 # Checklist - Screenshot Pipeline Last Mile
@@ -102,29 +102,29 @@ needs_screenshots: false   # was: true
 | 1 | FINDING-ID-evidence-macOS.png | Verification result summary |
 ```
 
-## Batch processing (8+ findings)
+## Batch processing (multiple findings)
 
 ```bash
 # Generate all HTML files first
-for id in 002 003 008 009 017 018 019 020; do
+for id in 001 002 003; do
   # Build HTML for each finding (script or manual)
-  generate_evidence_html "JK-${id}" > "/tmp/screenshots/jk${id}-evidence.html"
+  generate_evidence_html "FND-${id}" > "/tmp/screenshots/fnd${id}-evidence.html"
 done
 
 # Start server once
 cd /tmp/screenshots && python3 -m http.server 8889 &
 
 # Batch screenshot
-for id in 002 003 008 009 017 018 019 020; do
+for id in 001 002 003; do
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
     --headless=new \
-    --screenshot="/tmp/screenshots/JK-${id}-evidence-macOS.png" \
+    --screenshot="/tmp/screenshots/FND-${id}-evidence-macOS.png" \
     --window-size=1200,900 \
-    "http://localhost:8889/jk${id}-evidence.html"
+    "http://localhost:8889/fnd${id}-evidence.html"
 done
 
 # Batch copy to Vault
-cp /tmp/screenshots/JK-*-evidence-macOS.png \
+cp /tmp/screenshots/FND-*-evidence-macOS.png \
    "01 - Targets/<target>/Screenshots/"
 ```
 
@@ -132,7 +132,7 @@ cp /tmp/screenshots/JK-*-evidence-macOS.png \
 
 1. **HTML > raw terminal screenshot**: Styled HTML with color coding is clearer than a terminal screenshot with wall-of-text
 2. **Re-verification built in**: Building the evidence page forces you to re-run commands, confirming the vuln is still live
-3. **Batch = multiplicative**: 8 findings × 30min each = 4 hours individually; batch pipeline = 45 minutes total
+3. **Batch = multiplicative**: doing each finding individually at ~30 min each adds up fast; the batch pipeline handles them all in one much shorter pass
 4. **Dark theme**: Matches security audience expectations, high contrast, professional
 5. **Chrome headless reliability**: Unlike MCP screenshot tools, `--headless=new --screenshot=path` writes directly to disk — no intermediate ID resolution needed
 

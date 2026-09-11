@@ -6,7 +6,7 @@ status: verified
 first_seen: 2026-05-18
 last_updated: 2026-05-18
 severity: P2 High (if secondary window loads attacker-controlled content)
-precedents: VENDOR-007 (Meet window contextIsolation:false while Main window has it ON)
+precedents: a desktop messenger whose "meet" window used contextIsolation:false while the main window had it ON
 ---
 
 # Pattern - Electron contextIsolation Per-Window Variance
@@ -108,4 +108,4 @@ Attacker sends Meet/preview URL
   - Note: the script loads in the **parent page** (not an iframe) → it can directly access the preload-exposed `require('electron')` / the app's custom IPC wrapper object (wrapping `ipcRenderer`)
   - More severe than "window.electron bridge is accessible": the attacker's JS is already in the Node.js context when it loads, with no need to bypass contextBridge
   - **Audit keywords**: grep `createElement('script')` / `document.createElement("script")` + confirm whether the src origin is user/attacker-controlled
-- **Lessons #277**: inconsistent identifiers in obfuscated code cause false negatives — deobfuscate before testing, otherwise conclusions are invalid
+- **Lesson (see lessons)**: inconsistent identifiers in obfuscated code cause false negatives — deobfuscate before testing, otherwise conclusions are invalid
