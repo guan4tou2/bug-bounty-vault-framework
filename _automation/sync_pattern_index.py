@@ -3,7 +3,7 @@
 
 What it does (race-free):
 - Counts `Pattern - *.md` files in `09 - Knowledge Base/` (canonical source).
-- Reads `Pattern Index.md`; rewrites the `> NN 個 Pattern ...` header line to match.
+- Reads `Pattern Index.md`; rewrites the `> NN Patterns ...` header line to match.
 - Lists every `[[Pattern - X]]` wikilink in the index body.
 - Reports:
     * patterns on disk but NOT indexed (missing rows)
@@ -31,7 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 KB = ROOT / "09 - Knowledge Base"
 INDEX = KB / "Pattern Index.md"
-COUNT_RE = re.compile(r"^(>\s*)(\d+)( 個 Pattern)", re.MULTILINE)
+COUNT_RE = re.compile(r"^(>\s*)(\d+)( Patterns)", re.MULTILINE)
 WIKILINK_RE = re.compile(r"\[\[(Pattern - [^\]|#]+?)(?:[#|][^\]]*)?\]\]")
 
 

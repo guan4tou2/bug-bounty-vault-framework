@@ -64,7 +64,7 @@ TARGET_DIR="$VAULT_ROOT/01 - Targets/${TARGET}"
 
 if [ ! -d "$TARGET_DIR" ]; then
   [ "$COUNT_ONLY" -eq 1 ] && { echo 0; exit 0; }
-  echo "找不到 target 目錄: $TARGET_DIR"
+  echo "Target directory not found: $TARGET_DIR"
   exit 0
 fi
 
@@ -217,13 +217,13 @@ echo "=== ⏳ DAG Gaps: ${TARGET} / ${KIND} ($(date '+%Y-%m-%d')) ==="
 echo ""
 
 if [ ! -s "$DAG_FILES" ]; then
-  echo "找不到 ${KIND} DAG markdown 檔"
-  echo "建議：多系統 / 多 surface / 多驗證分支時，用 Target Work DAG 提升 coverage 與 route planning；單 finding 可跳過。"
+  echo "No ${KIND} DAG markdown files found"
+  echo "Suggestion: for multi-system / multi-surface / multi-validation-branch work, use a Target Work DAG to improve coverage and route planning; a single finding can skip it."
   exit 0
 fi
 
 if [ "$total" -eq 0 ]; then
-  echo "✅ 無 ⏳ edge — 所有已知 DAG edge 均已處理"
+  echo "✅ No ⏳ edges — all known DAG edges have been handled"
   exit 0
 fi
 
@@ -233,17 +233,17 @@ count_oth=$(grep -c "FROM" "$TMPFILE_OTH" 2>/dev/null || echo 0)
 
 [ -s "$TMPFILE_RED" ] && { echo "━━━ 🔴 Critical / high-ROI DAG edge ($count_red) ━━━"; cat "$TMPFILE_RED"; echo ""; }
 [ -s "$TMPFILE_YLW" ] && { echo "━━━ 🟡 Medium / follow-up DAG edge ($count_ylw) ━━━"; cat "$TMPFILE_YLW"; echo ""; }
-[ -s "$TMPFILE_OTH" ] && { echo "━━━ 其他未測 DAG edge ($count_oth) ━━━"; cat "$TMPFILE_OTH"; echo ""; }
+[ -s "$TMPFILE_OTH" ] && { echo "━━━ Other untested DAG edge ($count_oth) ━━━"; cat "$TMPFILE_OTH"; echo ""; }
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "⏳ 共 $total 個未測 DAG edge"
+echo "⏳ $total untested DAG edges total"
 echo ""
-echo "狀態標記:"
+echo "Status markers:"
 echo "  ✅  = tested + works / covered"
 echo "  ❌  = tested + dead end"
 echo "  ⏳  = untested / pending"
 echo "  🔴  = confirmed exploitable / highest ROI"
 echo "  ⚠️  = stopped (safety / production / scope)"
 echo ""
-echo "→ session 開頭先跑本工具，挑最高 ROI / 最能解除不確定性的 1-3 條 edge。"
-echo "→ 先提升挖洞與滲透效果；compact edge-list 只是避免重讀整個 RECON_DB。"
+echo "→ Run this tool at the start of a session, then pick the 1-3 edges with the highest ROI / most uncertainty-reducing potential."
+echo "→ Prioritize improving hunting and pentest effectiveness; the compact edge-list just avoids re-reading the entire RECON_DB."

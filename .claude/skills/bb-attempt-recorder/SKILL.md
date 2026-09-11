@@ -16,7 +16,7 @@ Run this when:
 - `bb-attack-chain-review` says no chain
 - a scan hit is false positive / out of scope / duplicate / non-exploitable
 - a safety check blocks the action
-- user says "記錄失敗", "不成立", "false positive", "stop condition", or "先停"
+- user says "record failure", "doesn't hold", "false positive", "stop condition", or "stop for now"
 
 ## Required Fields
 

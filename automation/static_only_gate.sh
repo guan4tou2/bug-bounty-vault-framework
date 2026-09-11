@@ -2,7 +2,7 @@
 # PreToolUse(Bash) hook — static-only mode lock.
 #
 # Origin: the "Code bugs in parent folder" session — an internal/static source
-# audit where the operator had to say "先不要連線挖 只要靜態就好" because the
+# audit where the operator had to say "don't go live yet, static only" because the
 # assistant drifted toward live testing. There was no enforcement. This gate
 # hard-blocks live/network Bash actions WHEN static-only mode is on.
 #

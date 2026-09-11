@@ -40,7 +40,7 @@ For each keyword, greps:
   - KB Lessons / Patterns (cross-target signals)
 
 Then prints hit count + first 3 matches per source per keyword.
-Decide dup by **root cause**, not just keyword match (see教訓 #112).
+Decide dup by **root cause**, not just keyword match (see Lesson #112).
 EOF
   exit 2
 fi
@@ -120,4 +120,4 @@ done
 
 echo
 echo "─────"
-echo "Decide dup by **root cause**, not keyword. See 教訓 #112 + bb-dedup-finding skill."
+echo "Decide dup by **root cause**, not keyword. See Lesson #112 + bb-dedup-finding skill."

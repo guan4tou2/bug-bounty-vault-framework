@@ -135,7 +135,7 @@ Do not claim Critical severity without Step 3 evidence. A freshly issued key tha
 - Mobile app SDK initialization (`/api/init`, `/api/sdk/register`)
 - Partner/client onboarding APIs missing auth on the registration step
 - Microservice-to-microservice registration endpoints accidentally exposed publicly
-- APIs with OpenAPI `security: []` on registration operations (教訓 #49)
+- APIs with OpenAPI `security: []` on registration operations (Lesson #49)
 
 ## Distinction from related patterns
 
@@ -156,6 +156,6 @@ Do not claim Critical severity without Step 3 evidence. A freshly issued key tha
 ## Related
 
 - [[Pattern - Hardcoded Credentials]] — contrast: static vs. dynamically issued credential
-- [[教訓 #49]] — OpenAPI `security: []` is a fast map to auth-bypass candidates
-- [[教訓 #50]] — file upload without auth → test all CRUD on same resource
-- [[教訓 #51]] — IAM read endpoint is the first step of a privilege escalation chain
+- [[Lesson #49]] — OpenAPI `security: []` is a fast map to auth-bypass candidates
+- [[Lesson #50]] — file upload without auth → test all CRUD on same resource
+- [[Lesson #51]] — IAM read endpoint is the first step of a privilege escalation chain

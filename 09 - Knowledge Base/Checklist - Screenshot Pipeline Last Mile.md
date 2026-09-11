@@ -97,9 +97,9 @@ cp /tmp/output.png "01 - Targets/<target>/Screenshots/FINDING-ID-evidence-macOS.
 needs_screenshots: false   # was: true
 
 # In screenshot section:
-| # | 檔名 | 內容 |
+| # | Filename | Content |
 |---|------|------|
-| 1 | FINDING-ID-evidence-macOS.png | 驗證結果摘要 |
+| 1 | FINDING-ID-evidence-macOS.png | Verification result summary |
 ```
 
 ## Batch processing (8+ findings)

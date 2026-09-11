@@ -26,7 +26,7 @@ No existing playbook covers the end-to-end IoT firmware analysis workflow. This 
 
 ---
 
-## Phase 0 — Pre-flight（強制 — 分析前必做，禁止跳過）
+## Phase 0 — Pre-flight (Mandatory — must be done before analysis; do not skip)
 
 **Gate**: Do not proceed past Phase 0 until all three sub-tasks are complete.
 
@@ -44,7 +44,7 @@ Before touching any firmware file or initiating a download:
 ```
 
 **Stop-loss criteria** (quit Phase 0 and abort session):
-- Firmware version matches an existing CVE you did not find (撞洞風險).
+- Firmware version matches an existing CVE you did not find (collision risk).
 - Vendor advisory says this model is EOL **and** TWCERT does not accept TVN for EOL-without-patch (verify with TWCERT policy first — EOL/defunct vendor may still qualify).
 - Target has already been analyzed in a prior session with no deferred actions outstanding.
 

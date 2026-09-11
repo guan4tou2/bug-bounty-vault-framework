@@ -9,28 +9,28 @@ last_updated: "{{date}}"
 
 > [!warning] Build only for XL multi-system / multi-finding targets; skip for single-finding targets — the DAG records, it doesn't drive decisions, and ROI scales with target size (broad use → low adoption).
 
-> 用於 recon / validation / decision gates / pentest route / exploit-chain bridge 的效果優先 DAG。
-> **何時用：多 surface、多入口、多驗證分支、或 session 之間容易忘記下一步時。單一 request / 單一 finding 可跳過。**
-> **Automation contract：只維護四欄表格 `from | edge | to | status`；第 4 欄 `status` 有 `⏳` 才會被 `automation/dag_gaps.sh` 視為未測 edge。**
-> **優先序：先提升挖洞 / 滲透能力（coverage、可利用路徑、證據品質、stop condition），再順手節省 token。**
+> An effectiveness-first DAG for recon / validation / decision gates / pentest route / exploit-chain bridge.
+> **When to use: many surfaces, many entry points, many validation branches, or when it's easy to forget the next step between sessions. Skip for a single request / single finding.**
+> **Automation contract: maintain only the four-column table `from | edge | to | status`; a `status` (column 4) that contains `⏳` is what makes `automation/dag_gaps.sh` treat an edge as untested.**
+> **Priority: first improve hunting / penetration capability (coverage, exploitable paths, evidence quality, stop conditions), then save tokens as a bonus.**
 
-狀態標記：✅ covered / ❌ dead end / ⏳ pending / 🔴 confirmed high ROI / ⚠️ stopped by safety or scope
+Status markers: ✅ covered / ❌ dead end / ⏳ pending / 🔴 confirmed high ROI / ⚠️ stopped by safety or scope
 
-## 使用規則
+## Usage Rules
 
-- DAG 會隨發現動態增長：新 surface、新能力、新 evidence、新阻擋條件都可以追加成 edge。
-- 不為了簡短刪掉高 impact / 高不確定性的 edge；先保留攻擊決策價值，再控制敘述長度。
-- 每個 session 從最高 ROI / 最能解除不確定性的 `⏳` edge 開始；若同時有多條，最多挑 3 條 active edge，除非明確拆給 parallel agents。
-- 測完就直接改 row status，不另外寫長篇敘述。
-- 新線索先進 DAG；證據、raw response、audit ref 再寫 RECON_DB / Finding。
-- Mermaid 只在 final report 或需要給人類 review 時 render，平時不畫圖。
-- 開 session 先跑 `bash automation/dag_gaps.sh <target>`；只看 recon 可加 `--kind recon`。
+- The DAG grows dynamically as you discover: new surfaces, new capabilities, new evidence, and new blocking conditions can all be appended as edges.
+- Don't delete high-impact / high-uncertainty edges just to be brief; preserve attack-decision value first, then control narrative length.
+- Each session, start from the `⏳` edge with the highest ROI / the greatest uncertainty to resolve; if several qualify, pick at most 3 active edges, unless they are explicitly split across parallel agents.
+- Once an edge is tested, just update the row status — don't write a separate long narrative.
+- New leads go into the DAG first; evidence, raw responses, and audit refs then go into RECON_DB / Finding.
+- Render Mermaid only for the final report or when a human needs to review it; don't draw diagrams routinely.
+- Start a session by running `bash automation/dag_gaps.sh <target>`; add `--kind recon` to look at recon only.
 
 ## Recon DAG
 
-> 目標：避免只追最亮的線索；把 discovery method 和 surface coverage 留成可接續 edge。
+> Goal: avoid chasing only the brightest lead; keep discovery method and surface coverage as continuable edges.
 
-| from（seed/source） | edge（discovery method） | to（surface/asset） | status |
+| from (seed/source) | edge (discovery method) | to (surface/asset) | status |
 |---|---|---|---|
 | Program scope | CT / subfinder / ASN | host inventory | ✅ |
 | host inventory | alt-port sweep | unknown service list | ⏳ |
@@ -38,9 +38,9 @@ last_updated: "{{date}}"
 
 ## Validation DAG
 
-> 目標：把「可疑」拆成可證偽條件，避免重複看同一段證據。
+> Goal: break "suspicious" down into falsifiable conditions, so you don't re-read the same evidence.
 
-| from（signal） | edge（success criterion） | to（evidence/decision） | status |
+| from (signal) | edge (success criterion) | to (evidence/decision) | status |
 |---|---|---|---|
 | login redirect candidate | valid account confirms post-login redirect | open redirect evidence | ⏳ |
 | source map endpoint | extracts API route and parameter | validation request list | ✅ |
@@ -48,9 +48,9 @@ last_updated: "{{date}}"
 
 ## Decision Gate DAG
 
-> 目標：把「下一步怎麼選」寫成可驗證分岔。這是決策樹的功能，但仍放在 DAG 中，因為多條路徑會 merge、共享 evidence、跨 session 累積。
+> Goal: express "how to choose the next step" as verifiable forks. This is a decision-tree function, but it still belongs in the DAG because multiple paths merge, share evidence, and accumulate across sessions.
 
-| from（current state） | edge（decision condition） | to（next route / stop condition） | status |
+| from (current state) | edge (decision condition) | to (next route / stop condition) | status |
 |---|---|---|---|
 | unknown web stack | fingerprint identifies WordPress | WP route / generic web route | ⏳ |
 | candidate finding | evidence meets reproducibility + impact bar | Finding / Attempt | ⏳ |
@@ -61,9 +61,9 @@ last_updated: "{{date}}"
 
 ## Pentest Route DAG
 
-> 目標：追蹤從目前 access / capability 到下一個 foothold 的路徑，不只追單一漏洞類型。
+> Goal: track the path from current access / capability to the next foothold, not just a single vulnerability type.
 
-| from（access/capability） | edge（action） | to（next foothold/decision） | status |
+| from (access/capability) | edge (action) | to (next foothold/decision) | status |
 |---|---|---|---|
 | read-only account | enumerate tenant IDs | IDOR candidate list | ⏳ |
 | exposed admin page | 401/403 bypass matrix | authenticated-only route map | ⏳ |
@@ -71,22 +71,22 @@ last_updated: "{{date}}"
 
 ## Exploit-chain Bridge
 
-> 找到可串的 finding / data 後，搬到 `Template - Exploit Chain DAG` 做正式 chain 追蹤。
+> Once you find a chainable finding / data, move it into `Template - Exploit Chain DAG` for formal chain tracking.
 
-| from（finding/data） | edge（exploit） | to（capability） | status |
+| from (finding/data) | edge (exploit) | to (capability) | status |
 |---|---|---|---|
 | leaked internal endpoint | IDOR | other user's data | ⏳ |
 | leaked version | CVE / advisory precheck | known-N-day decision | ⏳ |
 
-## Subagent 委派（node → worker）— 控 token / 防 session 過長
+## Subagent Delegation (node → worker) — control tokens / prevent overlong sessions
 
-> DAG 讓「主 loop = orchestrator + judge，node = 拋棄式 worker」這個分工自然成立。
-> 探索噪音（大 response、整段源碼、fuzz 輸出、payload 嘗試）關進 subagent 的 context，
-> 主 loop 只看回傳的 `status` + evidence 路徑 → context 不脹、compaction 砍掉也能從 DAG 重建。
+> The DAG makes the split "main loop = orchestrator + judge, node = disposable worker" fall out naturally.
+> Confine exploration noise (large responses, whole source files, fuzz output, payload attempts) inside the subagent's context;
+> the main loop only sees the returned `status` + evidence paths → context doesn't bloat, and even if compaction cuts it, it can be rebuilt from the DAG.
 
-- **何時委派**：edge 探索**verbose 且自足**（審一個 module、跑一次完整 exploit、fuzz 一個 param）→ 派 subagent。**trivial 檢查**主 loop 自己做，spawn 成本 > 任務。
-- **委派什麼**：依層級注入 convention（見 AGENTS.md「Subagent Convention Injection」，subagent 不繼承 CLAUDE.md/AGENTS）。
-- **回傳鎖死 schema（瓶頸在這，不在 worker）**：subagent 分出工作**不會**自動縮主 session —— 縮的是「回來的資訊被壓縮」。worker 最終訊息**只回結構化 JSON**，不回 raw transcript；主 loop 只吃 ~50-100 token 摘要。回傳介面沒鎖 = 把 worker 的垃圾倒回主 loop，比不拆更糟。
+- **When to delegate**: edge exploration that is **verbose and self-contained** (auditing one module, running one full exploit, fuzzing one param) → dispatch a subagent. **Trivial checks** the main loop does itself — the spawn cost exceeds the task.
+- **What to delegate**: inject conventions by tier (see AGENTS.md "Subagent Convention Injection"; subagents do not inherit CLAUDE.md/AGENTS).
+- **Lock down the return schema (this is the bottleneck, not the worker)**: splitting work off to a subagent does **not** automatically shrink the main session — what shrinks it is "the returned information being compressed." The worker's final message **returns structured JSON only**, never a raw transcript; the main loop consumes only a ~50-100 token summary. An unlocked return interface = dumping the worker's garbage back into the main loop, which is worse than not splitting at all.
 
   ```json
   {"task":"<one line>","new_findings":0,
@@ -95,17 +95,17 @@ last_updated: "{{date}}"
    "next_suggested":["test TRACE"],"carry_state":"needs X-Forwarded-Host spoof"}
   ```
   Enforce via the workflow's structured-output/schema mechanism, or paste the schema into an interactive subagent prompt ("final message = this JSON only"). Do NOT rely on the prompt instruction alone — pure-JSON compliance is format-following, not capability, and an eval found even the strongest model adds a preamble while cheaper models returned clean JSON. Enforce structure mechanically. PoC/evidence to `workspace/workshop/<target>/poc/`, return paths not inline.
-- **依任務選模型**：judgment / chain reasoning / **verification** = strongest model (**never downgrade**); source read / template-fill reporting = mid; result-classification / extraction / summary = cheap; CVE/version diff = no LLM (`grep`). Downgrade only bounded tasks a weak model can reliably finish (rework costs more — see AGENTS §6b2).
-- **判斷留中央**：worker **採集證據 + 暫定分類**，主 loop re-judges（severity / dead_ends re-judged; `404≠excluded`, SPA catch-all returns `200`; reproducibility / anti-exaggeration / dedup need global view; never let a worker self-certify a finding）。
-- **adaptive 不是 fan-out**：edge 邊挖邊長 → 主 loop 互動式派 subagent；只有已知批次（測這 N 個端點）才用 deterministic workflow。
-- **主 session 自身紀律**：對話歷史只留決策不留中間推理（推理放 extended thinking）；每 3-5 輪 worker 回來 → snapshot 進 Carry-state/RECON_DB → compact 前面細節。
-- **跨 node nuance 進 Carry-state**（下方），別塞進 4 欄表也別只留在 worker context。
+- **Pick the model by task**: judgment / chain reasoning / **verification** = strongest model (**never downgrade**); source read / template-fill reporting = mid; result-classification / extraction / summary = cheap; CVE/version diff = no LLM (`grep`). Downgrade only bounded tasks a weak model can reliably finish (rework costs more — see AGENTS §6b2).
+- **Judgment stays central**: the worker **gathers evidence + a tentative classification**, the main loop re-judges (severity / dead_ends re-judged; `404≠excluded`, SPA catch-all returns `200`; reproducibility / anti-exaggeration / dedup need a global view; never let a worker self-certify a finding).
+- **Adaptive is not fan-out**: edges grow as you dig → the main loop dispatches subagents interactively; use a deterministic workflow only for a known batch (test these N endpoints).
+- **The main session's own discipline**: keep only decisions in the conversation history, not intermediate reasoning (put reasoning in extended thinking); every 3-5 worker returns → snapshot into Carry-state/RECON_DB → compact the earlier details.
+- **Cross-node nuance goes into Carry-state** (below); don't cram it into the 4-column table and don't leave it only in the worker context.
 
-## Carry-state ledger（跨 node 必須保留的 nuance + evidence 路徑）
+## Carry-state ledger (nuance + evidence paths that must persist across nodes)
 
-> 只記「下個 node 會用到、但塞進 status 欄太長」的東西。空著代表沒有跨 node 依賴。
+> Record only things "the next node will need but are too long for the status column." Empty means there is no cross-node dependency.
 
-- （append…）
+- (append…)
 
 ## Automation
 

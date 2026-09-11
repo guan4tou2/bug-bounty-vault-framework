@@ -15,7 +15,7 @@ Run before:
 - POST / PUT / PATCH / DELETE
 - payload upload, webhook, callback, SSRF, parser, import, or stored effect
 - high-rate requests or actions that may affect service state
-- user asks "可以掃嗎", "跑 nuclei", "osmedeus", "bbot", "payload", or "驗證"
+- user asks "can I scan", "run nuclei", "osmedeus", "bbot", "payload", or "verify"
 
 ## Required Checks
 

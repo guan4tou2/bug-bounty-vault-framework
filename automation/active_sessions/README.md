@@ -1,10 +1,10 @@
 # Active Sessions Lock Registry
 
-**目的**：多 session 並行挖洞時的協調機制。lock-file 是 machine source of truth；HANDOFF.md 的 `## Active Sessions` 區段是 mirror（人類可讀）。
+**Purpose**: a coordination mechanism for hunting across multiple parallel sessions. The lock file is the machine source of truth; the `## Active Sessions` section of HANDOFF.md is a mirror (human-readable).
 
 ## Schema
 
-每個 lock 是 `<safe_scope>.lock` 檔，內含 JSON：
+Each lock is a `<safe_scope>.lock` file containing JSON:
 
 ```json
 {
@@ -19,121 +19,121 @@
 }
 ```
 
-`<safe_scope>` = scope 把 `/` 換成 `--`，e.g. `example-target--sub-service--idor.lock`。
+`<safe_scope>` = the scope with `/` replaced by `--`, e.g. `example-target--sub-service--idor.lock`.
 
-## Scope 階層與衝突規則
+## Scope hierarchy and conflict rules
 
-scope 用 `/` 分層,分 **target scope** 與 **shared-resource scope**(底線開頭):
+Scopes are layered with `/`, split into **target scopes** and **shared-resource scopes** (leading underscore):
 
 ### Target scopes
-| Scope 範例 | 意思 |
+| Scope example | Meaning |
 |---|---|
-| `example-target` | 整 target lock |
+| `example-target` | whole-target lock |
 | `example-target/sub-service` | sub-service lock |
 | `example-target/sub-service/idor` | sub-service + vuln-class lock |
 
-### Shared-resource scopes（2026-06-04 新增 — 多 session 平行寫共享檔的保護）
+### Shared-resource scopes (added 2026-06-04 — protection for multiple sessions writing shared files in parallel)
 
-當多個 Claude session / pipeline / agent 平行跑時,寫共享高頻檔(Pattern Index、Lessons Learned、Tool Arsenal、Skills…)會 race。下列 scope 把這類寫入分區互斥:
+When multiple Claude sessions / pipelines / agents run in parallel, writes to shared high-frequency files (Pattern Index, Lessons Learned, Tool Arsenal, Skills…) race. The scopes below partition these writes into mutually exclusive regions:
 
-| Scope 範例 | 鎖定範圍 | 典型使用者 |
+| Scope example | Locked range | Typical user |
 |---|---|---|
-| `_meta` | 架構/文件補丁,無 target | 改 AGENTS.md / STRUCTURE.md / repo 規範 |
-| `_kb` | 任何 `09 - Knowledge Base/` 寫入 | 大規模 KB 改造(SOTA refresh、批次升級) |
-| `_kb/<area>` | 特定 KB 區域 | 例 `_kb/Pattern-Index`、`_kb/Lessons-Learned`、`_kb/Tool-Arsenal` |
-| `_pipeline` | session-learning pipeline 跑 | 自動 proposal 提取 / promote 到 KB |
-| `_staging` | `_staging/proposed/` 審核流 | 手動 review proposals 升 KB |
-| `_automation` | `automation/` script 改 | 改 claim.sh / audit_workspace.sh 等核心腳本 |
-| `_skill` | `.claude/skills/` 系列改 | 新增/改 skill(自動 sync .codex/.gemini)|
-| `_agent` | `.claude/agents/` 改 | 新增/改 agent 提示 |
-| `_dashboard` | `00 - Dashboard/`(Kanban Board 等)| 跨 target 寫入熱點;triage、進度同步 |
+| `_meta` | architecture/doc patches, no target | editing AGENTS.md / STRUCTURE.md / repo conventions |
+| `_kb` | any write to `09 - Knowledge Base/` | large-scale KB overhaul (SOTA refresh, batch upgrade) |
+| `_kb/<area>` | a specific KB area | e.g. `_kb/Pattern-Index`, `_kb/Lessons-Learned`, `_kb/Tool-Arsenal` |
+| `_pipeline` | session-learning pipeline run | automatic proposal extraction / promotion to KB |
+| `_staging` | `_staging/proposed/` review flow | manually reviewing proposals for KB promotion |
+| `_automation` | changes to `automation/` scripts | editing claim.sh / audit_workspace.sh and other core scripts |
+| `_skill` | changes to the `.claude/skills/` series | adding/editing a skill (auto-syncs .codex/.gemini) |
+| `_agent` | changes to `.claude/agents/` | adding/editing an agent prompt |
+| `_dashboard` | `00 - Dashboard/` (Kanban Board, etc.) | cross-target write hotspot; triage, progress sync |
 
-範例:
-- 開 web-vuln-scan 設計時 claim `_skill`,期間 pipeline claim `_pipeline` 不撞(兄弟)
-- 但若 pipeline 想 claim `_kb`(批量升 KB),而你正改 `_kb/Pattern-Index` → 撞(parent/child,衝突規則 #3)
-- target 工作(`example-target`)與共享資源(`_kb`)互不撞(完全不同分支)
+Examples:
+- When designing web-vuln-scan, claim `_skill`; a pipeline claiming `_pipeline` during that time doesn't collide (siblings)
+- But if the pipeline wants to claim `_kb` (batch KB promotion) while you're editing `_kb/Pattern-Index` → collision (parent/child, conflict rule #3)
+- Target work (`example-target`) and a shared resource (`_kb`) don't collide (entirely different branches)
 
-衝突邏輯由 `_lock_lib.sh::conflicts_with()` 統一處理,新 scope 自動沿用 prefix-based parent/child 規則。
+Conflict logic is handled uniformly by `_lock_lib.sh::conflicts_with()`; new scopes automatically inherit the prefix-based parent/child rules.
 
-**衝突判定（claim 時）**：
+**Conflict determination (at claim time)**:
 
-1. **完全相同** → 撞
-2. **新 scope 是現有 scope 的 prefix**（claim parent，子已 lock）→ 撞
-3. **現有 scope 是新 scope 的 prefix**（claim child，父已 lock）→ 撞
-4. **完全不同分支**（兄弟、不同 target）→ 不撞
+1. **Exactly identical** → collision
+2. **New scope is a prefix of an existing scope** (claiming a parent whose child is locked) → collision
+3. **Existing scope is a prefix of the new scope** (claiming a child whose parent is locked) → collision
+4. **Entirely different branches** (siblings, different targets) → no collision
 
-範例：`example-target/sub-service` 已 locked
-- claim `example-target` → 撞（#2）
-- claim `example-target/sub-service/idor` → 撞（#3）
-- claim `example-target/example-msg-app` → 不撞（#4）
-- claim `example-target` → 不撞（#4）
+Example: `example-target/sub-service` is already locked
+- claim `example-target` → collision (#2)
+- claim `example-target/sub-service/idor` → collision (#3)
+- claim `example-target/example-msg-app` → no collision (#4)
+- claim `example-target` → no collision (#4)
 
-## 過期機制
+## Expiry mechanism
 
-- `last_heartbeat` 超過 30 分鐘 → 視為 dead session
-- post-commit hook 觸發 heartbeat 更新（commit message 含 target name 即匹配）
-- 過期 lock 由 `claim.sh` / `check_active_sessions.sh` 自動清掃到 `_expired/`，不阻塞新 claim
+- `last_heartbeat` older than 30 minutes → treated as a dead session
+- the post-commit hook triggers a heartbeat update (matched when the commit message contains the target name)
+- expired locks are automatically swept into `_expired/` by `claim.sh` / `check_active_sessions.sh` and do not block new claims
 
-## 目錄
+## Directory
 
-- `*.lock` — 活躍 lock（被 .gitignored；本機 only）
-- `_expired/` — 過期/release 後的 archive，debug 用
-- `_completed/` — release 時自動產生的 handoff capsule (scope/commits/files/last_task)
-- `_inbox/<scope-or-session>/msg-*.md` — broadcast.sh 投遞的訊息;讀過會 rename `*.read`
-- `SESSION_LOG.jsonl` — 跨 session 事件 bus(claim/release/status/broadcast/commit);append-only
-- `.gitkeep` — 保留目錄結構
+- `*.lock` — active locks (.gitignored; local only)
+- `_expired/` — archive of expired/released locks, for debugging
+- `_completed/` — handoff capsules auto-generated at release time (scope/commits/files/last_task)
+- `_inbox/<scope-or-session>/msg-*.md` — messages delivered by broadcast.sh; once read they are renamed `*.read`
+- `SESSION_LOG.jsonl` — cross-session event bus (claim/release/status/broadcast/commit); append-only
+- `.gitkeep` — preserves the directory structure
 
-## 跨 session 溝通(2026-06-04 Full layer)
+## Cross-session communication (2026-06-04 Full layer)
 
-lock 告訴別人「我占哪個 scope」;`status` + `broadcast` + `SESSION_LOG` 告訴別人「我做到哪、有事要轉達」。
+The lock tells others "which scope I hold"; `status` + `broadcast` + `SESSION_LOG` tell others "how far I've got, and what I need to pass along."
 
-> **使用層級提示**(2026-06-04 review 後)
-> - 🟢 **日常**:lock + `status.sh` + `session_brief.sh` + `SESSION_LOG` + handoff capsule(release 時自動產)— 90% 場景夠用
-> - 🟡 **進階**:`broadcast.sh` + `_inbox/` — **experimental**,等真要跨人/跨 session 即時轉達訊息才用;3 小時實測使用 1 次(smoke test)
-> - 仍然保留因為:opus-4.6 並行 / session-learning pipeline 並行 = 跨 session 場景會發生
+> **Usage-tier guidance** (after the 2026-06-04 review)
+> - 🟢 **Everyday**: lock + `status.sh` + `session_brief.sh` + `SESSION_LOG` + handoff capsule (auto-generated at release) — enough for 90% of cases
+> - 🟡 **Advanced**: `broadcast.sh` + `_inbox/` — **experimental**, only for real-time cross-person/cross-session messaging when actually needed; used once in 3 hours of testing (smoke test)
+> - Still retained because: parallel opus-4.6 / parallel session-learning pipeline = cross-session scenarios will happen
 
 ```bash
-# 心跳 + 公告當前正在做什麼(更新 lock.current_task + SESSION_LOG)
+# Heartbeat + announce what you're currently doing (updates lock.current_task + SESSION_LOG)
 bash automation/status.sh "fixing Pattern Index drift"
 
-# 看自己目前狀態
+# Check your own current status
 bash automation/status.sh --read
 
-# 投訊息到別 session 的信箱(scope 或 session_id 都行)
-bash automation/broadcast.sh --to=_kb "我在動 Lessons/，先別動"
-bash automation/broadcast.sh --to=all "lint hook 壞了,等修好再 commit"
+# Drop a message into another session's inbox (scope or session_id both work)
+bash automation/broadcast.sh --to=_kb "I'm working on Lessons/, hold off for now"
+bash automation/broadcast.sh --to=all "lint hook is broken, wait until it's fixed before committing"
 
-# 看自己的信箱
+# Check your own inbox
 bash automation/broadcast.sh --inbox
-bash automation/broadcast.sh --ack <msg-path>   # 標已讀
+bash automation/broadcast.sh --ack <msg-path>   # mark as read
 
-# 全景 snapshot(自己/別人/信箱/最近事件/handoff)
+# Full-picture snapshot (self/others/inbox/recent events/handoff)
 bash automation/session_brief.sh
 bash automation/session_brief.sh --window=2h
 ```
 
-release 時自動產出 `_completed/<ts>_<scope>_<sid>.md` handoff capsule,記錄 claim 期間的 commits + files_changed + last_task,讓下一個 session 接手不用問。
+At release time, a `_completed/<ts>_<scope>_<sid>.md` handoff capsule is auto-generated, recording the commits + files_changed + last_task during the claim period, so the next session can take over without asking.
 
-## 用法
+## Usage
 
 ```bash
-# Session 開始
-bash automation/check_active_sessions.sh           # 列出所有 active
+# Session start
+bash automation/check_active_sessions.sh           # list all active
 bash automation/claim.sh example-target/sub-service/idor     # claim scope
 
-# Session 中
-# (post-commit hook 自動更新 heartbeat)
+# During the session
+# (post-commit hook auto-updates the heartbeat)
 
-# Session 結束
-bash automation/session_end_checklist.sh example-target  # 自動 release
-# 或手動：
+# Session end
+bash automation/session_end_checklist.sh example-target  # auto-release
+# or manually:
 bash automation/release.sh example-target/sub-service/idor
 ```
 
-## Vault 跨 repo 相容
+## Vault cross-repo compatibility
 
-scope 的 `target` 部分（第一段）跨 parent + Vault 共用。例：claim `example-target/sub-service` 同時鎖：
+The `target` part of the scope (the first segment) is shared across the parent + Vault. Example: claiming `example-target/sub-service` locks both:
 - parent repo `workshop/example-target/`
 - Vault repo `01 - Targets/ExampleTarget/`
 
-兩個 repo 都會在 commit 時觸發 heartbeat。
+Both repos trigger a heartbeat at commit time.

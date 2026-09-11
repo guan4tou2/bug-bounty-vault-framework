@@ -7,7 +7,7 @@ hotspot the same way split_lessons.py did for Lessons Learned.
 
 Heuristic boundaries:
   Writeup heading = `## <ID>. <title>` where ID is `1-9..NN` or `B1-B11`.
-  Non-writeup `##` sections (e.g. `## 跨篇交叉觀察`, `## Batch 2 ...`) are
+  Non-writeup `##` sections (e.g. `## Cross-writeup observations`, `## Batch 2 ...`) are
   kept in the MOC head as "between-writeup commentary" if they appear among
   writeups, and as MOC content if before/after the writeup block.
 
@@ -42,7 +42,7 @@ def slugify(text: str, max_len: int = 50) -> str:
     for ch in text.lower():
         if ch.isalnum():
             out.append(ch)
-        elif "一" <= ch <= "鿿":
+        elif 0x4e00 <= ord(ch) <= 0x9fff:
             out.append(ch)
         elif ch in " -_/:":
             out.append("-")
@@ -56,7 +56,7 @@ def slugify(text: str, max_len: int = 50) -> str:
 def split(text: str):
     """Return (head, [(id, title, body), ...]).
 
-    Note: between-writeup ## section headers (e.g. `## 跨篇交叉觀察`) without
+    Note: between-writeup ## section headers (e.g. `## Cross-writeup observations`) without
     a numeric ID get absorbed into the PRECEDING writeup's body — that's how
     they sit semantically in the source.
     """
@@ -110,19 +110,19 @@ def write_writeup(wid: str, title: str, body: str, apply: bool):
 def write_moc(head: str, writeups, apply: bool):
     moc_tail = (
         "\n\n---\n\n"
-        "## 個別 Writeup 檔\n\n"
-        "> 2026-06-04 起,每篇 writeup 拆成 `Writeups/WU-NNN-<slug>.md`(消除 monolith 寫入熱點)。\n"
-        "> 本檔變成 MOC + 索引;新加 writeup 請寫進 `Writeups/`,不要再 append 此檔。\n\n"
+        "## Individual Writeup Files\n\n"
+        "> Since 2026-06-04, each writeup is split into `Writeups/WU-NNN-<slug>.md` (eliminating the monolith write hotspot).\n"
+        "> This file becomes a MOC + index; add new writeups under `Writeups/`, do not append to this file anymore.\n\n"
         "```dataview\n"
         "TABLE WITHOUT ID\n"
-        "  link(file.link, file.name) AS \"檔\",\n"
-        "  title AS \"標題\",\n"
-        "  file.cday AS \"建立\"\n"
+        "  link(file.link, file.name) AS \"File\",\n"
+        "  title AS \"Title\",\n"
+        "  file.cday AS \"Created\"\n"
         "FROM \"09 - Knowledge Base/Writeups\"\n"
         "WHERE type = \"writeup\"\n"
         "SORT id ASC\n"
         "```\n\n"
-        "## 全文索引(直接列表)\n\n"
+        "## Full Index (literal list)\n\n"
     )
     rows = []
     for wid, title, _ in writeups:

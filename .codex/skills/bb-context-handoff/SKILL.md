@@ -1,6 +1,6 @@
 ---
 name: bb-context-handoff
-description: Use when session context is low, work needs checkpointing, takeover is needed, user says 快滿了/整理進度/handoff/checkpoint/context low/takeover/接手, or a long bug bounty session reaches a natural handoff point.
+description: Use when session context is low, work needs checkpointing, takeover is needed, user says almost full / summarize progress / handoff / checkpoint / context low / takeover / take over, or a long bug bounty session reaches a natural handoff point.
 ---
 
 # Bug Bounty — Context Window Management + Takeover Protocol

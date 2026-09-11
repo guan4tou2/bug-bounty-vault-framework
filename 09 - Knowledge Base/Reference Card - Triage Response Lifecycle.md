@@ -10,7 +10,7 @@ added: 2026-05-22
 
 # Reference Card - Triage Response Lifecycle
 
-> 目的：收到平台 / 廠商回覆後，用固定順序更新 Submission、FORM、Kanban、KB / Lessons 與 Pattern update，避免只改其中一處。
+> Purpose: After receiving a platform / vendor reply, update the Submission, FORM, Kanban, KB / Lessons, and Pattern update in a fixed order, to avoid updating only one of them.
 
 ---
 
@@ -18,12 +18,12 @@ added: 2026-05-22
 
 | Triage status | Submission | FORM | Kanban | KB / Lessons | Pattern update |
 |---|---|---|---|---|---|
-| accepted | status = accepted；補 bounty / case id | 同步平台狀態 | moved to accepted / resolved | 記錄成功條件 | 若可重用則補 Pattern |
-| duplicate | status = duplicate；補 duplicate id / reason | 同步 duplicate | moved to closed / duplicate | 記錄撞題原因 | 補 false-positive / prior-disclosure rule |
-| n_a | status = n_a；補 rejection reason | 同步 n_a | moved to closed / N/A | 記錄降級教訓 | 補「不成立條件」 |
-| informative | status = informative | 同步 informative | moved to low-priority closed | 記錄平台態度 | 視需要補 Pattern |
-| resolved | status = resolved | 同步 resolved | moved to resolved | 記錄修補與驗證 | 補 remediation note |
-| wont_fix | status = wont_fix | 同步 wont_fix | moved to closed | 記錄政策原因 | 補 stop condition |
+| accepted | status = accepted; add bounty / case id | sync platform status | moved to accepted / resolved | record success conditions | add Pattern if reusable |
+| duplicate | status = duplicate; add duplicate id / reason | sync duplicate | moved to closed / duplicate | record collision reason | add false-positive / prior-disclosure rule |
+| n_a | status = n_a; add rejection reason | sync n_a | moved to closed / N/A | record downgrade lesson | add "invalidation conditions" |
+| informative | status = informative | sync informative | moved to low-priority closed | record platform stance | add Pattern as needed |
+| resolved | status = resolved | sync resolved | moved to resolved | record fix and verification | add remediation note |
+| wont_fix | status = wont_fix | sync wont_fix | moved to closed | record policy reason | add stop condition |
 
 ---
 

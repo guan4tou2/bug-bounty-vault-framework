@@ -72,11 +72,11 @@ services:
       - "127.0.0.1:8080:80"    # bind to localhost only
     environment:
       - APP_DEBUG=true           # example: enable debug mode
-      - APP_KEY=base64:sandbox-key-not-for-production
+      - APP_KEY=base64:EXAMPLE-SANDBOX-KEY-REPLACE-ME
       - DB_HOST=db
       - DB_DATABASE=sandbox
       - DB_USERNAME=sandbox
-      - DB_PASSWORD=sandbox
+      - DB_PASSWORD=CHANGE_ME
     volumes:
       - ./evidence:/evidence     # mount evidence capture directory
     networks:
@@ -263,11 +263,11 @@ services:
     environment:
       - APP_DEBUG=true
       - APP_ENV=local
-      - APP_KEY=base64:dGhpcyBpcyBhIHNhbmRib3gga2V5IGZvciB0ZXN0aW5n
+      - APP_KEY=base64:EXAMPLE-SANDBOX-KEY-REPLACE-ME
       - DB_HOST=db
       - DB_DATABASE=sandbox
       - DB_USERNAME=root
-      - DB_PASSWORD=sandbox
+      - DB_PASSWORD=CHANGE_ME
     networks:
       - sandbox-net
     depends_on:

@@ -1,7 +1,7 @@
 ---
 type: pattern
 name: SSRF via URL-based Upload Chain
-description: Profile-picture / avatar / media upload 接 URL 而非 file → SSRF → 內網 recon → 沒認證的 admin panel / debug endpoint → mass PII exfil
+description: Profile-picture / avatar / media upload takes a URL instead of a file → SSRF → internal-network recon → unauthenticated admin panel / debug endpoint → mass PII exfil
 last_updated: 2026-04-22
 seen_in:
   - external_writeup_hacklido_1493_sagar_seagate_2026
@@ -159,7 +159,7 @@ Same endpoint set:
 - [[External Writeups - 2026 Collection]] — original writeup entry
 - [[Playbook - API Attack Surface]] — upload endpoints checklist
 
-## 相關
+## Related
 
 - [[Pattern - SSRF Filter Bypass]]
 - [[Target - example-target]] (ai-chat upload endpoint)

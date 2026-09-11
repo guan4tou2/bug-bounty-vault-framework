@@ -123,7 +123,7 @@ def print_brief(target: str) -> None:
         in_section = False
         section_name = ""
         for line in lines:
-            if line.startswith("## ") and any(k in line for k in ["在做什麼", "Was Doing", "下一步", "Next Step", "阻塞", "Block"]):
+            if line.startswith("## ") and any(k in line for k in ["Was Doing", "Next Step", "Block"]):
                 in_section = True
                 section_name = line
                 print(f"\n{line}")

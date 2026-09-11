@@ -15,7 +15,7 @@ Run this when:
 - preparing a Submission / FORM
 - reviewing attack-chain evidence
 - deciding whether a candidate is ready or should remain an Attempt
-- user asks "證據夠嗎", "能送嗎", "report ready", or "reproducible?"
+- user asks "is the evidence enough", "can I submit", "report ready", or "reproducible?"
 
 ## Required Checks
 

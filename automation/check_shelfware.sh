@@ -1,30 +1,33 @@
 #!/usr/bin/env bash
-# check_shelfware.sh — template adoption telemetry（量哪些 template 沒人用）
+# check_shelfware.sh — template adoption telemetry (measures which templates nobody uses)
 #
-# check_orphan_scripts 管「腳本」沒被引用；本腳本管「template」沒被實例化。
-# 每個 Template 有 frontmatter marker（subpage:/type:/fileClass:）；實例會複製它。
-# 數有多少實例 = 該 template 的真實採用率。0 實例 = shelf-ware（DAG template 曾 0/124
-# 就是這種；forward 量測比事後挖 124 個 session 才發現便宜）。
+# check_orphan_scripts tracks "scripts" that are never referenced; this script
+# tracks "templates" that are never instantiated.
+# Each Template has a frontmatter marker (subpage:/type:/fileClass:); instances copy it.
+# Counting how many instances exist = the template's real adoption rate. 0 instances =
+# shelf-ware (the DAG template was once 0/124 — this exactly; measuring forward is
+# cheaper than only discovering it after digging through 124 sessions).
 #
-# Advisory only（LLM 判斷：0 實例是「該 retire」還是「剛建/季節性」）。
+# Advisory only (LLM decides whether 0 instances means "should retire" or "just
+# created / seasonal").
 #
-# 用法: bash automation/check_shelfware.sh
-# bash 3.2 相容（macOS）
+# Usage: bash automation/check_shelfware.sh
+# bash 3.2 compatible (macOS)
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 eval "$("$SCRIPT_DIR/workspace_layout.sh" --shell)"
 
 TPL_DIR="$VAULT_ROOT/07 - Templates"
 
-echo "# Template adoption（實例數 = 真實採用率；0 = shelf-ware 候選）"
-echo "# advisory：0 實例 ≠ 該砍（可能剛建/季節性）；LLM 判斷。"
+echo "# Template adoption (instance count = real adoption rate; 0 = shelf-ware candidate)"
+echo "# advisory: 0 instances != should delete (may be just created / seasonal); LLM decides."
 echo
 
 shelf=0
 for tpl in "$TPL_DIR"/Template\ -\ *.md; do
   [ -f "$tpl" ] || continue
   name="$(basename "$tpl" .md)"
-  # 取主 marker：優先 subpage > type > fileClass（subpage 對 target 子頁最具辨識度）
+  # Pick the primary marker: prefer subpage > type > fileClass (subpage is most distinctive for target subpages)
   key=""; val=""
   for k in subpage type fileClass; do
     line="$(grep -m1 -E "^${k}:" "$tpl" 2>/dev/null || true)"
@@ -35,18 +38,18 @@ for tpl in "$TPL_DIR"/Template\ -\ *.md; do
     fi
   done
   if [ -z "$key" ] || [ -z "$val" ]; then
-    printf '  %-55s [無 marker — 無法量測]\n' "$name"
+    printf '  %-55s [no marker — cannot measure]\n' "$name"
     continue
   fi
-  # 數 vault 內（排除 07-Templates）有同 marker 的實例檔
+  # Count instance files in the vault (excluding 07-Templates) that share the same marker
   count="$(grep -rl --include='*.md' -E "^${key}:[[:space:]\"]*${val}\"?[[:space:]]*$" "$VAULT_ROOT" 2>/dev/null \
             | grep -vF "/07 - Templates/" | wc -l | tr -d ' ')"
   flag=""
-  if [ "$count" -eq 0 ]; then flag="  ⬅ shelf-ware (0 實例)"; shelf=$((shelf+1)); fi
-  printf '  %-55s %s=%s  →  %s 實例%s\n' "$name" "$key" "$val" "$count" "$flag"
+  if [ "$count" -eq 0 ]; then flag="  ⬅ shelf-ware (0 instances)"; shelf=$((shelf+1)); fi
+  printf '  %-55s %s=%s  →  %s instances%s\n' "$name" "$key" "$val" "$count" "$flag"
 done
 
 echo
-echo "Shelf-ware 候選（0 實例）：$shelf"
-[ "$shelf" -gt 0 ] && echo "→ 逐項判斷：retire / 簡化降 friction / 加 session 開頭 nudge（如 dag_gaps）"
+echo "Shelf-ware candidates (0 instances): $shelf"
+[ "$shelf" -gt 0 ] && echo "→ Decide case by case: retire / simplify to lower friction / add a session-start nudge (like dag_gaps)"
 exit 0

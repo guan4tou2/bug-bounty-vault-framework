@@ -106,7 +106,7 @@ done < images.txt | grep -E 'PASSWORD|SECRET|KEY|TOKEN|URL.*://.*:.+@' > hits.tx
 - Image pushed years ago (~100 pulls)
 - `crane config` dumps:
   ```
-  PG_DATABASE_URL=postgres://postgres:REDACTED@db.example.com:5432/acme_app
+  PG_DATABASE_URL=postgres://postgres:REDACTED@db.example.com:5432/app_db
   HASURA_GRAPHQL_ADMIN_SECRET=REDACTED
   ```
 - Azure Postgres FQDN NXDOMAIN today → **P5/P4 today** (infra dead)

@@ -3,7 +3,7 @@ type: reference
 category: Checklist
 tags: [checklist, firmware, static-analysis, quality-gate, PoC, TWCERT, stop-loss, verification-boundary, QEMU, chroot]
 last_updated: 2026-06-04
-source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, #99 — 10+ separate sessions with explicit corrections on static analysis over-statement, missing dynamic gates, large-session near-zero yield
+source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + Lesson #7, #81, #99 — 10+ separate sessions with explicit corrections on static analysis over-statement, missing dynamic gates, large-session near-zero yield
 ---
 
 # Checklist — Firmware Static Analysis Quality Gates
@@ -16,7 +16,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
 
 ---
 
-## Stage 1 — Pre-analysis Gates（分析開始前，任一 FAIL 立即停損）
+## Stage 1 — Pre-analysis Gates (Before analysis begins; any FAIL = immediate stop-loss)
 
 ### Gate 1.1 — Environment Availability
 
@@ -71,7 +71,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
   [STOP-LOSS] Existing CVE <ID> covers this attack surface on version <X>. No new finding.
   Ref: <NVD URL>
   ```
-  Do not spend 6h confirming what a 5-minute search could have revealed. (教訓 QN-003 = CVE-2023-50358 教訓.)
+  Do not spend 6h confirming what a 5-minute search could have revealed. (Lesson QN-003 = CVE-2023-50358 lesson.)
 
 ### Gate 1.3 — Session Time-Box for Large Binaries
 
@@ -93,7 +93,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
 
 ---
 
-## Stage 2 — During Analysis Gates（分析過程中的強制確認點）
+## Stage 2 — During Analysis Gates (mandatory checkpoints during analysis)
 
 ### Gate 2.1 — Caller Auth Check for system()/popen() Hits
 
@@ -122,7 +122,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
 
   **If any question cannot be answered from static analysis → mark as `[needs dynamic confirmation]`, not as exploitable.**
 
-  Reference: Monolithic httpd dual-dispatch pattern (教訓: SOAP dispatch has auth flag; CGI dispatch may not — non-standard flag = target of analysis, not assumption).
+  Reference: Monolithic httpd dual-dispatch pattern (Lesson: SOAP dispatch has auth flag; CGI dispatch may not — non-standard flag = target of analysis, not assumption).
 
 ### Gate 2.2 — Shared Library False-Positive Filter
 
@@ -184,7 +184,7 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
 
 ---
 
-## Stage 3 — Output Gates（寫報告前的強制確認點）
+## Stage 3 — Output Gates (mandatory checkpoints before writing a report)
 
 ### Gate 3.1 — Conditional Language for Non-Dynamically-Verified Findings
 
@@ -324,5 +324,5 @@ source: Items #8, #18, #28, #29, #31, #42, #53, #55, #63, #68 + 教訓 #7, #81, 
 - [[bb-version-cve-precheck]] — skill for pre-flight CVE/advisory check (Gate 1.2)
 - [[Pattern - Firmware CGI Command Injection Grep]] — grep methodology for Gates 2.1–2.3
 - [[Reference Card - TWCERT CVE Form]] — Gate 3.2 verification boundary field placement
-- [[Lessons Learned]] §教訓 #7 (韌體分析三件必做), #81 (靜態分析架構結論必須動態驗證), #99 (CGI 命令注入 grep + 往回追一層)
+- [[Lessons Learned]] §Lesson #7 (three must-dos for firmware analysis), #81 (static architectural conclusions must be dynamically verified), #99 (CGI command injection grep + trace back one layer)
 - [[Checklist - Attack Surface Coverage]] — upstream gate before firmware analysis begins

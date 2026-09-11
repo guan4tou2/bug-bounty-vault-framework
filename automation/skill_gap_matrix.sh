@@ -117,7 +117,7 @@ generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 HEADER
 
 # yaklang skills with heuristics
-[ "$SIG_PHP" = 1 ] && verdict "type-juggling" yes "Laravel/PHP detected — OTP / hash 弱比較 / magic hash" || verdict "type-juggling" no "no PHP detected"
+[ "$SIG_PHP" = 1 ] && verdict "type-juggling" yes "Laravel/PHP detected — OTP / hash weak comparison / magic hash" || verdict "type-juggling" no "no PHP detected"
 [ "$SIG_AUTH" = 1 ] && verdict "http-host-header-attacks" yes "auth surface present → password reset poisoning candidate" || verdict "http-host-header-attacks" maybe "no auth surface noted; check anyway"
 [ "$SIG_AUTH" = 1 ] && verdict "authbypass-authentication-flaws" yes "auth surfaces detected — pw reset / MFA / token predictability" || verdict "authbypass-authentication-flaws" maybe "verify auth surfaces"
 [ "$SIG_AUTH" = 1 ] && verdict "jwt-oauth-token-attacks" maybe "auth detected — check if JWT/OAuth specifically" || verdict "jwt-oauth-token-attacks" no "no auth detected"
@@ -125,7 +125,7 @@ HEADER
 [ "$SIG_NODE" = 1 ] && verdict "prototype-pollution" yes "Node.js detected" || verdict "prototype-pollution" no "no Node detected"
 [ "$SIG_NODE" = 1 ] && verdict "prototype-pollution-advanced" yes "Node.js — PP→RCE gadgets relevant" || verdict "prototype-pollution-advanced" no "no Node detected"
 verdict "business-logic-vulnerabilities" yes "always-applicable to any form/workflow"
-[ "$SIG_API" = 1 ] && verdict "http-parameter-pollution" yes "API surface — CDN/WAF/app 解析差異" || verdict "http-parameter-pollution" maybe "any param-taking endpoint"
+[ "$SIG_API" = 1 ] && verdict "http-parameter-pollution" yes "API surface — CDN/WAF/app parsing discrepancies" || verdict "http-parameter-pollution" maybe "any param-taking endpoint"
 verdict "crlf-injection" maybe "test any redirect/Location/Set-Cookie endpoint"
 [ "$SIG_PHP" = 1 ] && verdict "nosql-injection" maybe "PHP stack — MongoDB possible but uncommon" || verdict "nosql-injection" maybe "fingerprint backend DB first"
 [ "$SIG_UPLOAD" = 1 ] && verdict "upload-insecure-files" yes "upload surface present — IIS/Nginx/Apache parser CVEs" || verdict "upload-insecure-files" no "no upload surface noted"
@@ -148,7 +148,7 @@ cat <<MID
 |---|---|---|
 MID
 
-[ "$SIG_COMPETITION" = 1 ] && verdict "Disclosed Pre-Read Gate" yes "**MANDATORY** — competition target" || verdict "Disclosed Pre-Read Gate" yes "always required;低成本"
+[ "$SIG_COMPETITION" = 1 ] && verdict "Disclosed Pre-Read Gate" yes "**MANDATORY** — competition target" || verdict "Disclosed Pre-Read Gate" yes "always required; low cost"
 verdict "bb-surface-mapping" yes "first gate — required before any pattern/hunter"
 verdict "bb-scope-safety-check" yes "before any active scan"
 verdict "bb-web-vuln-scan" yes "main OWASP coverage skill"

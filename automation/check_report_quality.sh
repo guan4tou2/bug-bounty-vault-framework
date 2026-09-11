@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Report-quality gate (TEMPLATE/REPORT loop) — mechanical pre-submission check on a
-# FORM / Submission file. Turns the "三題檢驗 / 反誇大 / 通報前清單" conventions into a
+# FORM / Submission file. Turns the "three-question check / anti-exaggeration / pre-submission checklist" conventions into a
 # real gate. Hard-fails on the "never" rules (exaggeration words, internal IDs);
 # warns on completeness (impact / PoC / severity) since field layout varies.
 #
@@ -20,9 +20,9 @@ body=$(cat "$f")
 echo "── report quality: $(basename "$f") ──"
 
 # HARD 1 — anti-exaggeration: no unproven hedging presented as impact
-exag=$(echo "$body" | grep -niE "could potentially|potentially could|理論上(可|能)|推測(可|能)|應該可以|可能可以|maybe exploitable|might allow" | head -5)
+exag=$(echo "$body" | grep -niE "could potentially|potentially could|theoretically (could|can)|presumably (could|can)|should be able to|possibly could|maybe exploitable|might allow" | head -5)
 if [ -n "$exag" ]; then
-  bad "exaggeration / unproven hedging — prove it or drop it (反誇大):"
+  bad "exaggeration / unproven hedging — prove it or drop it (anti-exaggeration):"
   echo "$exag" | sed 's/^/     /'
 else
   ok "no exaggeration hedging"
@@ -31,16 +31,16 @@ fi
 # HARD 2 — no internal IDs in report body (exclude CVE/CWE/CVSS)
 ids=$(echo "$body" | grep -noE "[A-Z]{2,5}-[0-9]{2,4}" | grep -viE "CVE-|CWE-|CVSS|SHA-|RFC-|ISO-|AES-|RSA-|TLS-|SSL-|MD5-|UTF-|HMAC-" | head -5)
 if [ -n "$ids" ]; then
-  bad "internal IDs in report body — strip them (報告禁用內部編號):"
+  bad "internal IDs in report body — strip them (no internal IDs in reports):"
   echo "$ids" | sed 's/^/     /'
 else
   ok "no internal IDs in body"
 fi
 
 # WARN — completeness signals (layout varies; advisory)
-echo "$body" | grep -qiE "impact|影響|衝擊" || warn "no Impact section/keyword found — state concrete impact, not just 'exposed'"
-echo "$body" | grep -qiE "poc|proof of concept|重現|reproduc|步驟|steps to" || warn "no PoC / reproduction steps found"
-echo "$body" | grep -qiE "severity|嚴重|cvss|critical|high|medium|low" || warn "no severity/CVSS found"
+echo "$body" | grep -qiE "impact" || warn "no Impact section/keyword found — state concrete impact, not just 'exposed'"
+echo "$body" | grep -qiE "poc|proof of concept|reproduc|steps to" || warn "no PoC / reproduction steps found"
+echo "$body" | grep -qiE "severity|cvss|critical|high|medium|low" || warn "no severity/CVSS found"
 
 echo "──"
 if [ "$fails" -gt 0 ]; then

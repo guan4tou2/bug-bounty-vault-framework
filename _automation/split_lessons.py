@@ -28,8 +28,8 @@ KB = ROOT / "09 - Knowledge Base"
 SRC = KB / "Lessons Learned.md"
 OUT_DIR = KB / "Lessons"
 
-# Match lesson header: `### 教訓 #NN. <title>` (NN may be 1-3 digits, optionally W prefix)
-LESSON_HEAD = re.compile(r"^###\s+教訓\s+#([A-Z]?\d+)\.\s*(.+?)\s*$", re.MULTILINE)
+# Match lesson header: `### Lesson #NN. <title>` (NN may be 1-3 digits, optionally W prefix)
+LESSON_HEAD = re.compile(r"^###\s+Lesson\s+#([A-Z]?\d+)\.\s*(.+?)\s*$", re.MULTILINE)
 
 
 def slugify(text: str, max_len: int = 50) -> str:
@@ -41,7 +41,7 @@ def slugify(text: str, max_len: int = 50) -> str:
     for ch in text.lower():
         if ch.isalnum():
             out.append(ch)
-        elif "一" <= ch <= "鿿":  # CJK unified ideograph
+        elif 0x4e00 <= ord(ch) <= 0x9fff:  # CJK unified ideograph
             out.append(ch)
         elif ch in " -_/:":
             out.append("-")
@@ -97,7 +97,7 @@ def write_lesson(lid: str, title: str, body: str, apply: bool) -> Path:
         "tags:\n  - bb-lesson\n"
         "---\n\n"
     )
-    content = fm + f"# 教訓 #{lid}. {title}\n\n{body}\n"
+    content = fm + f"# Lesson #{lid}. {title}\n\n{body}\n"
     if apply:
         OUT_DIR.mkdir(exist_ok=True)
         path.write_text(content, encoding="utf-8")
@@ -110,19 +110,19 @@ def write_moc(head: str, lessons: list[tuple[str, str, str]], apply: bool) -> st
     # Append a directory + dataview query.
     moc_tail = (
         "\n\n---\n\n"
-        "## 個別教訓檔\n\n"
-        "> 2026-06-04 起,每條教訓拆成 `Lessons/LL-NNN-<slug>.md`(消除 parallel-session 寫入熱點)。\n"
-        "> 本檔變成 MOC + 索引;新加教訓請寫進 `Lessons/`,不要再 append 此檔。\n\n"
+        "## Individual Lesson Files\n\n"
+        "> Since 2026-06-04, each lesson is split into `Lessons/LL-NNN-<slug>.md` (eliminating the parallel-session write hotspot).\n"
+        "> This file becomes a MOC + index; add new lessons under `Lessons/`, do not append to this file anymore.\n\n"
         "```dataview\n"
         "TABLE WITHOUT ID\n"
-        "  link(file.link, replace(file.name, \"LL-\", \"#\")) AS \"教訓\",\n"
-        "  title AS \"標題\",\n"
-        "  file.cday AS \"建立\"\n"
+        "  link(file.link, replace(file.name, \"LL-\", \"#\")) AS \"Lesson\",\n"
+        "  title AS \"Title\",\n"
+        "  file.cday AS \"Created\"\n"
         "FROM \"09 - Knowledge Base/Lessons\"\n"
         "WHERE type = \"lesson\"\n"
         "SORT id DESC\n"
         "```\n\n"
-        "## 全文索引(直接列表)\n\n"
+        "## Full Index (literal list)\n\n"
     )
     rows = []
     for lid, title, _ in lessons:

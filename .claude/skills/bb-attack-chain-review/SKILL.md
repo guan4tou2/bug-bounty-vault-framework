@@ -17,7 +17,7 @@ Run this when:
 - an info leak might expose tokens, endpoints, roles, internal services, or tenant identifiers
 - a low / medium issue might combine with auth, tenant, role, write, SSRF, callback, or async behavior
 - a report severity feels uncertain
-- the user asks "還能串嗎", "deep dive", "chain", "impact", or "深入挖掘"
+- the user asks "can this chain further", "deep dive", "chain", "impact", or "dig deeper"
 
 ## Required Inputs
 

@@ -22,7 +22,7 @@ related_patterns:
 
 ---
 
-## Stage 0 — Trigger Conditions（何時必須跑此 checklist）
+## Stage 0 — Trigger Conditions (when this checklist must be run)
 
 Run this checklist for every bucket discovery that passes any of the following:
 
@@ -36,7 +36,7 @@ Run this checklist for every bucket discovery that passes any of the following:
 
 ---
 
-## Stage 1 — Content-Based Ownership Check（必須至少通過一項）
+## Stage 1 — Content-Based Ownership Check (at least one must pass)
 
 A bucket is attributed to the target only if at least one content-based ownership signal is confirmed. The following gates are ordered by cost (cheapest first).
 
@@ -149,7 +149,7 @@ A bucket is attributed to the target only if at least one content-based ownershi
 
 ---
 
-## Stage 2 — Negative Attribution Check（排除第三方擁有者）
+## Stage 2 — Negative Attribution Check (rule out third-party owners)
 
 Even if Stage 1 passes, confirm no stronger signal points to a different owner.
 
@@ -315,5 +315,5 @@ Any Finding with this flag must not advance to Submission until the flag is reso
 - [[Pattern - S3 Bucket Takeover]] — covers unclaimed bucket registration (different problem: bucket does not exist yet)
 - [[Checklist - Attack Surface Coverage]] §7 Files / Uploads / Storage — upstream gate where bucket is first flagged
 - [[Checklist - Web Vuln Technique Coverage]] — broader vuln matrix
-- 教訓 #100 — Cloud Bucket 路徑結構 = 商業情報（path-as-BI lesson）
+- Lesson #100 — Cloud Bucket path structure = business intelligence (path-as-BI lesson)
 - Memory: `feedback_bucket_namespace_ownership.md` — LISTABLE ≠ owned by target; content-based ownership verification

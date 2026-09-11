@@ -269,10 +269,10 @@ app.on("will-download", (event, item, webContents) => {
 
 ## Related
 
-- [[Pattern - Windows UNC Path Primitive]] — meta-pattern：Variant C 對應 T3 (file-write) sink，同 OS primitive
+- [[Pattern - Windows UNC Path Primitive]] — meta-pattern: Variant C corresponds to the T3 (file-write) sink, same OS primitive
 - [[Pattern - Electron Custom Scheme Handler Injection]] — trigger entrypoint
-- [[Pattern - shell.openExternal UNC RCE]] — sibling T1 sink，可串「traversal write + UNC `.lnk` 自動 open」
+- [[Pattern - shell.openExternal UNC RCE]] — sibling T1 sink; can chain "traversal write + UNC `.lnk` auto-open"
 - [[Pattern - JWT File-based Validation UNC NTLM Oracle]] — sibling T2 sink
 - [[Pattern - Electron Preload Injection Chain]]
 - Target vendor case study §VENDOR-018
-- [[Lessons Learned]] §韌體漏洞驗證標準 / §Bug Bounty 報告反誇大規範
+- [[Lessons Learned]] §Firmware vulnerability verification standards / §Bug bounty report anti-exaggeration rules

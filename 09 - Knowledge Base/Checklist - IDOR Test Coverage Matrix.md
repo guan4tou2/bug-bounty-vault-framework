@@ -3,7 +3,7 @@ type: reference
 category: Checklist
 tags: [checklist, idor, authz, write-path, verb-matrix, financial-api, deal-id, order-id, api-gateway, backend-authz, multi-role]
 last_updated: 2026-06-04
-source: Items #9, #10 (merged — same root cause), #11 — a multi-role ERP/SaaS session's tests, plus a trading API's observations. Converge on: testers stop at GET and miss higher-severity write-path IDOR. 教訓 #50 covers file upload CRUD briefly; Playbook - IDOR Hunting (Burp) mentions verbs; no existing checklist item enforces this as a mandatory gate.
+source: Items #9, #10 (merged — same root cause), #11 — a multi-role ERP/SaaS session's tests, plus a trading API's observations. Converge on: testers stop at GET and miss higher-severity write-path IDOR. Lesson #50 covers file upload CRUD briefly; Playbook - IDOR Hunting (Burp) mentions verbs; no existing checklist item enforces this as a mandatory gate.
 ---
 
 # Checklist — IDOR Test Coverage Matrix: Read AND Write Operations Required
@@ -123,7 +123,7 @@ For each resource ID type, test ALL five operations below. Mark each with PASS /
 - [ ] **Do not assume API gateway auth = backend authz.**
 
   Evidence of a split-layer architecture (check for these signals before starting):
-  - Swagger/OpenAPI spec shows `security: []` on some paths but not others (see 教訓 #49)
+  - Swagger/OpenAPI spec shows `security: []` on some paths but not others (see Lesson #49)
   - Different response times between authenticated and unauthenticated calls to the same path (gateway intercepts auth; slow path = forwarded to backend)
   - Error messages differ between 401 (gateway-level) and 403 (backend-level) on related endpoints
   - Some endpoints return gateway-formatted error JSON, others return backend-framework-formatted errors
@@ -282,5 +282,5 @@ For each resource ID type, test ALL five operations below. Mark each with PASS /
 - [[Pattern - IDOR Response Differential]] — how to confirm IDOR from response shape when status codes are identical
 - [[Playbook - IDOR Hunting (Burp)]] — Burp-based workflow for intercepting and replaying IDOR requests
 - [[Checklist - Web Vuln Technique Coverage]] — upstream checklist; IDOR is one item there; this checklist expands the IDOR row
-- [[Lessons Learned]] §教訓 #50 (A→B: file upload 無認證 → 所有同資源 CRUD 操作都要測), §教訓 #106 (前端 RBAC = 0 RBAC)
+- [[Lessons Learned]] §Lesson #50 (A→B: unauthenticated file upload → test all CRUD operations on the same resource), §Lesson #106 (frontend RBAC = zero RBAC)
 - [[Reference Card - Bug Bounty Workflow 2026]] — severity guidance: write-path IDOR typically P2–P3; financial write-path IDOR typically P1–P2

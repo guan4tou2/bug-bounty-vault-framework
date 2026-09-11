@@ -100,12 +100,12 @@ Attacker sends Meet/preview URL
 
 ## Session-Mined Additions (2026-06-04)
 
-- **PDF viewer webview exception**：Rocket.Chat Desktop 的 `will-navigate` handler 對 PDF viewer webview 有例外分支，非 PDF webview 的 navigation 可繞過 handler。審計時必須確認每個 webview 的 `will-navigate` 覆蓋範圍。
+- **PDF viewer webview exception**: Rocket.Chat Desktop's `will-navigate` handler has an exception branch for the PDF viewer webview; navigation in a non-PDF webview can bypass the handler. During an audit you must confirm the `will-navigate` coverage of every webview.
 
 ## Session-Mined Additions (2026-08-04)
 
-- **Preload 直接載入外部 script 變體**（[Case A] meetPreload.js）：preload 從 `--meet-url=` argument 解析 domain，直接建 `<script src="https://DOMAIN/external_api.js">`，**零白名單驗證**。攻擊者控制 domain → script 在 parent page context 執行（contextIsolation:false）→ 完全 RCE。
-  - 注意：script 在 **parent page**（非 iframe）載入 → 能直接存取 preload 暴露的 `require('electron')` / 該 app 自訂的 IPC wrapper 物件（wrapping `ipcRenderer`）
-  - 比「window.electron bridge 可存取」更嚴重：攻擊者的 JS 載入時就在 Node.js context 中，不需繞 contextBridge
-  - **審計關鍵字**：grep `createElement('script')` / `document.createElement("script")` + 確認 src 來源是否受使用者/攻擊者控制
-- **Lessons #277**：混淆碼 identifier 不一致導致 false negative — 先解混淆再測，否則結論無效
+- **Preload directly loads external script variant** ([Case A] meetPreload.js): the preload parses the domain from the `--meet-url=` argument and directly builds `<script src="https://DOMAIN/external_api.js">`, with **zero allowlist validation**. Attacker controls the domain → the script runs in the parent page context (contextIsolation:false) → full RCE.
+  - Note: the script loads in the **parent page** (not an iframe) → it can directly access the preload-exposed `require('electron')` / the app's custom IPC wrapper object (wrapping `ipcRenderer`)
+  - More severe than "window.electron bridge is accessible": the attacker's JS is already in the Node.js context when it loads, with no need to bypass contextBridge
+  - **Audit keywords**: grep `createElement('script')` / `document.createElement("script")` + confirm whether the src origin is user/attacker-controlled
+- **Lessons #277**: inconsistent identifiers in obfuscated code cause false negatives — deobfuscate before testing, otherwise conclusions are invalid

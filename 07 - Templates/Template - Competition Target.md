@@ -13,7 +13,7 @@ competition_end: "{{YYYY-MM-DD}}"
 scoring_rules: "{{e.g., 80% CVSS + 20% completeness; same system merges}}"
 team: "{{team-name}}"
 team_account: "{{handle}}"
-ip_constraint: "{{台灣 IP / VPS allowed yes/no}}"
+ip_constraint: "{{local/regional IP / VPS allowed yes/no}}"
 risk: medium
 first_seen: "{{YYYY-MM-DD}}"
 external_findings_count: 0
@@ -71,14 +71,14 @@ teammate_findings_count: 0
 ## 7. KB Purity Boundary
 
 What goes WHERE:
-- 競賽-specific（scoring/rules/platform IDs/teammate findings）→ this file or memory
-- 抽象化教訓（攻擊模式、推論方法）→ `09 - Knowledge Base/Lessons/LL-NNN-*.md`
-- 工具配方（generic、不限本競賽）→ `09 - Knowledge Base/Pattern - / Playbook -`
+- Competition-specific (scoring/rules/platform IDs/teammate findings) → this file or memory
+- Abstracted lessons (attack patterns, reasoning methods) → `09 - Knowledge Base/Lessons/LL-NNN-*.md`
+- Tool recipes (generic, not tied to this competition) → `09 - Knowledge Base/Pattern - / Playbook -`
 
 ## Related
 
 - [[Checklist - Disclosed Findings Pre-Read Gate]] — mandatory before hunt
-- [[Playbook - Trigger Chain Dry-Run]] — pre-hunt 紙上跑
+- [[Playbook - Trigger Chain Dry-Run]] — pre-hunt paper run
 - `automation/check_disclosed_preread.sh` — evidence file gate
-- `automation/skill_gap_matrix.sh` — Step 3 矩陣產出
-- `automation/dedup_hints.sh` — Step 5 dedup 前手動 grep
+- `automation/skill_gap_matrix.sh` — Step 3 matrix generation
+- `automation/dedup_hints.sh` — Step 5 manual grep before dedup

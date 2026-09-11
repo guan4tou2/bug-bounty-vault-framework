@@ -294,10 +294,10 @@ def lint_file(path: Path) -> list[str]:
 def staged_md_files() -> list[Path]:
     """Return staged .md files for lint.
 
-    Scope policy(2026-06-05):
-    - 01 - Targets/: AM(Added + Modified)— template-bound schema
-    - 09 - Knowledge Base/Pattern - *.md: A only(Added)— enforce frontmatter ONLY
-      on newly added patterns;既有 legacy patterns 不強制(too aggressive
+    Scope policy (2026-06-05):
+    - 01 - Targets/: AM (Added + Modified) — template-bound schema
+    - 09 - Knowledge Base/Pattern - *.md: A only (Added) — enforce frontmatter ONLY
+      on newly added patterns; existing legacy patterns are not enforced (too aggressive a
       grandfather burden). Modifying an existing pattern that lacks
       frontmatter still passes — but a brand-new pattern MUST have it.
     """

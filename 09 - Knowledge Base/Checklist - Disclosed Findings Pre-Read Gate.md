@@ -7,7 +7,7 @@ first_seen: 2026-06-04
 last_updated: 2026-06-04
 category: Checklist
 precedents: >
-  Example Competition 競賽（2026-06-02）— agent had not read the disclosed vulnerability PDF
+  <Competition> competition (2026-06-02) — agent had not read the disclosed vulnerability PDF
   before starting work; risked duplicating known findings. User correction was explicit.
   No existing KB item covers this competition-specific pre-work gate.
   'Checklist - Fresh Clone Acceptance' covers workspace hygiene only.
@@ -26,7 +26,7 @@ findings were already documented in a public disclosed-report PDF. This gate for
 
 Trigger conditions (any one is sufficient):
 
-- Any bug bounty competition (Example Competition, <Platform> CTF-style competitions, government red-blue
+- Any bug bounty competition (<Competition>, <Platform> CTF-style competitions, government red-blue
   exercises, etc.)
 - Any platform with a public disclosed/fixed report page (<Platform>, <Platform>, <Platform>)
 - Any scope page that lists a "prior findings", "disclosed vulnerabilities", or "known issues"
@@ -49,7 +49,7 @@ Depending on platform type:
 
 | Context | Where to find disclosed reports | Command / URL pattern |
 |---|---|---|
-| Example Competition (and similar gov competitions) | Competition results page + official announcement PDF | WebFetch `<competition-official-site>/results` or organiser's Google Drive link |
+| <Competition> (and similar gov competitions) | Competition results page + official announcement PDF | WebFetch `<competition-official-site>/results` or organiser's Google Drive link |
 | <Platform> | <Platform> published advisories | `https://zeroday.platform.org/vulnerability` (filter by target org name) |
 | <Platform> program | Program's "Hacktivity" tab — filter "disclosed" | `https://<bb-platform>/<program>/hacktivity |
 | <Platform> program | Program's "Disclosed Reports" section | `https://<bb-platform>/<program>/disclosed |
@@ -96,7 +96,7 @@ For each disclosed report read, extract these three fields and add a row to RECO
 
 | ID | Source | Vuln Type | Affected Endpoint / Component | Root Cause (one line) | Status |
 |----|--------|-----------|-------------------------------|-----------------------|--------|
-| KF-001 | <Platform> #12345 | 存取控制缺陷 | /api/admin/users | No auth check on list endpoint | Fixed 2025-11 |
+| KF-001 | <Platform> #12345 | Broken access control | /api/admin/users | No auth check on list endpoint | Fixed 2025-11 |
 | KF-002 | <Platform> #987654 | IDOR | /v2/orders/{id} | UUID not verified against session user | Resolved |
 | KF-003 | Competition PDF p.4 | SQLi | /search?q= | Unsanitised string concat in ORM | Unknown |
 ```
@@ -128,7 +128,7 @@ Before opening any Finding candidate, confirm in RECON_DB:
 If `NO`: state explicit reason (e.g., `no public disclosed section exists for this program`).
 A blank or missing gate entry = gate not passed.
 
-### §4b. Evidence file(2026-06-04 加,automation-enforceable)
+### §4b. Evidence file (added 2026-06-04, automation-enforceable)
 
 The RECON_DB sign-off is text — easy to forge / forget. Add a **physical evidence file** so automation can check:
 
@@ -163,7 +163,7 @@ status: pre_read_complete
 - ...
 ```
 
-**Verification(可由 skill / agent / audit 呼叫)**:
+**Verification (can be invoked by skill / agent / audit)**:
 ```bash
 # Quick check: does the evidence file exist + is it complete?
 bash automation/check_disclosed_preread.sh <target>
@@ -172,7 +172,7 @@ bash automation/check_disclosed_preread.sh <target>
 #   exit 1 + "⛔ <target>: missing $WORKSHOP_ROOT/<t>/disclosed_pre_read.md"
 ```
 
-`bb-surface-mapping` skill 在 Step 0 之前先 call 這個 check;失敗 → 不准進入後續 lifecycle gates。
+The `bb-surface-mapping` skill calls this check before Step 0; on failure → not allowed to proceed into subsequent lifecycle gates.
 
 ---
 
@@ -195,17 +195,17 @@ grep -i "<vuln-type-keyword>" "workspace/workshop/<target>/RECON_DB.md"
 
 ## §6. Competition-specific addenda
 
-Additional steps required for competitions (e.g., Example Competition, government red-blue drills):
+Additional steps required for competitions (e.g., <Competition>, government red-blue drills):
 
 - [ ] Download the **official competition scope PDF** before session start — competition organisers often publish a list of in-scope systems AND a list of already-known/awarded findings from prior rounds
 - [ ] If prior-round results are published (e.g., "2024 awarded findings" list): treat every item as a KF entry in §3, even if no technical details are given — record vuln type + system name at minimum
-- [ ] Confirm competition scoring rules: some competitions disqualify duplicate findings even if the root cause is slightly different (e.g., Example Competition: same system = merged, not split)
+- [ ] Confirm competition scoring rules: some competitions disqualify duplicate findings even if the root cause is slightly different (e.g., <Competition>: same system = merged, not split)
 - [ ] Record competition round and scoring rules at top of RECON_DB:
 
 ```markdown
 ## 🏆 Competition Context
 
-- Competition: Example Competition 2026
+- Competition: <Competition> 2026
 - Round: Red-blue exercise (06/01–06/15)
 - Scoring rules: same system merges, different system prioritised, outdated-version-only invalid
 - Prior round findings PDF: workspace/workshop/example-competition/recon/disclosed/2025_results.pdf
@@ -229,6 +229,6 @@ Additional steps required for competitions (e.g., Example Competition, governmen
 - [[Checklist - Recon Floor]] — tool-based recon floor; this checklist is the prior-disclosure pre-work that runs before Recon Floor
 - [[Checklist - Attack Surface Coverage]] — dimension-level surface map; run after both this gate and Recon Floor
 - [[Reference Card - Bug Bounty Workflow 2026]] — full session lifecycle; this gate sits between scope-read and recon-tool-run
-- [[Lessons Learned]] — 教訓 #121 (競賽策略: different system > same system), 教訓 #25 (Prior-disclosure check)
+- [[Lessons Learned]] — Lesson #121 (competition strategy: different system > same system), Lesson #25 (Prior-disclosure check)
 - `bb-dedup-finding` skill — root-cause dedup logic; invoked in §5
 - AGENTS.md §0c — KB query timing (before research, during hunting, before report writing)

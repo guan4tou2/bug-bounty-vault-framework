@@ -10,7 +10,7 @@ added: 2026-05-22
 
 # Reference Card - Evidence Retention Policy
 
-> 目的：定義 Vault 與 workspace 的 evidence 邊界，避免 raw scan output、大檔、secret-bearing evidence 被 commit，同時保留報告需要的可追溯證據。
+> Purpose: Define the evidence boundary between the Vault and the workspace, preventing raw scan output, large files, and secret-bearing evidence from being committed, while retaining the traceable evidence that reports require.
 
 ---
 
@@ -19,38 +19,38 @@ added: 2026-05-22
 | Evidence type | Location | Rule |
 |---|---|---|
 | Canonical reproduction steps | Finding / Submission / FORM | Vault keeps canonical evidence summaries |
-| Minimal curl / request shape | Finding Evidence | 可進 Vault；去除 secrets |
+| Minimal curl / request shape | Finding Evidence | May go in the Vault; strip secrets |
 | Raw scan output | external workspace | workspace keeps raw artifacts |
-| PoC bundle / exploit script | external workspace `poc/` | 只在 Vault 放 path + hash |
-| Rootfs / binary extraction | external workspace | 不進 Obsidian / git |
+| PoC bundle / exploit script | external workspace `poc/` | store only path + hash in the Vault |
+| Rootfs / binary extraction | external workspace | does not go into Obsidian / git |
 | Screenshots | Vault only if small and sanitized | screenshots allowed in Vault only when sanitized |
-| Token / cookie / credential response | external workspace or redacted summary | secret-bearing evidence 不 commit |
+| Token / cookie / credential response | external workspace or redacted summary | do not commit secret-bearing evidence |
 
 ---
 
 ## Vault Evidence Requirements
 
-Vault 裡應保留：
+The Vault should retain:
 
-- 足夠重現的步驟。
-- sanitized request / response excerpt。
-- impact explanation。
-- hash and path reference to raw artifact when needed。
-- audit ref 或 operation log reference。
+- Steps sufficient to reproduce.
+- sanitized request / response excerpt.
+- impact explanation.
+- hash and path reference to raw artifact when needed.
+- audit ref or operation log reference.
 
-Vault 裡不保留：
+The Vault should NOT retain:
 
-- do not commit raw scan output。
-- full credential dump。
-- unredacted cookies / tokens / API keys。
-- large binary / rootfs / tool cache。
-- vendor private資料超出報告必要範圍。
+- do not commit raw scan output.
+- full credential dump.
+- unredacted cookies / tokens / API keys.
+- large binary / rootfs / tool cache.
+- vendor private data beyond what the report requires.
 
 ---
 
 ## Redaction Checklist
 
-redaction checklist：
+redaction checklist:
 
 - [ ] token / cookie / bearer / session id removed
 - [ ] private IP only kept if directly relevant and scoped

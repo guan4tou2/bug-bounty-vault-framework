@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
-# precheck_version_cve.sh — AGENTS.md §0g.11 加速器
+# precheck_version_cve.sh — AGENTS.md §0g.11 accelerator
 #
-# 用 NVD CVE API 2.0（公開，無需 API key）搜尋 <vendor> <product>，
-# 印出符合的 CVE 列表 + 可貼進 RECON_DB `## 🛡️ Pre-flight Checks` 的 markdown snippet。
+# Uses the NVD CVE API 2.0 (public, no API key needed) to search <vendor> <product>,
+# printing the matching CVE list + a markdown snippet you can paste into the RECON_DB
+# `## 🛡️ Pre-flight Checks` section.
 #
-# 注意：
-# - NVD keyword search 不會自動過濾版本。你必須手動驗證每個 CVE 的 affected version range。
-# - 本腳本**不**解析各家 vendor advisory（各家頁面結構差異太大），advisory 仍須手動 WebFetch。
-# - 是 §0g.5 NVD 必查項的加速工具，不是替代品；vendor advisory + changelog 必查仍要做。
+# Notes:
+# - NVD keyword search does not automatically filter by version. You must manually verify each CVE's affected version range.
+# - This script does **not** parse individual vendor advisories (page structures vary too much); advisories still require a manual WebFetch.
+# - It is an accelerator for the mandatory §0g.5 NVD check, not a replacement; the mandatory vendor advisory + changelog checks still need to be done.
 #
-# 用法：
+# Usage:
 #   automation/precheck_version_cve.sh <vendor> <product> [version]
 #
-# 範例：
+# Examples:
 #   automation/precheck_version_cve.sh qnap qts 5.0.1.2425
 #   automation/precheck_version_cve.sh netgear wax620 1.0.5
 #   automation/precheck_version_cve.sh dlink dcs-4614ek
 #
 # Exit codes:
-#   0  Success（含 0 hits）
+#   0  Success (including 0 hits)
 #   1  Usage error
 #   2  Network / API error
 
@@ -117,12 +118,12 @@ if [[ "${TOTAL}" -gt 0 ]]; then
   fi
   if [[ "$KEV_HITS" -gt 0 ]]; then
     echo ""
-    echo "🔥 **${KEV_HITS} CVE(s) in CISA KEV** (Known Exploited Vulnerabilities) — high-priority chain candidate;若 target 版本受影響,**幾乎一定可利用**(in-the-wild exploitation 已確認)。"
+    echo "🔥 **${KEV_HITS} CVE(s) in CISA KEV** (Known Exploited Vulnerabilities) — high-priority chain candidate; if the target version is affected, it is **almost certainly exploitable** (in-the-wild exploitation confirmed)."
   fi
   echo ""
-  echo "### Other CVE sources(manual follow-up)"
+  echo "### Other CVE sources (manual follow-up)"
   echo "- Exploit-DB search: https://www.exploit-db.com/search?q=$(printf '%s' "$KEY" | jq -sRr @uri)"
-  echo "- searchsploit local:  \`searchsploit ${VENDOR} ${PRODUCT}\`(若有安裝)"
+  echo "- searchsploit local:  \`searchsploit ${VENDOR} ${PRODUCT}\` (if installed)"
   echo "- packetstormsecurity:  https://packetstormsecurity.com/search/?q=$(printf '%s' "$KEY" | jq -sRr @uri)"
 else
   echo "_No NVD hits via keyword search. Still verify via vendor advisory + GHSA + H1 manually._"
@@ -132,7 +133,7 @@ cat <<EOF
 
 ---
 
-## Paste-ready RECON_DB snippet（依 §0g.9 模板；填完 manual verification 結果再 commit）
+## Paste-ready RECON_DB snippet (per the §0g.9 template; commit only after filling in the manual verification results)
 
 \`\`\`
 ### Target Pre-flight - ${DATE} - ${VENDOR}/${PRODUCT}/${VERSION}
@@ -148,5 +149,5 @@ cat <<EOF
 - Decision: <proceed | proceed - exception (<reason>) | abort - too old | abort - known CVE <CVE-ID> | abort - EOL>
 \`\`\`
 
-> 強制：填完 Decision 後，如果是 abort，跑 AGENTS.md §0g.7 五步停損 SOP。
+> Mandatory: after filling in Decision, if it is abort, run the five-step stop-loss SOP in AGENTS.md §0g.7.
 EOF

@@ -3,12 +3,12 @@ type: reference
 category: Checklist
 tags: [checklist, electron, shell.openExternal, static-analysis, triage, windows, unc, smb, ntlm, batch-audit]
 last_updated: 2026-06-04
-source: Items #27, #34, #37, #43 + 教訓 #85, #86, #87, #93 + Pattern - shell.openExternal UNC RCE
+source: Items #27, #34, #37, #43 + Lesson #85, #86, #87, #93 + Pattern - shell.openExternal UNC RCE
 ---
 
 # Checklist — Electron shell.openExternal Static Analysis Triage
 
-> **Purpose**: Prevent wasted hunts (Wire 教訓 #37, Mattermost 教訓 #40) and enforce consistent evidence standards before opening any Finding.
+> **Purpose**: Prevent wasted hunts (Wire Lesson #37, Mattermost Lesson #40) and enforce consistent evidence standards before opening any Finding.
 >
 > **Scope**: Static analysis triage only. For dynamic verification SOP see [[Pattern - shell.openExternal UNC RCE]] § Live verification SOP.
 >
@@ -16,7 +16,7 @@ source: Items #27, #34, #37, #43 + 教訓 #85, #86, #87, #93 + Pattern - shell.o
 
 ---
 
-## Pre-analysis gates（先做，任一 FAIL 立即停損）
+## Pre-analysis gates (Do first; any FAIL = immediate stop-loss)
 
 - [ ] **Confirm Electron**: `app.asar` present, `electron` in `package.json` devDependencies, bundled Chromium dir (`resources/`, `locales/`, `LICENSE.electron.txt` or `LICENSE.chromium.html`), binary size ~100-200 MB. If none of these → not Electron → stop.
 - [ ] **CVE / advisory pre-check** for `shell.openExternal` in this specific app:
@@ -33,7 +33,7 @@ source: Items #27, #34, #37, #43 + 教訓 #85, #86, #87, #93 + Pattern - shell.o
 
 ---
 
-## Sink discovery（extract 後第一步）
+## Sink discovery (first step after extraction)
 
 Run all four greps before reading any result — avoid tunnel vision on first hit.
 
@@ -58,7 +58,7 @@ grep -rn "skipValidityCheck\|ALLOWED_PROTOCOLS\|BLOCKED_PROTOCOLS\|allowedProtoc
 
 ---
 
-## For each call site（每個 sink 逐一過）
+## For each call site (go through each sink one by one)
 
 For each file from sink discovery:
 
@@ -109,7 +109,7 @@ For each file from sink discovery:
 
 ---
 
-## Delivery chain gate（每個 candidate sink 都必須過，開 Finding 前）
+## Delivery chain gate (every candidate sink must pass, before opening a Finding)
 
 Three layers must all pass for the finding to be exploitable. Document each layer explicitly in the Finding.
 
@@ -141,7 +141,7 @@ Exploitable = L1 × L2 × L3 (all three must be YES)
 
 ---
 
-## Kill conditions（任一成立 → 不開 Finding）
+## Kill conditions (any one true → do not open a Finding)
 
 - [ ] Cannot demonstrate attacker-controlled URL reaching the sink (L1, L2, or L3 fails)
 - [ ] Finding requires 5+ simultaneous prerequisites with no realistic attack scenario
@@ -182,4 +182,4 @@ If `verified_evidence: static` → grade B → acceptable for HITCON ZD / TWCERT
 - [[Pattern - Electron Custom Scheme Handler Injection]] — common L1 input point
 - [[Pattern - Electron Preload Injection Chain]] — common L1 input point
 - [[Checklist - Web Vuln Technique Coverage]] — technique matrix for web-facing injection paths into Electron
-- [[Lessons Learned]] §教訓 #85 (三層過濾模型), #86 (batch audit ROI), #87 (CVE incomplete fix), #93 (asar 快速分級法)
+- [[Lessons Learned]] §Lesson #85 (three-layer filtering model), #86 (batch audit ROI), #87 (CVE incomplete fix), #93 (asar rapid grading method)

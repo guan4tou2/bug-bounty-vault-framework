@@ -1,6 +1,6 @@
 ---
 name: bb-cvss-score
-description: Use when creating or reviewing a Finding and you need a CVSS 3.1 vector + base score. Stateless desc→vector transform for common BB vuln classes (IDOR, SSRF, XSS, SQLi, RCE, auth bypass, file upload, business logic, OAuth, GraphQL). Triggers include 算 CVSS, CVSS 評分, severity 多少.
+description: Use when creating or reviewing a Finding and you need a CVSS 3.1 vector + base score. Stateless desc→vector transform for common BB vuln classes (IDOR, SSRF, XSS, SQLi, RCE, auth bypass, file upload, business logic, OAuth, GraphQL). Triggers include calculate CVSS, CVSS scoring, what severity.
 ---
 
 # Bug Bounty — CVSS 3.1 Scoring
