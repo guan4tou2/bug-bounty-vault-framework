@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import uuid
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -24,6 +25,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVE_DIR = ROOT / "automation" / "active_sessions"
 EXPIRED_DIR = ACTIVE_DIR / "_expired"
+# Cross-process mutex for the claim critical section. mkdir() is atomic on POSIX
+# (no flock needed / macOS has none), so it serialises the conflict-check +
+# lock-create so two concurrent claims cannot both pass the check and both write.
+CLAIM_MUTEX = ACTIVE_DIR / ".claim.lock.d"
 
 
 def safe_scope(scope: str) -> str:
@@ -59,36 +64,75 @@ def conflicts_with(scope: str) -> list[str]:
     return conflicts
 
 
+def _acquire_mutex(timeout: float = 10.0, stale: float = 60.0) -> None:
+    """Atomically acquire the claim mutex via mkdir; reclaim if stale (>60s)."""
+    deadline = time.time() + timeout
+    while True:
+        try:
+            os.mkdir(CLAIM_MUTEX)
+            return
+        except FileExistsError:
+            try:
+                if time.time() - os.stat(CLAIM_MUTEX).st_mtime > stale:
+                    os.rmdir(CLAIM_MUTEX)
+                    continue
+            except FileNotFoundError:
+                continue
+            if time.time() > deadline:
+                raise TimeoutError(f"could not acquire claim mutex within {timeout}s")
+            time.sleep(0.1)
+
+
+def _release_mutex() -> None:
+    try:
+        os.rmdir(CLAIM_MUTEX)
+    except FileNotFoundError:
+        pass
+
+
 def claim(scope: str, owner: str, eta_minutes: int) -> bool:
-    """Attempt to claim a scope lock. Returns True on success."""
+    """Attempt to claim a scope lock. Returns True on success.
+
+    The conflict-check and lock-create run inside an atomic mkdir mutex so two
+    concurrent processes cannot both pass the check and both write a lock
+    (TOCTOU-free); the lock file itself is created with O_EXCL as defence-in-depth.
+    """
     ACTIVE_DIR.mkdir(parents=True, exist_ok=True)
     EXPIRED_DIR.mkdir(parents=True, exist_ok=True)
 
-    conflicts = conflicts_with(scope)
-    if conflicts:
-        print(f"BLOCKED: scope '{scope}' conflicts with active locks:")
-        for c in conflicts:
-            print(c)
-        print("\nUse --force to override (not implemented in minimal version).")
-        return False
+    _acquire_mutex()
+    try:
+        conflicts = conflicts_with(scope)
+        if conflicts:
+            print(f"BLOCKED: scope '{scope}' conflicts with active locks:")
+            for c in conflicts:
+                print(c)
+            print("\nUse --force to override (not implemented in minimal version).")
+            return False
 
-    lp = lock_path(scope)
-    if lp.exists():
-        print(f"BLOCKED: lock already exists: {lp.name}")
-        return False
+        lp = lock_path(scope)
+        now = datetime.now(timezone.utc)
+        lock_data = {
+            "session_id": uuid.uuid4().hex[:16],
+            "owner": owner,
+            "scope": scope,
+            "target": scope.split("/")[0],
+            "claimed_at": now.isoformat(),
+            "last_heartbeat": now.isoformat(),
+            "expected_release": (now + timedelta(minutes=eta_minutes)).isoformat(),
+            "host": os.uname().nodename,
+        }
+        try:
+            # O_EXCL: atomic create-or-fail, so an existing lock is never clobbered.
+            fd = os.open(lp, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        except FileExistsError:
+            print(f"BLOCKED: lock already exists: {lp.name}")
+            return False
+        with os.fdopen(fd, "w") as fh:
+            fh.write(json.dumps(lock_data, indent=2) + "\n")
+    finally:
+        _release_mutex()
 
-    now = datetime.now(timezone.utc)
-    lock_data = {
-        "session_id": uuid.uuid4().hex[:16],
-        "owner": owner,
-        "scope": scope,
-        "target": scope.split("/")[0],
-        "claimed_at": now.isoformat(),
-        "last_heartbeat": now.isoformat(),
-        "expected_release": (now + timedelta(minutes=eta_minutes)).isoformat(),
-        "host": os.uname().nodename,
-    }
-    lp.write_text(json.dumps(lock_data, indent=2) + "\n")
     print(f"CLAIMED: {scope} (owner={owner}, eta={eta_minutes}m)")
     print(f"  Lock: {lp}")
     print(f"  Session ID: {lock_data['session_id']}")

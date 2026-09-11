@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -52,6 +53,18 @@ def find_workspace(target: str) -> Path | None:
         if candidate.is_dir():
             return candidate
     return None
+
+
+def _frontmatter_value(text: str, key: str) -> str:
+    """First YAML frontmatter scalar for `key` (quotes/enum-hint stripped), else ''."""
+    m = re.search(rf"^{re.escape(key)}:\s*(.+)$", text, re.MULTILINE)
+    if not m:
+        return ""
+    val = m.group(1).strip().strip('"').strip("'").strip()
+    # A finding still on the template shows the enum hint ("a | b | c") — treat as unset.
+    if "|" in val:
+        return ""
+    return val
 
 
 def run_checklist(target: str) -> tuple[int, int]:
@@ -138,6 +151,40 @@ def run_checklist(target: str) -> tuple[int, int]:
     except Exception:
         print(f"{Y}[WARN]{N} Could not check git status")
         warnings += 1
+
+    # 6. Evidence readiness — a finding marked ready/submitted must not rest on
+    #    theoretical-only evidence (closed-loop Ring 3 → don't ship unproven).
+    findings_dir = VAULT_DIR / target / "Findings"
+    finding_files = sorted(findings_dir.glob("*.md")) if findings_dir.is_dir() else []
+    unproven = []
+    for ff in finding_files:
+        text = ff.read_text(errors="ignore")
+        status = _frontmatter_value(text, "status")
+        if status not in ("ready", "submitted"):
+            continue
+        ve = _frontmatter_value(text, "verified_evidence")
+        if ve in ("", "theoretical"):
+            unproven.append(f"{ff.name} (status={status}, verified_evidence={ve or 'unset'})")
+    if finding_files:
+        if unproven:
+            print(f"{R}[FAIL]{N} {len(unproven)} ready/submitted finding(s) lack proven evidence:")
+            for u in unproven[:5]:
+                print(f"       {u}")
+            failures += 1
+        else:
+            print(f"{G}[PASS]{N} All ready/submitted findings carry proven evidence")
+
+    # 7. Knowledge capture (closed-loop Ring 4) — a session that produced findings
+    #    but recorded no Attempts has likely left the loop open (no back-fill).
+    if finding_files:
+        attempts_dir = VAULT_DIR / target / "Attempts"
+        n_attempts = len(list(attempts_dir.glob("*.md"))) if attempts_dir.is_dir() else 0
+        if n_attempts == 0:
+            print(f"{Y}[WARN]{N} {len(finding_files)} finding(s) but 0 Attempts recorded -- "
+                  f"Ring 4 (knowledge capture) may be incomplete; run knowledge-capture before closing")
+            warnings += 1
+        else:
+            print(f"{G}[PASS]{N} Knowledge capture present ({n_attempts} attempt(s) recorded)")
 
     # Summary
     print(f"\n{'='*50}")

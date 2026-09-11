@@ -62,7 +62,7 @@ See [docs/architecture-closed-loop.md](docs/architecture-closed-loop.md) for the
 - An **Obsidian vault as the top-level control plane** — not a flat file tree
 - A complete **Finding → Submission → FORM** pipeline with templates and frontmatter schema
 - **Session lifecycle management** with claim/release concurrency control
-- **Tool layer is [bbflow](https://github.com/guan4tou2/bbflow)** — a standalone zero-LLM scanner CLI you install as a dependency (not bundled); establish it with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). Any contract-conforming scanner is a fallback.
+- **Tool layer is optional; default is [bbflow](https://github.com/guan4tou2/bbflow)** — a standalone zero-LLM scanner CLI you install separately (not bundled); establish it with `bb-tool-setup` / [bbflow/setup.md](bbflow/setup.md). You can run LLM-only or fully manual; when you do use a tool layer, any scanner conforming to the `bbflow/` output contract is a swappable adapter.
 - A **Knowledge Base** framework for cross-target pattern capture
 - A **workspace scaffold** for local-only operational data (.gitignored)
 

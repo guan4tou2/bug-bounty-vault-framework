@@ -88,7 +88,7 @@ The `bbflow/` directory describes how scope, automation output, and knowledge ca
 
 ### Tooling as optional runtime
 
-Tooling can produce machine-readable output, but the framework does not depend on any specific scanner or automation stack. Tools should be optional, replaceable, and filled in by the user after adoption.
+The tool/candidate-generation layer is **optional** — the framework runs LLM-only or fully manual. When you do use it, **[bbflow](https://github.com/guan4tou2/bbflow) is the default** (a standalone zero-LLM scanner CLI, installed separately, not bundled), and any automation stack that conforms to the `bbflow/` output contract can replace it. The framework depends on that **contract**, not on any specific scanner — so "default bbflow, swappable adapter" rather than "no tooling assumed."
 
 ## Source of Truth
 
