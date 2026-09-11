@@ -3,7 +3,7 @@ type: reference
 category: Checklist
 tags: [checklist, cloud-bucket, s3, gcs, azure-blob, ownership-verification, false-attribution, recon, surface-mapping, submission-gate]
 last_updated: 2026-06-04
-source: "private-runtime false attribution incident — example-target bucket scan returned LISTABLE buckets actually owned by third-party-one/third-party-two; root cause: LISTABLE confirmation treated as ownership confirmation. Gap confirmed against existing KB: Pattern - Cloud Bucket Path Structure Business Intelligence (covers path-as-BI, not false attribution), Pattern - S3 Bucket Takeover (covers unclaimed bucket, not misattributed live bucket), Lesson #14 (subdomain takeover pre-claim, not bucket ownership). No existing gate required content-based ownership verification."
+source: "False-attribution incident — an automated bucket scan returned LISTABLE buckets actually owned by unrelated third parties; root cause: LISTABLE confirmation treated as ownership confirmation. Gap confirmed against existing KB: Pattern - Cloud Bucket Path Structure Business Intelligence (covers path-as-BI, not false attribution), Pattern - S3 Bucket Takeover (covers unclaimed bucket, not misattributed live bucket), Lesson #14 (subdomain takeover pre-claim, not bucket ownership). No existing gate required content-based ownership verification."
 related_patterns:
   - Pattern - Cloud Bucket Path Structure Business Intelligence
   - Pattern - S3 Bucket Takeover
@@ -14,9 +14,9 @@ related_patterns:
 
 > **Purpose**: After any LISTABLE or publicly accessible cloud bucket is discovered, this checklist is mandatory before attributing the bucket to the target and before opening a Finding or Submission. LISTABLE status alone is NOT sufficient to attribute a bucket to a target.
 >
-> **Root cause**: private-runtime automated scanning falsely attributed buckets to example-target (target) because those buckets were LISTABLE and matched subdomain or naming patterns. The actual bucket owners were third-party-one and third-party-two (unrelated third parties). The existing KB patterns (S3 Bucket Takeover, Cloud Bucket Path-as-BI) do not cover this false attribution failure mode.
+> **Root cause**: Automated scanning falsely attributed buckets to the target because those buckets were LISTABLE and matched subdomain or naming patterns. The actual bucket owners were unrelated third parties. The existing KB patterns (S3 Bucket Takeover, Cloud Bucket Path-as-BI) do not cover this false attribution failure mode.
 >
-> **Scope**: AWS S3, Google Cloud Storage, Azure Blob Storage, and any CDN-served bucket (CloudFront, Fastly, Akamai origin buckets). Applies to automated scanner output (private-runtime, bbflow, nuclei) and manual recon.
+> **Scope**: AWS S3, Google Cloud Storage, Azure Blob Storage, and any CDN-served bucket (CloudFront, Fastly, Akamai origin buckets). Applies to automated scanner output (bbflow, nuclei, or any automated scanner) and manual recon.
 >
 > **Time budget**: 5–10 minutes per bucket before opening any Finding.
 
@@ -168,14 +168,14 @@ Even if Stage 1 passes, confirm no stronger signal points to a different owner.
   - Check if the third-party uses this bucket in their own application
   - If the third-party is the clear owner, discard this bucket from the target's Finding scope entirely
 
-  **Common false-attribution patterns private-runtime has hit**:
+  **Common false-attribution patterns automated scanners hit**:
   - SaaS platforms that provision buckets on behalf of customers (e.g., bucket named after target but owned by the SaaS vendor's account)
   - CDN vendors with bucket names matching customer domains
   - Previously acquired companies whose buckets were migrated to a new owner
 
 ### Gate 2.2 — Automated Scanner Hit Must Be Manually Verified Before Attributing
 
-- [ ] **If the bucket discovery originated from an automated scanner (private-runtime, bbflow, nuclei, S3Scanner, GrayhatWarfare), confirm the attribution was not based solely on name-pattern matching.**
+- [ ] **If the bucket discovery originated from an automated scanner (bbflow, nuclei, S3Scanner, GrayhatWarfare), confirm the attribution was not based solely on name-pattern matching.**
 
   Automated scanner false-attribution causes:
   1. Bucket name contains target keyword (`target-cdn-backup`) but is owned by a service provider
@@ -220,7 +220,7 @@ For every bucket found, record the result in `RECON_DB.md` regardless of outcome
 
 Bucket: <bucket-name>
 Provider: [AWS S3 / GCS / Azure Blob]
-Discovered by: [private-runtime / manual / bbflow nuclei]
+Discovered by: [automated scanner / manual / bbflow nuclei]
 LISTABLE: [yes / no]
 Public files: [yes / no / partial]
 
@@ -303,7 +303,7 @@ Any Finding with this flag must not advance to Submission until the flag is reso
 |---|---|
 | Bucket name contains target's brand but files reference a different company | Third-party owned — do not report against target |
 | Subdomain CNAME to bucket, but bucket name registered by SaaS platform providing service TO target | SaaS vendor owns the bucket — report is against vendor, not target (check vendor's program) |
-| Scanner matched bucket based on keyword overlap (target is "example-target", bucket is "privy-cdn" but owned by third-party-one) | Unattributed — do not report |
+| Scanner matched bucket based on keyword overlap (target is "acme-corp", bucket is "acme-cdn" but owned by an unrelated company) | Unattributed — do not report |
 | Bucket is LISTABLE but contains only public assets (logos, marketing images, fonts) that are intentionally public | Not a finding unless file content confirms access control misconfiguration on non-public data |
 | Bucket discovered via GrayhatWarfare or S3Scanner without manual ownership verification | Requires Gate 2.2 completion before any attribution |
 

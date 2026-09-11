@@ -79,13 +79,13 @@
 - `hunt-hudson-rock` — HudsonRock breach-corpus lookup
 
 ## Integration points
-- **private-runtime (VPS agent)** wraps bbflow via `bbflow_tool.py` (`bbflow-runner` agent runs hunters, parses hits, updates RECON_DB). The private-runtime layer is a *separate* repo (`tools/bb_tools.py`); see the vault `reference_bbflow_vs_framework_vs_bbtools` note.
+- **A private VPS agent** wraps bbflow (runs hunters, parses hits, updates RECON_DB) from a separate private repo.
 - **Vault** consumes only machine-readable output (`run_manifest.json`, `candidates.jsonl`) after a run — never the reverse (see `output-contract.md`).
 
 <!-- BEGIN auto-sync hunters -->
 ## Pattern hunters (`hunters/hunt-*.sh`)
 
-Auto-synced from the standalone `guan4tou2/bbflow` repo by `sync_bbflow_to_framework.sh`.
+Auto-synced from the standalone `guan4tou2/bbflow` repo by a sync script.
 Inventory only — no payloads, no detection logic. (47 hunters total)
 
 | Hunter | One-liner |

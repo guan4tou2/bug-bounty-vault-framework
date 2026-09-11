@@ -11,10 +11,10 @@ tags:
   - session-lifecycle
 last_updated: 2026-06-04
 precedents:
-  - Tenda W15E (14 CGI injections)
-  - D-Link consumer-router (16 findings)
-  - NETGEAR WAX620/WAX630/RAX50 (20 findings)
-  - "Camera Vendor (21 findings)"
+  - Tenda W15E
+  - D-Link consumer routers
+  - NETGEAR WAX620/WAX630/RAX50
+  - "Camera vendors"
   - Sapido RB-1732
 ---
 
@@ -313,7 +313,7 @@ Internal tracking IDs (e.g. VENDOR-001, VENDOR-F-007, VENDOR-RCE-02) must not ap
 Acceptable locations: Vault Finding file frontmatter, FINDINGS_QUICK_REF.md, personal notes.
 
 Violation example (do not do):
-> "As documented in FINDING-ID, the endpoint /goform/formSetQos..."
+> "As documented in an earlier finding, the endpoint /goform/formSetQos..."
 
 Correct:
 > "The endpoint `/goform/formSetQos` passes the `wan_ip` parameter directly to `system()`..."

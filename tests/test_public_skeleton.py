@@ -582,6 +582,11 @@ def test_no_private_or_target_specific_data():
     content_lower = content.lower()
     # Case-insensitive checks (private target names, usernames)
     ci_forbidden = [
+        "hermes",
+        "privy",
+        "bloombees",
+        "hellospoke",
+        "deuteron",
         "guantou",
         "teamplus",
         "juiker",

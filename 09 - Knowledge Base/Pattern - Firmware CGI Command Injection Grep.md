@@ -4,7 +4,7 @@ title: Pattern - Firmware CGI Command Injection Grep
 tags: [pattern, cwe-78, firmware, cgi, command-injection, grep, iot, router, ip-camera, shell-script, qnap, dlink, acti, lilin, planet, bb-pattern]
 status: verified
 severity_range: P1-P2 (pre-auth) / P2-P3 (post-auth)
-precedents: consumer router firmware (10-30 CGI injections per image), D-Link consumer-router (RCE chain + inner_ CGI), NETGEAR RAX50/WAX620, Sapido RB-1732, LILIN/PLANET IP cameras (DDNS/PPPoE/NTP fields), ACTi (shell unquoted vars), QNAP (qnap_exec wrapper), Vivotek (text-redirect unauth paths)
+precedents: consumer router firmware (10-30 CGI injections per image), D-Link consumer routers (RCE chain + inner_ CGI), NETGEAR RAX50/WAX620, Sapido RB-1732, LILIN/PLANET IP cameras (DDNS/PPPoE/NTP fields), ACTi (shell unquoted vars), QNAP (qnap_exec wrapper), Vivotek (text-redirect unauth paths)
 last_updated: 2026-06-04
 ---
 
@@ -285,7 +285,7 @@ Only mark `[SAFE]` after both stages are tested, or the call site is proven sani
 
 ### 4E: inner_ CGI auth bypass (D-Link)
 
-D-Link consumer-router (and some other vendors) register two sets of CGI handlers: a standard route (with an auth check) and an `inner_`-prefixed route (no auth). The `inner_` prefix was originally meant for daemon-to-daemon internal calls, but is often directly reachable from the LAN or even the WAN interface. D-Link consumer-router findings confirmed this pattern.
+Some D-Link routers (and other vendors) register two sets of CGI handlers: a standard route (with an auth check) and an `inner_`-prefixed route (no auth). The `inner_` prefix was originally meant for daemon-to-daemon internal calls, but is often directly reachable from the LAN or even the WAN interface. This pattern is confirmed across multiple D-Link devices.
 
 ```bash
 # find the inner_ prefix in the CGI registration table

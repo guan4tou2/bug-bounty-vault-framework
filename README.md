@@ -218,7 +218,7 @@ Basic configurations in `tools/`:
 - `tools/osmedeus/profiles/` — Osmedeus scan profiles
 - `tools/bbot/presets/` — BBOT presets
 
-> **This repo is architecture-only / sanitized — no real detection templates, hunters, or payloads belong here.** Real, runnable Nuclei templates + the 47 pattern hunters live in the standalone tool **[`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow)** (`nuclei-templates/bb-recon/`); the autonomous-agent copies live in the private private-runtime runtime (`tools/nuclei/custom-safe/`). Do **not** commit real KB-derived templates here.
+> **This repo is architecture-only / sanitized — no real detection templates, hunters, or payloads belong here.** Real, runnable Nuclei templates + the 47 pattern hunters live in the standalone tool **[`guan4tou2/bbflow`](https://github.com/guan4tou2/bbflow)** (`nuclei-templates/bb-recon/`); the autonomous-agent copies live in a private autonomous-agent runtime. Do **not** commit real KB-derived templates here.
 
 These are starting points — customize for your workflow.
 

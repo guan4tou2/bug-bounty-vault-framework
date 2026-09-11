@@ -312,7 +312,7 @@ External sources.
 |----------|----------|-----|
 | Target-specific data | Findings, RECON_DB, submissions, screenshots | Contains private vulnerability data |
 | Internal process docs | Vault maintenance, session management, Kanban | Specific to operator's workflow |
-| Infrastructure docs | VPS setup, private-runtime agent config, Obsidian plugins | Specific to operator's infrastructure |
+| Infrastructure docs | VPS setup, private agent config, Obsidian plugins | Specific to operator's infrastructure |
 | Anti-fraud operations | Phishing takedown, IOC collection, LINE scam investigation | Region-specific, potentially sensitive |
 | Competitive intelligence | Program-specific scoring rules, platform profiles | Operational advantage |
 | Harness-specific meta | Agent skill matrix, audit policies, SOP review cadence | Internal harness governance |
