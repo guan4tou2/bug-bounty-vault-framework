@@ -8,6 +8,13 @@
 #   Parses effectiveness-first edge-list tables:
 #   | from | edge | to | status |
 #   Only the status column is counted; compact parsing is a token-saving side effect.
+#   Section headers at ## or ### level are recognized (the Target Work DAG template
+#   uses ##).
+#
+# NOT a scheduler safety proof (C07): this lists pending/reachable edges as an
+# ADVISORY. It does not model resource mutexes, rate limits, or shared-account
+# contention. "No precedence edge between two items" does NOT mean they are safe to
+# run in parallel — enforce resource/mutex checks separately before parallelizing.
 
 set -uo pipefail
 
@@ -154,7 +161,9 @@ parse_dag_file() {
     fi
     [ "$in_code_block" -eq 1 ] && continue
 
-    if [[ "$line" =~ ^"###" ]]; then
+    # Match ## and ### section headers — the Target Work DAG template uses ##
+    # (## Validation DAG / ## Decision Gate DAG); matching only ### missed them.
+    if [[ "$line" =~ ^"##" ]]; then
       current_section="$line"
       if [[ "$line" == *"🔴"* ]]; then
         current_priority="red"

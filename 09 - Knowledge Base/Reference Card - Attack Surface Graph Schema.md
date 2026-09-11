@@ -15,8 +15,17 @@ related:
 > Per-target attack surface is a **graph**, not a flat table. Canonical file:
 > `<target-dir>/Attack Surface Graph - <target>.md` (next to `RECON_DB.md`).
 > Machine source of truth = the single fenced ```yaml``` block below. Visual =
-> `Attack Surface Graph - <target>.canvas`, rendered by
-> `automation/render_surface_graph_canvas.py`. Adapted from Z3r0 (MIT).
+> `Attack Surface Graph - <target>.canvas`, rendered by a canvas renderer if you
+> wire one up. Adapted from Z3r0 (MIT).
+
+> **Seed contract vs optional runtime (C09).** This seed ships the **schema + the
+> Markdown source-of-truth only**. Capability traversal, reachability / `dag-suggest`,
+> and capability-state propagation are **optional runtime you supply** (e.g. a
+> capability-graph engine / CGT tooling) — they are **not bundled** here. Do not
+> assume the bare seed can traverse the graph or auto-derive reachable-but-untested
+> nodes; a conforming adapter must report clearly (a `doctor`-style check) when that
+> capability is absent rather than silently returning empty. The YAML contract below
+> is the stable interface an adapter reads/writes.
 
 ## The yaml block
 

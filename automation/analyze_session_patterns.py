@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -27,7 +28,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS_DIR = ROOT / "01 - Targets"
-WORKSHOP_DIR = ROOT / "workspace" / "workshop"
+# Honour an external workspace (VAULT_WORKSPACE), consistent with
+# start_session.py / end_session.py; fall back to the in-repo workspace/.
+_ext_ws = os.environ.get("VAULT_WORKSPACE")
+WORKSHOP_DIR = (Path(_ext_ws) / "workshop") if _ext_ws else (ROOT / "workspace" / "workshop")
 
 # Patterns that identify action lines in markdown
 ACTION_PATTERNS = [
