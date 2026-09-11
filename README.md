@@ -17,7 +17,7 @@ flowchart TB
     KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
   end
   subgraph LLM["Optional LLM layer"]
-    SK[".claude / .codex / .gemini<br/>17 skills + 6 agents"]
+    SK[".claude / .codex / .gemini<br/>skills + agents (see .claude/)"]
   end
   subgraph LOCAL["workspace/ (gitignored, local only)"]
     WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
@@ -164,7 +164,7 @@ This repo is **built to be driven by an LLM agent**: the skills are trigger-acti
 
 | Tool | Entrypoint | Skills |
 |------|-----------|--------|
-| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | 17 skills + 6 agents |
+| **Claude Code** | `CLAUDE.md` → `.claude/skills/` + `.claude/agents/` | skills + agents (see .claude/) |
 | **Codex CLI** | `CODEX.md` → `.codex/skills/` | Mirrored from Claude |
 | **Gemini CLI** | `GEMINI.md` → `.gemini/skills/` | Mirrored from Claude |
 
