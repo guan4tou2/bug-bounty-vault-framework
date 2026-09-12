@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.1.5 — 2026-09-12
+
+### ASG single-authority hunt loop (event-sourced) becomes main; legacy CGT loop branched
+
+Replaces the CGT-centric hunt-loop as the reference architecture with an event-sourced
+Attack Surface Graph: one append-only ledger is the single source of truth, and the
+capability set / ready-vs-blocked partition / verdict state are pure projections over it
+(least-fixed-point, so a capability withdraws when its supporting verdict is refuted).
+
+New `automation/` modules (with tests): `hunt_loop` (capsule projection + invariants),
+`asg` (ledger + Markdown/snapshot projections + filename resolver + single append path),
+`hunt_autodrive` (read → select → dispatch → control-comparison oracle → replan),
+`hunt_live` (autodrive as a self-driving loop through a `spawn` seam; capability-chaining
+and KB-primed proposals), `logic_vuln_loop` (control-comparison judge — the anti-hallucination
+core: ran_ok ≠ confirmed), `hunt_worker`/`hunt_lock`/`hunt_session`/`kb_connector`/
+`hunt_integration`, and `lesson_candidates` (auto-draft LL candidates from the ledger for
+human promotion). The prior CGT-centric loop is preserved on branch `legacy/cgt-hunt-loop`;
+`Reference Card - Hunt Loop Architecture` is reconciled to mark CGT pin/traverse + P/R
+tagging as opt-in and point here.
+
+
 ## v0.1.4 — 2026-06-24
 
 ### KB effect loop (measure retrieval, not just capture)
