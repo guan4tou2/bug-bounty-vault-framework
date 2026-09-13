@@ -104,8 +104,12 @@ class HuntLoop:
     def add_surface(self, node_id: str, untested: bool = True) -> None:
         self.append("surface", node_id=node_id, untested=untested)
 
-    def add_hypothesis(self, hyp_id: str, requires: Optional[list[str]] = None) -> None:
-        self.append("hypothesis", hyp_id=hyp_id, requires=requires or [])
+    def add_hypothesis(self, hyp_id: str, requires: Optional[list[str]] = None,
+                       strategy: Optional[str] = None) -> None:
+        ev = dict(hyp_id=hyp_id, requires=requires or [])
+        if strategy:
+            ev["strategy"] = strategy
+        self.append("hypothesis", **ev)
 
     def record_execution(self, r: ExecutionResult) -> None:
         # I1/I6: an execution is just an event. It never, by itself, grants a

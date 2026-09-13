@@ -151,6 +151,9 @@ class LogicHypothesis:
     # the established rule this hypothesis tests (provenance gate). When set,
     # research_step downgrades a CONFIRMED against an unestablished invariant.
     invariant_ref: Optional[str] = None
+    # which thinking strategy was applied to generate this hypothesis (audit trail
+    # + feedback loop: strategy_used → verdict → per-strategy effectiveness stats)
+    strategy: Optional[str] = None
     # generation lens (heuristic tag only, NOT graph structure): role-swap |
     # state-order | entry-diff | lifecycle | composition | exploratory
     lens: Optional[str] = None

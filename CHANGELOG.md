@@ -1,5 +1,38 @@
 # Changelog
 
+## v0.1.6 — 2026-09-13
+
+### Strategy effectiveness feedback loop + deterministic hypothesis templates
+
+Closes the UCCU-inspired auto-improvement loop: the hunt loop now records which
+thinking strategy each hypothesis used, correlates strategies with verdict outcomes,
+and injects per-strategy effectiveness stats into the next proposal prompt — so the
+LLM self-adjusts toward strategies that actually find bugs on this target.
+
+**Added:**
+- `automation/thinking_strategies.py` — 7 meta-cognitive strategies (ARCHITECTURE_CONFUSION,
+  FEATURE_INTERACTION, TRUST_INHERITANCE, DEFENSE_INVERSION, IMPLICIT_STATE,
+  CHAIN_ESCALATION, SEMANTIC_GAP) + `compute_strategy_stats()` feedback loop +
+  `format_strategies()` with inline effectiveness tags and ranking + methodology
+  hint loader from KB
+- `automation/hyp_templates.py` — deterministic hypothesis templates that seed
+  coverage-first hypotheses (for held capabilities and untested surfaces) before
+  burning the LLM replan budget; runs as a free pre-pass in autodrive
+- `tests/test_thinking_strategies.py` — 16 tests covering stats computation,
+  format rendering, effectiveness injection, and ledger strategy recording
+- `tests/test_hyp_templates.py` — template expansion and dedup tests
+
+**Changed:**
+- `automation/hunt_loop.py` — `add_hypothesis()` accepts optional `strategy` parameter
+  for the feedback loop
+- `automation/logic_vuln_loop.py` — `LogicHypothesis` gains `strategy` field
+- `automation/hunt_autodrive.py` — deterministic templater runs before LLM propose
+  in replan (doesn't burn replan budget); hypothesis always registered on ledger
+  with strategy (moved outside `if kb_tags:` guard)
+- `automation/hunt_live.py` — strategies section rebuilt per-round with fresh
+  effectiveness stats; strategy recorded on hypothesis object; templater wired
+  into `run_live()`
+
 ## v0.1.5 — 2026-09-12
 
 ### ASG single-authority hunt loop (event-sourced) becomes main; legacy CGT loop branched

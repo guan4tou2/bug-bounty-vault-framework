@@ -167,6 +167,7 @@ def autodrive(
     kb_dir=None,
     rank: Optional[Callable[[list[str], dict, HuntLoop], list[str]]] = None,
     persist: Optional[Callable[[HuntLoop], None]] = None,
+    templater: Optional[Callable[[HuntLoop, dict], Optional[LogicHypothesis]]] = None,
     max_rounds: int = 200,
 ) -> DriveReport:
     """Run the loop until a clear hand-back condition. Callables:
@@ -228,8 +229,14 @@ def autodrive(
                 rep.interventions += 1
                 rep.handoff_reason = "replan budget exhausted (bounded; avoids infinite retry)"
                 break
-            hyp = propose(loop, cap)
-            budget.replans += 1
+            # DETERMINISTIC coverage first: seed hypotheses for a held capability (Gap 3)
+            # or the next untested surface (Gap 1/2) from templates; only fall back to the
+            # LLM brain for what the templates do not cover. Template seeding does not burn
+            # a replan (it is free + exhaustive), so untested surface can never sit idle.
+            hyp = templater(loop, cap) if templater else None
+            if hyp is None:
+                hyp = propose(loop, cap)
+                budget.replans += 1
             was_replan = True
             if hyp is None:
                 rep.interventions += 1
@@ -247,17 +254,17 @@ def autodrive(
             rep.dead_end_reruns += 1
             continue
 
-        # 4) KB/LL in-loop BEFORE the task, and actually FEED it to the worker (the
+        # 4) ensure hypothesis is on the ledger (with strategy for the feedback loop)
+        if hyp.hyp_id not in {e.get("hyp_id") for e in loop.events if e["kind"] == "hypothesis"}:
+            loop.add_hypothesis(hyp.hyp_id, strategy=getattr(hyp, "strategy", None))
+
+        # 4b) KB/LL in-loop BEFORE the task, and actually FEED it to the worker (the
         # earlier bug: retrieval ran AFTER the task was built and its result was
         # discarded — knowledge was logged, never used). A retrieval failure is a
         # recorded knowledge_retrieval event, never a silent swallow, so "thought we
         # had prior experience but started from zero" is visible in the capsule.
         knowledge: list[str] = []
         if kb_tags:
-            # ensure the hypothesis exists on the ledger so ledger-lesson retrieval
-            # (which requires a known hyp) works for a freshly-proposed one too.
-            if hyp.hyp_id not in {e.get("hyp_id") for e in loop.events if e["kind"] == "hypothesis"}:
-                loop.add_hypothesis(hyp.hyp_id)
             try:
                 from kb_connector import retrieve_all
                 hits = retrieve_all(loop, hyp.hyp_id, kb_tags, kb_dir=kb_dir)

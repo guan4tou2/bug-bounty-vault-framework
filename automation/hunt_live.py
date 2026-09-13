@@ -55,6 +55,11 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
     hypothesis so ready_hyp can reconstruct it. Structured-field enforcement here;
     creativity/correctness is judged by the downstream evidence, not by this call.
 
+    Two layers of knowledge injection into the proposal:
+      1. THINKING STRATEGIES (always) — meta-cognitive prompts for CREATIVE hypothesis
+         generation: "how to think about what could break" → discovery power
+      2. DEEP PATTERNS (tag-gated) — known bug shapes to instantiate → coverage depth
+
     DEPTH: when `kb_tags` name the target's tech stack / vuln classes, the vault KB's
     matching deep-pattern lessons (WRITE-5, SECRET-USE, state-transition, chaining, …)
     are fed INTO the proposal prompt — so the loop proposes hypotheses that instantiate
@@ -62,9 +67,19 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
     KB the worker already consults, wired one step earlier (at the decision, not just
     the execution)."""
     registry = registry if registry is not None else {}
+    # --- Layer 1: THINKING STRATEGIES (always injected, not tag-gated) ---
+    # Meta-cognitive prompts that tell the LLM HOW to think, not WHAT to look for.
+    # Methodology hints are stable (KB doesn't change mid-hunt), computed once.
+    from thinking_strategies import (format_strategies, load_methodology_hints,
+                                     compute_strategy_stats)
+    methodology_hints = load_methodology_hints(kb_dir)
+    # strategies_section is rebuilt each round inside propose() so effectiveness
+    # stats from the growing ledger feed back into the next proposal (strategies
+    # that confirmed rank higher).
+    # --- Layer 2: DEEP PATTERNS (tag-gated, stack-specific) ---
     # Cross-cutting method lessons (how to VERIFY, how to avoid false positives, how to
-    # cover a technique fully) apply on every stack — always fold them in so the LL 思路
-    # travels, not just stack-specific pattern names.
+    # cover a technique fully) apply on every stack — always fold them in so the LL
+    # methodology travels, not just stack-specific pattern names.
     _METHOD_TAGS = ["methodology", "verification", "adversarial-verification", "false-positive"]
     kb_patterns: list[str] = []
     if kb_tags:
@@ -88,6 +103,9 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
             "refuted": cap["refuted"][:20],
             "capabilities": cap["capabilities"],
         }
+        effectiveness = compute_strategy_stats(loop.events)
+        strategies_section = format_strategies(
+            methodology_hints=methodology_hints, effectiveness=effectiveness or None)
         depth_hint = (
             "KNOWN DEEP PATTERNS for this stack (prefer INSTANTIATING one of these into a "
             "concrete testable hypothesis over a generic checklist item like 'unauth reads "
@@ -96,9 +114,14 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
         prompt = (
             "You are the planning brain of an autonomous bug-bounty loop. Given the ASG "
             "state, propose the SINGLE most valuable NEXT testable hypothesis (GET-only, "
-            f"in-scope hosts: {hosts}; scope: {scope_desc}). Prefer an uncovered role / "
-            "state-transition / trust-boundary / business-invariant over replaying a "
-            "refuted path.\n"
+            f"in-scope hosts: {hosts}; scope: {scope_desc}).\n\n"
+            "PRIORITY ORDER for hypothesis selection:\n"
+            "  1. STRATEGY-DRIVEN: apply a thinking strategy to concrete ASG state "
+            "(e.g. a refuted 401 REVEALS an endpoint — chain it with a leaked capability)\n"
+            "  2. PATTERN-INSTANTIATED: instantiate a known deep pattern for this stack\n"
+            "  3. ONLY IF 1+2 exhausted: generic checklist (unauth read, IDOR scan)\n"
+            "Never propose a hypothesis you could write WITHOUT reading the ASG state.\n\n"
+            + strategies_section + "\n"
             + depth_hint +
             "CAPABILITY CHAINING (important): if `capabilities` below is non-empty, a "
             "prior finding just unlocked something — prefer a hypothesis that LEVERAGES a "
@@ -108,7 +131,8 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
             "chain off it. Capabilities can be earned UNAUTHENTICATED (a leaked cred/token, "
             "SSRF, an exposed config) — no account required.\n"
             "Reply with ONLY one JSON object:\n"
-            '{"dimension":"invariant|roles|state|trust|cross-flow",'
+            '{"strategy_used":"which THINKING STRATEGY you applied (or checklist if none)",'
+            '"dimension":"invariant|roles|state|trust|cross-flow",'
             '"invariant":"the rule that must hold","precondition":"",'
             '"expected_normal":"what a correct system does","test_action":"exact GET action",'
             '"control_action":"the normal/baseline GET","violation_outcome":"token meaning broken",'
@@ -134,6 +158,9 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
             provides=[c for c in (obj.get("provides") or []) if c],
             requires=[c for c in (obj.get("requires") or []) if c],
             surface_id=obj.get("test_action"))
+        strategy = obj.get("strategy_used", "")
+        if strategy:
+            hyp.strategy = strategy
         registry[hid] = hyp
         return hyp
 
@@ -189,10 +216,12 @@ def run_live(
             heartbeat(ledger, token)
             guarded_save(lp, ledger, token)
 
+        from hyp_templates import make_templater
         rep = autodrive(
             loop, current_env=env, dispatch=make_dispatch(spawn), propose=propose,
             ready_hyp=_ready, budget=budget, human_gate=human_gate or default_human_gate,
-            rank=value_rank, persist=persist, max_rounds=max_rounds)
+            rank=value_rank, persist=persist,
+            templater=make_templater(env, registry), max_rounds=max_rounds)
         guarded_save(loop, ledger, token)
         # policy A — auto-DRAFT LL candidates from what the loop just learned (refuted
         # paths / dead-ends), staged for human promotion. Best-effort: closing the
