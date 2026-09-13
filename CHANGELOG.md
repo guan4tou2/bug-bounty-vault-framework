@@ -21,6 +21,10 @@ LLM self-adjusts toward strategies that actually find bugs on this target.
 - `tests/test_thinking_strategies.py` — 16 tests covering stats computation,
   format rendering, effectiveness injection, and ledger strategy recording
 - `tests/test_hyp_templates.py` — template expansion and dedup tests
+- `automation/hunt_run.py` — the single top-level run entry that composes the
+  autonomous hunt loop: lock → load → autodrive → save → release → project.
+  Wires all orchestration pieces (dispatch, propose, rank, persist, KB) into
+  one call with a coarse claim + fine ledger lock
 
 **Changed:**
 - `automation/hunt_loop.py` — `add_hypothesis()` accepts optional `strategy` parameter
