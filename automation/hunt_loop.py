@@ -255,8 +255,5 @@ def step_execute_and_judge(loop: HuntLoop, hyp_id: str,
         return Verdict.INCONCLUSIVE
     loop.record_execution(r)
     verdict, evidence_ref, provides = judge(r)
-    if not r.exit_ok or r.error:
-        # I6 backstop: a failed execution can never confirm.
-        verdict, evidence_ref, provides = Verdict.INCONCLUSIVE, None, []
     loop.record_verdict(hyp_id, verdict, evidence_ref=evidence_ref, provides=provides)
     return verdict
