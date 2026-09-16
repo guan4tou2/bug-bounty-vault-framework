@@ -167,6 +167,62 @@ def make_llm_propose(scope_desc: str, hosts: list[str], env: Env,
     return propose
 
 
+RISK_LEVELS = ("low", "medium", "high", "critical")
+
+_BUDGET_BY_RISK: dict[str, dict[str, int]] = {
+    "critical": {"max_actions": 0, "max_replans": 0},
+    "high":     {"max_actions": 4, "max_replans": 2},
+    "medium":   {"max_actions": 12, "max_replans": 4},
+    "low":      {"max_actions": 20, "max_replans": 6},
+}
+
+
+def _read_target_risk(ledger: Path) -> str:
+    """Resolve the target's risk level from its Target-*.md frontmatter.
+    Ledger lives at `01 - Targets/<name>/.state/asg-events*.jsonl`;
+    the Target page is `01 - Targets/<name>/Target - <name>.md`."""
+    target_dir = ledger.resolve().parent.parent
+    candidates = list(target_dir.glob("Target - *.md"))
+    if not candidates:
+        return "medium"
+    try:
+        text = candidates[0].read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return "medium"
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return "medium"
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        if line.startswith(("risk:", "risk :")):
+            val = line.split(":", 1)[1].strip().strip('"').strip("'").lower()
+            if val in RISK_LEVELS:
+                return val
+    return "medium"
+
+
+def make_risk_gate(risk: str) -> Callable[[HuntLoop, dict], Optional[str]]:
+    """Return a human_gate that enforces target risk policy:
+    - critical: hand back every round (manual-only)
+    - high: hand back on any new CONFIRMED verdict (human reviews before continuing)
+    - medium/low: no extra gate (budget controls suffice)
+    """
+    _seen_confirmed: set[str] = set()
+
+    def gate(loop: HuntLoop, cap: dict) -> Optional[str]:
+        if risk == "critical":
+            return f"risk=critical: manual-only target — hand back for human approval"
+        if risk == "high":
+            for hid in cap.get("confirmed", {}):
+                if hid not in _seen_confirmed:
+                    _seen_confirmed.add(hid)
+                    return f"risk=high: new confirmed finding {hid} — hand back for human review"
+        return None
+
+    return gate
+
+
 def default_human_gate(loop: HuntLoop, cap: dict) -> Optional[str]:
     """Hand back on the genuine conditions — never mid-flow. (Budget/replan handled
     by autodrive.) Extend per engagement (e.g. missing account already surfaces as a
@@ -196,9 +252,17 @@ def run_live(
     `spawn` defaults to headless `claude -p` (subprocess_spawn) — the real driver.
     Inject a stub `spawn` to test the loop without live workers.
     `kb_tags` (the target's stack / vuln classes) prime the proposal with the vault
-    KB's matching deep-pattern lessons — the depth lever."""
+    KB's matching deep-pattern lessons — the depth lever.
+    Risk-aware: reads the target's `risk` frontmatter and adjusts budget + human_gate
+    accordingly. critical = manual-only, high = halved budget + confirm-on-find."""
     spawn = spawn or subprocess_spawn
-    budget = budget or Budget(max_actions=12, max_replans=4, max_retries_per_hyp=2)
+    risk = _read_target_risk(Path(ledger))
+    risk_budget = _BUDGET_BY_RISK.get(risk, _BUDGET_BY_RISK["medium"])
+    budget = budget or Budget(
+        max_actions=risk_budget["max_actions"],
+        max_replans=risk_budget["max_replans"],
+        max_retries_per_hyp=2,
+    )
     registry: dict = {}
     propose = propose or make_llm_propose(scope_desc, hosts, env, spawn, model, registry,
                                           kb_tags=kb_tags, kb_dir=kb_dir)
@@ -217,9 +281,10 @@ def run_live(
             guarded_save(lp, ledger, token)
 
         from hyp_templates import make_templater
+        effective_gate = human_gate or make_risk_gate(risk)
         rep = autodrive(
             loop, current_env=env, dispatch=make_dispatch(spawn), propose=propose,
-            ready_hyp=_ready, budget=budget, human_gate=human_gate or default_human_gate,
+            ready_hyp=_ready, budget=budget, human_gate=effective_gate,
             rank=value_rank, persist=persist,
             templater=make_templater(env, registry), max_rounds=max_rounds)
         guarded_save(loop, ledger, token)

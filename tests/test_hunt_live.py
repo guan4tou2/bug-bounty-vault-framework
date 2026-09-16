@@ -11,7 +11,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "automation"))
 from hunt_autodrive import Budget  # noqa: E402
-from hunt_live import run_live  # noqa: E402
+from hunt_live import (  # noqa: E402
+    run_live, make_risk_gate, _read_target_risk, _BUDGET_BY_RISK,
+)
 from logic_vuln_loop import Env  # noqa: E402
 
 
@@ -151,3 +153,81 @@ def test_propose_without_kb_tags_has_no_depth_hint(tmp_path):
     run_live(tmp_path / "d.jsonl", owner="A", scope_desc="x", hosts=["h"], env=Env(),
              spawn=stub_spawn, budget=Budget(max_actions=2, max_replans=1))
     assert "KNOWN DEEP PATTERNS" not in seen["prompt"]
+
+
+# ── risk-aware gate tests ──────────────────────────────────────────────────
+
+def _write_target_page(tmp_path, risk_level):
+    """Set up a target dir with a Target-*.md that has the given risk level."""
+    target = tmp_path / "01 - Targets" / "Risky"
+    state = target / ".state"
+    state.mkdir(parents=True, exist_ok=True)
+    page = target / "Target - Risky.md"
+    page.write_text(f"---\nstatus: hunting\nrisk: {risk_level}\n---\n# Risky\n",
+                    encoding="utf-8")
+    return state / "asg-events.jsonl"
+
+
+def test_read_target_risk_from_frontmatter(tmp_path):
+    ledger = _write_target_page(tmp_path, "critical")
+    assert _read_target_risk(ledger) == "critical"
+
+    ledger2 = _write_target_page(tmp_path / "h", "high")
+    assert _read_target_risk(ledger2) == "high"
+
+
+def test_read_target_risk_defaults_medium(tmp_path):
+    state = tmp_path / ".state"
+    state.mkdir(parents=True)
+    ledger = state / "events.jsonl"
+    assert _read_target_risk(ledger) == "medium"
+
+
+def test_risk_gate_critical_always_hands_back():
+    from hunt_loop import HuntLoop
+    gate = make_risk_gate("critical")
+    loop = HuntLoop([])
+    cap = loop.capsule()
+    reason = gate(loop, cap)
+    assert reason is not None
+    assert "critical" in reason
+
+
+def test_risk_gate_high_hands_back_on_new_confirmed():
+    from hunt_loop import HuntLoop
+    gate = make_risk_gate("high")
+    loop = HuntLoop([])
+    cap = loop.capsule()
+    assert gate(loop, cap) is None
+
+    cap_with_confirm = dict(cap, confirmed={"h1": ["P:x"]})
+    reason = gate(loop, cap_with_confirm)
+    assert reason is not None and "h1" in reason
+
+    reason2 = gate(loop, cap_with_confirm)
+    assert reason2 is None
+
+
+def test_risk_gate_medium_never_hands_back():
+    from hunt_loop import HuntLoop
+    gate = make_risk_gate("medium")
+    loop = HuntLoop([])
+    cap = dict(loop.capsule(), confirmed={"h1": ["P:x"]})
+    assert gate(loop, cap) is None
+
+
+def test_critical_target_gets_zero_budget(tmp_path):
+    ledger = _write_target_page(tmp_path, "critical")
+    calls = {"n": 0}
+
+    def stub_spawn(prompt, model):
+        calls["n"] += 1
+        if "planning brain" in prompt:
+            return '{"stop":true,"reason":"done"}'
+        return "{}"
+
+    rep, loop = run_live(
+        ledger, owner="A", scope_desc="critical-test", hosts=["h"], env=Env(),
+        spawn=stub_spawn)
+    assert rep.handoff_reason and "critical" in rep.handoff_reason
+    assert rep.rounds == 0
