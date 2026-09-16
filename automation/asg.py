@@ -52,10 +52,11 @@ def target_dir(target: str | Path) -> Path:
     directory (the immediate child of `01 - Targets/`), validated (no traversal)."""
     root = (vault_root() / TARGETS_DIRNAME).resolve()
     p = Path(target)
-    if not (p.is_absolute() or TARGETS_DIRNAME in p.parts):
-        return (root / p.name).resolve()          # bare target name
-    cand = p.resolve()
-    if root not in cand.parents:
+    if len(p.parts) == 1 and not p.is_absolute() and p.parts[0] not in (".", ".."):
+        cand = (root / p.parts[0]).resolve()       # bare target name
+    else:
+        cand = p.resolve()                          # path form
+    if cand == root or root not in cand.parents:
         raise ValueError(f"target {target!r} does not resolve under {TARGETS_DIRNAME}/")
     while cand.parent != root:                     # climb to the target dir
         cand = cand.parent
@@ -138,34 +139,47 @@ def migrate_yaml_to_ledger(target: str | Path) -> dict:
     if any(e.get("kind") == "migration" and e.get("digest") == digest for e in prior.events):
         return {"migrated": 0, "reason": "already migrated (same content)"}
 
+    existing_ids: set[str] = set()
+    for ev in prior.events:
+        for key in ("node_id", "hyp_id"):
+            if key in ev:
+                existing_ids.add(str(ev[key]))
+
     events: list[tuple[str, dict]] = [("migration", {"source": "yaml", "digest": digest})]
     for n in _real_nodes(graph):
-        events.append(("surface", {"node_id": str(node_identifier(n)), "untested": True}))
+        nid = str(node_identifier(n))
+        if nid not in existing_ids:
+            events.append(("surface", {"node_id": nid, "untested": True}))
     for cap in graph.get("capability_state", []) or []:
-        if isinstance(cap, dict) and cap.get("state") == "confirmed" and cap.get("cap"):
+        if isinstance(cap, dict) and cap.get("cap") and cap.get("state", "confirmed") == "confirmed":
             c = str(cap["cap"]); hid = f"migrated:{c}"
-            events.append(("hypothesis", {"hyp_id": hid, "requires": []}))
-            events.append(("verdict", {"hyp_id": hid, "verdict": "confirmed",
-                                        "evidence_ref": f"migrated:{cap.get('source', 'yaml')}",
-                                        "provides": [c]}))
+            if hid not in existing_ids:
+                events.append(("hypothesis", {"hyp_id": hid, "requires": []}))
+                events.append(("verdict", {"hyp_id": hid, "verdict": "confirmed",
+                                            "evidence_ref": f"migrated:{cap.get('source', 'yaml')}",
+                                            "provides": [c]}))
     for f in graph.get("findings", []) or []:
         fid = isinstance(f, dict) and f.get("id")
         if not fid:
             continue
         hid = f"finding:{fid}"
-        events.append(("hypothesis", {"hyp_id": hid, "requires": list(f.get("requires", []) or [])}))
-        if f.get("status") == "validated":
-            events.append(("verdict", {"hyp_id": hid, "verdict": "confirmed",
-                                        "evidence_ref": str(fid),
-                                        "provides": list(f.get("provides", []) or [])}))
+        if hid not in existing_ids:
+            events.append(("hypothesis", {"hyp_id": hid, "requires": list(f.get("requires", []) or [])}))
+            if f.get("status") == "validated":
+                events.append(("verdict", {"hyp_id": hid, "verdict": "confirmed",
+                                            "evidence_ref": str(fid),
+                                            "provides": list(f.get("provides", []) or [])}))
     for e in graph.get("edges", []) or []:
         if isinstance(e, dict) and e.get("status") == "dead":
             hid = f"edge:{e.get('src')}->{e.get('dst')}"
-            events.append(("dead_end", {"hyp_id": hid, "cause": "refuted",
-                                        "reason": e.get("reason", ""),
-                                        "reopen_when": "a new capability / variant"}))
-    append_events(target, events)
-    return {"migrated": len(events) - 1, "digest": digest}
+            if hid not in existing_ids:
+                events.append(("dead_end", {"hyp_id": hid, "cause": "refuted",
+                                            "reason": e.get("reason", ""),
+                                            "reopen_when": "a new capability / variant"}))
+    new_count = len(events) - 1
+    if new_count > 0:
+        append_events(target, events)
+    return {"migrated": new_count, "digest": digest}
 
 
 # ── PROJECTIONS (one-way, from the ledger) ──────────────────────────────────

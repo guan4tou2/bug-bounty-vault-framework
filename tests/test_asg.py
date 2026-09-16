@@ -26,9 +26,17 @@ def test_resolver_uses_contract_filename_and_state_paths():
     assert deep.name == "ExampleT"
 
 
-def test_resolver_rejects_traversal():
+@pytest.mark.parametrize("bad_input", [
+    "/etc/passwd",
+    "..",
+    "../..",
+    "a/..",
+    ".",
+    "x/y/..",
+])
+def test_resolver_rejects_traversal(bad_input):
     with pytest.raises(ValueError):
-        asg.target_dir("/etc/passwd")
+        asg.target_dir(bad_input)
 
 
 def test_append_event_is_sole_writer_and_appends(tmp_path, monkeypatch):
@@ -161,3 +169,73 @@ def test_migration_idempotent_even_after_projection(tmp_path, monkeypatch):
     asg.project_markdown("T6")                                   # mutates the Markdown
     r = asg.migrate_yaml_to_ledger("T6")                         # must still be a no-op
     assert r["migrated"] == 0 and "already migrated" in r["reason"]
+
+
+def test_remigration_after_edit_does_not_duplicate(tmp_path, monkeypatch):
+    """Issue #2: editing the YAML changes the digest → re-migration must only
+    emit NEW entities, not re-import everything."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    md = asg.markdown_path("T7")
+    md.parent.mkdir(parents=True, exist_ok=True)
+    md.write_text('''---
+fileClass: AttackSurfaceGraph
+---
+# Attack Surface Graph - T7
+
+```yaml
+schema_version: 2
+target: T7
+updated: 2026-01-01
+nodes:
+  - id: ep1
+    type: endpoint
+    identifier: "/api/v1"
+findings:
+  - id: T7-001
+    status: validated
+    provides: ["P:read=config"]
+    requires: []
+```
+
+## Operator Notes
+''')
+    r1 = asg.migrate_yaml_to_ledger("T7")
+    assert r1["migrated"] > 0
+    count_after_first = len(HuntLoop.load(asg.ledger_path("T7")).events)
+
+    # edit only the date — changes digest but no new entities
+    txt = md.read_text()
+    md.write_text(txt.replace("updated: 2026-01-01", "updated: 2026-01-02"))
+    r2 = asg.migrate_yaml_to_ledger("T7")
+    assert r2["migrated"] == 0  # no new entities to add
+    count_after_second = len(HuntLoop.load(asg.ledger_path("T7")).events)
+    assert count_after_second == count_after_first  # no duplicates
+
+
+def test_capability_state_without_state_key_is_imported(tmp_path, monkeypatch):
+    """Issue #2 secondary: capability_state entries without a 'state' key
+    should be imported (presence = confirmed assertion)."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    md = asg.markdown_path("T8")
+    md.parent.mkdir(parents=True, exist_ok=True)
+    md.write_text('''---
+fileClass: AttackSurfaceGraph
+---
+# Attack Surface Graph - T8
+
+```yaml
+schema_version: 2
+target: T8
+capability_state:
+  - cap: "P:cred=admin"
+    source: F-001
+    evidence: "recovered from config backup"
+nodes: []
+```
+
+## Operator Notes
+''')
+    asg.migrate_yaml_to_ledger("T8")
+    loop = HuntLoop.load(asg.ledger_path("T8"))
+    cap = loop.capsule()
+    assert "P:cred=admin" in cap["capabilities"]
