@@ -39,9 +39,20 @@ try:
     import asg
     def _target_dir(target: str) -> Path:
         return asg.target_dir(target)
+    def _default_round_log(target: str) -> Path:
+        # co-located with the ASG ledger in .state/ — MUST match where hunt_run.py
+        # writes it (asg.ledger_path(target).parent / "round_log.jsonl"), else
+        # context_brief reads a different file than the run wrote.
+        return asg.ledger_path(target).parent / "round_log.jsonl"
+    def _default_ledger(target: str) -> Path:
+        return asg.ledger_path(target)
 except ImportError:
     def _target_dir(target: str) -> Path:
         return Path(target)
+    def _default_round_log(target: str) -> Path:
+        return Path(target) / "round_log.jsonl"
+    def _default_ledger(target: str) -> Path:
+        return Path(target) / "asg-events.jsonl"
 
 
 def _now() -> str:
@@ -58,7 +69,7 @@ class RoundLogger:
         if path is not None:
             self.path = Path(path)
         else:
-            self.path = _target_dir(target) / "round_log.jsonl"
+            self.path = _default_round_log(target)
 
     def log(self, action: str, **data) -> dict:
         entry = {"sid": self.session_id, "ts": _now(), "action": action}
@@ -176,7 +187,7 @@ def context_brief(target: str, session_id: Optional[str] = None,
 
     lp = ledger_path
     if lp is None:
-        lp = _target_dir(target) / "hunt_ledger.jsonl"
+        lp = _default_ledger(target)
     capsule = {}
     if lp.exists():
         loop = HuntLoop.load(lp)

@@ -293,6 +293,26 @@ def test_cross_session_dedup(tmp_path):
     assert overlap == {"/api/a"}, "should detect cross-session overlap"
 
 
+# ── default path routing (must match where hunt_run writes) ──────────────────
+
+def test_default_paths_colocate_with_ledger():
+    """Regression: the RoundLogger default path and context_brief default ledger
+    must resolve through asg.ledger_path — else context_brief reads a different
+    file than hunt_run wrote (they diverged: <target>/round_log.jsonl vs the real
+    .state/round_log.jsonl)."""
+    import asg
+    import round_logger as rlmod
+    target = "digiwin-bbp"  # any real target dir under 01 - Targets/
+    try:
+        led = asg.ledger_path(target)
+    except Exception:
+        import pytest
+        pytest.skip("target dir not present in this checkout")
+    rl = RoundLogger(target, session_id="x")
+    assert rl.path == led.parent / "round_log.jsonl"
+    assert rlmod._default_ledger(target) == led
+
+
 # ── malformed line resilience ────────────────────────────────────────────────
 
 def test_malformed_lines_skipped(tmp_path):
