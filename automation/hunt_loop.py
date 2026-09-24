@@ -30,7 +30,9 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import uuid
 from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
@@ -78,14 +80,24 @@ class ExecutionResult:
     outcome: Optional[str] = None       # normalized rule-relevant token (preserved across serialization)
 
 
-def _event(kind: str, **data) -> dict:
-    return {"kind": kind, **data}
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _event(kind: str, *, session_id: str = "", **data) -> dict:
+    ev = {"kind": kind, "ts": _now()}
+    if session_id:
+        ev["sid"] = session_id
+    ev.update(data)
+    return ev
 
 
 # ── the loop core ───────────────────────────────────────────────────────────
 class HuntLoop:
-    def __init__(self, events: Optional[list[dict]] = None):
+    def __init__(self, events: Optional[list[dict]] = None,
+                 session_id: Optional[str] = None):
         self.events: list[dict] = list(events or [])
+        self.session_id: str = session_id or uuid.uuid4().hex[:12]
 
     # --- persistence (I4: atomic event-log snapshot, deterministic reload) ---
     def save(self, path: str | Path) -> None:
@@ -114,7 +126,7 @@ class HuntLoop:
         return cls(evs)
 
     def append(self, kind: str, **data) -> None:
-        self.events.append(_event(kind, **data))
+        self.events.append(_event(kind, session_id=self.session_id, **data))
 
     # --- domain ops ---
     def add_surface(self, node_id: str, untested: bool = True) -> None:
