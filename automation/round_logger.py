@@ -82,6 +82,26 @@ class RoundLogger:
     def decision(self, choice: str, reason: str = "", **extra) -> dict:
         return self.log("decision", choice=choice, reason=reason, **extra)
 
+    def set_mode(self, mode: str, reason: str = "") -> dict:
+        """Record the current interaction mode (ALIGNMENT / EXECUTION).
+
+        ALIGNMENT = user has a specific mental model still being pinned down;
+        confirm structure before acting. EXECUTION = goal is clear, act then
+        report. Recording it lets context_brief() restore the MODE (not just the
+        facts) after auto-compression — the compaction summary + "resume directly"
+        prompt otherwise silently flips a stopped session back into EXECUTION.
+        """
+        return self.log("mode", mode=mode, reason=reason)
+
+    def current_mode(self, sid: Optional[str] = None) -> Optional[dict]:
+        """The last recorded interaction mode for this session, or None."""
+        entries = self.read_session(sid) if (sid or self.session_id) else self.read_all()
+        for e in reversed(entries):
+            if e.get("action") == "mode":
+                return {"mode": e.get("mode"), "reason": e.get("reason", ""),
+                        "ts": e.get("ts")}
+        return None
+
     def error(self, tool: str, message: str, **extra) -> dict:
         return self.log("error", tool=tool, message=message[:500], **extra)
 
@@ -170,10 +190,13 @@ def context_brief(target: str, session_id: Optional[str] = None,
         recent = rl.recent(n_recent)
 
     stats = rl.summary()
+    mode = rl.current_mode(session_id)
 
     return {
         "target": target,
         "session_id": session_id,
+        "interaction_mode": mode,   # None until a mode is recorded; restores the
+        #                             MODE after compaction, not just the facts.
         "capsule": capsule,
         "recent_ops": recent,
         "stats": stats,

@@ -167,6 +167,7 @@ def autodrive(
     kb_dir=None,
     rank: Optional[Callable[[list[str], dict, HuntLoop], list[str]]] = None,
     persist: Optional[Callable[[HuntLoop], None]] = None,
+    round_log: Optional[Callable[[dict], None]] = None,
     templater: Optional[Callable[[HuntLoop, dict], Optional[LogicHypothesis]]] = None,
     max_rounds: int = 200,
 ) -> DriveReport:
@@ -177,6 +178,9 @@ def autodrive(
       ready_hyp(id)    -> reconstruct the LogicHypothesis for a ready capsule id
                           (needed after a reload, when the object isn't in memory).
       human_gate(loop,cap) -> a reason string to hand back (auth/account/risk), else None.
+      round_log(entry) -> record a structured OPERATIONAL round (separate from the ASG
+                          event log): what was tried this round + its verdict. Fuels
+                          the JSONL round log / context_brief for compression recovery.
     """
     rep = DriveReport()
     prev_caps: set = set()
@@ -328,6 +332,21 @@ def autodrive(
         rep.trace.append((hyp.hyp_id, v.value, res["reason"][:70]))
         budget.actions += 1
         rep.rounds += 1
+
+        # structured OPERATIONAL round record (separate from the ASG event log):
+        # feeds the JSONL round log / context_brief so a post-compaction reload
+        # sees "what was tried this round" without replaying the whole event log.
+        if round_log:
+            round_log({
+                "round": rep.rounds,
+                "hyp_id": hyp.hyp_id,
+                "dimension": getattr(hyp, "dimension", None),
+                "verdict": v.value,
+                "reason": res["reason"][:200],
+                "tier": task.model_tier,
+                "knowledge_count": len(knowledge),
+                "was_replan": was_replan,
+            })
 
         # durable per-round: heartbeat + lock-guarded save (the run-entry supplies
         # persist). Raises ConcurrentWriter if another writer took the ledger over.

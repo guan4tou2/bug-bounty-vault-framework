@@ -85,17 +85,34 @@ def run_hunt(
         loop = HuntLoop.load(ledger)
         dispatch = make_dispatch(spawn)
 
+        # operational round log (JSONL, next to the ledger) — separate from the ASG
+        # event log; a compression-resilient record of what each round tried.
+        round_logger = None
+        try:
+            from round_logger import RoundLogger
+            rl_path = Path(ledger).parent / "round_log.jsonl"
+            round_logger = RoundLogger(target or str(ledger),
+                                       session_id=loop.session_id, path=rl_path)
+        except Exception:
+            round_logger = None   # round log is best-effort; never fail a run over it
+
         def persist(lp: HuntLoop) -> None:
             heartbeat(ledger, token)
             guarded_save(lp, ledger, token)   # refuses if we lost the lock (no clobber)
+
+        def round_log(entry: dict) -> None:
+            if round_logger is not None:
+                round_logger.log("round", **entry)
 
         rep = autodrive(
             loop, current_env=current_env, dispatch=dispatch, propose=propose,
             ready_hyp=ready_hyp, budget=budget, human_gate=human_gate,
             kb_tags=kb_tags, kb_dir=kb_dir, rank=value_rank, persist=persist,
-            max_rounds=max_rounds,
+            round_log=round_log, max_rounds=max_rounds,
         )
         guarded_save(loop, ledger, token)     # final durable state
+        if round_logger is not None and rep.handoff_reason:
+            round_logger.handoff(rep.handoff_reason, capsule=loop.capsule())
     finally:
         release(ledger, token)
     # projections are one-way and lock-free (read the just-saved ledger)

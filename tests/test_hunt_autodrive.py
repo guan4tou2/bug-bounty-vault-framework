@@ -159,3 +159,28 @@ def test_blocked_reopens_only_when_precondition_lands():
     assert rep.confirmed == []                       # never ran (precondition unmet)
     assert rep.interventions == 1
     assert "no autonomous next step" in rep.handoff_reason
+
+
+def test_round_log_receives_structured_per_round_entries():
+    # the round_log callback fires once per executed round with a structured entry,
+    # feeding the JSONL round log / context_brief (compression-resilience).
+    loop, reg = _build()
+    variant = _hyp("e-variant", "/api/variant", [], [])
+    reg["e-variant"] = variant
+    entries: list = []
+    autodrive(
+        loop, current_env=ENV,
+        dispatch=_make_dispatch(reg, {"n": 0}),
+        propose=_make_propose(reg, [variant]),
+        ready_hyp=lambda hid: reg[hid],
+        budget=Budget(max_actions=50, max_replans=5, max_retries_per_hyp=2),
+        round_log=entries.append,
+    )
+    assert entries, "round_log should have received at least one entry"
+    for e in entries:
+        assert set(e) >= {"round", "hyp_id", "verdict", "reason", "tier"}
+    rounds = [e["round"] for e in entries]
+    assert rounds == sorted(rounds)
+    verdicts = {e["hyp_id"]: e["verdict"] for e in entries}
+    assert verdicts.get("a-config") == "confirmed"
+    assert verdicts.get("b-public") == "refuted"
