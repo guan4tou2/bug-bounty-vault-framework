@@ -22,6 +22,8 @@ Design invariants it ENFORCES (the point of building the spine bottom-up):
       Reload -> identical capsule (compaction / handover survives).
   I5  a revoked capability invalidates the actions that required it.
   I6  a failed / errored execution is INCONCLUSIVE, never auto "not_vulnerable".
+  I7  confidence tracks verification quality: static-only findings are surfaced
+      separately from dynamically reproduced ones in the capsule.
 """
 from __future__ import annotations
 
@@ -32,6 +34,19 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
+
+
+# ── confidence levels (I7) ─────────────────────────────────────────────────
+CONFIDENCE_LEVELS = {
+    "theoretical": 0,   # inferred from pattern/documentation, not code-confirmed
+    "static": 1,        # found via source code / config / binary analysis, no live test
+    "reproduced": 2,    # dynamically verified with live request / PoC
+    "repeated": 3,      # independently confirmed multiple times
+}
+
+
+def confidence_is_dynamic(level: str) -> bool:
+    return CONFIDENCE_LEVELS.get(level, 0) >= CONFIDENCE_LEVELS["reproduced"]
 
 
 # ── verdict + run-state taxonomies ──────────────────────────────────────────
@@ -60,6 +75,7 @@ class ExecutionResult:
     exit_ok: bool                       # did the command run cleanly?
     output_ref: Optional[str] = None    # artifact path (evidence)
     error: Optional[str] = None         # environment/timeout/etc.
+    outcome: Optional[str] = None       # normalized rule-relevant token (preserved across serialization)
 
 
 def _event(kind: str, **data) -> dict:
@@ -115,14 +131,17 @@ class HuntLoop:
         # I1/I6: an execution is just an event. It never, by itself, grants a
         # capability or confirms a hypothesis.
         self.append("execution", action_id=r.action_id, exit_ok=r.exit_ok,
-                    output_ref=r.output_ref, error=r.error)
+                    output_ref=r.output_ref, error=r.error,
+                    outcome=r.outcome)
 
     def record_verdict(self, hyp_id: str, verdict: Verdict,
                        evidence_ref: Optional[str] = None,
-                       provides: Optional[list[str]] = None) -> None:
+                       provides: Optional[list[str]] = None,
+                       confidence: str = "static") -> None:
         # I1: CONFIRMED must carry evidence to be trusted for a capability grant.
         self.append("verdict", hyp_id=hyp_id, verdict=verdict.value,
-                    evidence_ref=evidence_ref, provides=provides or [])
+                    evidence_ref=evidence_ref, provides=provides or [],
+                    confidence=confidence)
 
     def revoke_capability(self, cap: str, reason: str) -> None:
         self.append("revoke", cap=cap, reason=reason)
@@ -140,6 +159,7 @@ class HuntLoop:
         surfaces: dict[str, bool] = {}          # node_id -> untested?
         hyp_requires: dict[str, list[str]] = {}
         confirmed: dict[str, list[str]] = {}    # hyp_id -> provides (CONFIRMED)
+        confidence: dict[str, str] = {}
         refuted: set[str] = set()
         disputed: set[str] = set()
         capabilities: set[str] = set()
@@ -153,6 +173,7 @@ class HuntLoop:
                 hyp_requires.setdefault(e["hyp_id"], e.get("requires", []))
             elif k == "verdict":
                 hid, v = e["hyp_id"], e["verdict"]
+                confidence[hid] = e.get("confidence", "static")
                 if v == Verdict.CONFIRMED.value:
                     if hid in refuted:                      # I3: conflict
                         disputed.add(hid); refuted.discard(hid)
@@ -204,11 +225,18 @@ class HuntLoop:
                 ready.append(hid)
 
         untested_surface = [n for n, ut in surfaces.items() if ut]
+        conf_for_confirmed = {h: confidence.get(h, "static") for h in confirmed}
+        # I7: separate static-only findings from dynamically reproduced ones
+        static_only = sorted(
+            h for h, c in conf_for_confirmed.items()
+            if not confidence_is_dynamic(c))
         return {
             "event_cursor": len(self.events),
             "invalidated_hypotheses": invalidated,
             "capabilities": sorted(capabilities),
             "confirmed": confirmed,
+            "confidence": conf_for_confirmed,
+            "static_only": static_only,
             "refuted": sorted(refuted),
             "disputed": sorted(disputed),          # I3
             "ready_hypotheses": sorted(ready),

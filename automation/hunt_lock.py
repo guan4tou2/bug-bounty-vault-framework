@@ -93,9 +93,12 @@ def acquire(ledger: str | Path, owner: str, *, ttl_s: int = DEFAULT_TTL_S,
 
     holder = _read_holder(ledger)
     if holder is None or _expired(holder, now):
-        # stale / crashed / corrupt -> take over
         _write_holder(ledger, record)
-        return token
+        actual = _read_holder(ledger)
+        if actual and actual.get("token") == token:
+            return token
+        raise ConcurrentWriter(
+            f"lost takeover race: another writer took the expired lock before us")
     raise ConcurrentWriter(
         f"ledger held by {holder.get('owner')!r} (pid {holder.get('pid')}), "
         f"{int(now - holder.get('acquired_at', now))}s ago, ttl {holder.get('ttl_s')}s; "

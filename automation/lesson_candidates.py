@@ -146,7 +146,8 @@ def _covered(title: str, existing: list[str]) -> bool:
 
 def write_candidates(target: str | Path, *, dry: bool = False) -> list[Path]:
     """Draft + write staging candidate files. Idempotent (filename keyed on hyp_id).
-    Dedups against curated LLs by crude title overlap. Returns written/would-write paths."""
+    Dedups against curated LLs by crude title overlap. Returns written/would-write paths.
+    Skips files that already exist with human edits (content differs from generated)."""
     cands = draft_candidates(target)
     if not cands:
         return []
@@ -179,6 +180,8 @@ def write_candidates(target: str | Path, *, dry: bool = False) -> list[Path]:
             written.append(fp)
             continue
         out_dir.mkdir(parents=True, exist_ok=True)
+        if fp.exists() and fp.read_text(encoding="utf-8") != body:
+            continue
         fp.write_text(body, encoding="utf-8")
         written.append(fp)
     return written

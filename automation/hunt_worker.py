@@ -47,6 +47,12 @@ def model_for_tier(tier: str) -> str:
 _RESULT_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
 
 
+def _to_bool(v) -> bool:
+    if isinstance(v, str):
+        return v.lower() not in ("false", "0", "no", "")
+    return bool(v)
+
+
 def render_worker_prompt(task: WorkerTask) -> str:
     """Render a bounded worker brief. Everything the worker needs, nothing it doesn't;
     raw tool output stays in files, only a structured result comes back."""
@@ -107,12 +113,17 @@ def parse_worker_result(result, task: WorkerTask) -> tuple[Observation, Observat
             err = f"worker result block not valid JSON: {e}"
             return (Observation(task.hyp.test_action, ok=False, error=err),
                     Observation(task.hyp.control_action, ok=False, error=err))
-    t, c = obj.get("test", {}), obj.get("control", {})
+    t = obj.get("test") if isinstance(obj.get("test"), dict) else {}
+    c = obj.get("control") if isinstance(obj.get("control"), dict) else {}
+    if not t and not c:
+        err = "worker result has no valid test/control objects"
+        return (Observation(task.hyp.test_action, ok=False, error=err),
+                Observation(task.hyp.control_action, ok=False, error=err))
     return (
-        Observation(task.hyp.test_action, ok=bool(t.get("ok", False)),
+        Observation(task.hyp.test_action, ok=_to_bool(t.get("ok", False)),
                     outcome=t.get("outcome"), evidence_ref=t.get("evidence_ref"),
                     error=t.get("error")),
-        Observation(task.hyp.control_action, ok=bool(c.get("ok", False)),
+        Observation(task.hyp.control_action, ok=_to_bool(c.get("ok", False)),
                     outcome=c.get("outcome"), evidence_ref=c.get("evidence_ref"),
                     error=c.get("error")),
     )

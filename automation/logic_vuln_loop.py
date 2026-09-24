@@ -248,12 +248,15 @@ def env_gate(hyp: LogicHypothesis, current_env: Env) -> Optional[str]:
 
 
 def reconcile(loop: HuntLoop, action_id: str) -> Optional[dict]:
-    """Interrupted-action reconciliation: if the ledger already has a completed
+    """Interrupted-action reconciliation: if the ledger already has a SUCCESSFUL
     execution for action_id, return it so we DON'T blindly re-run. Returns None if
-    it should run fresh."""
+    it should run fresh. Failed executions (ok=False, timeout, error) are NOT reused
+    — the retry should re-execute with the corrected environment."""
     for e in reversed(loop.events):
         if e.get("kind") == "execution" and e.get("action_id") == action_id:
-            return e
+            if e.get("exit_ok"):
+                return e
+            return None
     return None
 
 
@@ -312,7 +315,12 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
     # provenance gate: a violation is only trusted against an ESTABLISHED rule.
     inv = invariant if invariant is not None else (
         resolve_invariant(loop, hyp.invariant_ref) if hyp.invariant_ref else None)
-    verdict, reason = guard_invariant_provenance(inv, verdict, reason)
+    if hyp.invariant_ref and inv is None and verdict == Verdict.CONFIRMED:
+        verdict, reason = Verdict.INCONCLUSIVE, (
+            f"invariant_ref '{hyp.invariant_ref}' cannot be resolved from the ledger; "
+            f"record the invariant first, then re-test. ({reason})")
+    else:
+        verdict, reason = guard_invariant_provenance(inv, verdict, reason)
     # I1: only a CONFIRMED verdict carries evidence + grants the hypothesis's
     # declared capabilities to the ledger's capability layer.
     loop.record_verdict(hyp.hyp_id, verdict,
@@ -331,7 +339,7 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
 # ── small adapters between Observation and the hunt_loop execution event ────
 def _exec_result(o: Observation):
     from hunt_loop import ExecutionResult
-    return ExecutionResult(action_id=o.action_id, exit_ok=o.ok, output_ref=o.evidence_ref, error=o.error)
+    return ExecutionResult(action_id=o.action_id, exit_ok=o.ok, output_ref=o.evidence_ref, error=o.error, outcome=o.outcome)
 
 
 def _obs_from_event(e: dict) -> Observation:
