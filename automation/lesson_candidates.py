@@ -91,7 +91,9 @@ def draft_candidates(target: str | Path) -> list[dict]:
         invariant = h.get("invariant", "") or (h.get("surface_id") or hid)
         reason = v.get("reason", "") or evidence.get(hid, "")
         t_out, c_out = v.get("test_outcome"), v.get("control_outcome")
-        differential = (f"test→{t_out} vs control→{c_out}" if t_out or c_out else "")
+        has_real_differential = (t_out is not None and c_out is not None
+                                 and t_out != c_out)
+        differential = (f"test→{t_out} vs control→{c_out}" if has_real_differential else "")
         reopen = d.get("reopen_when", "")
         scope = d.get("scope") or h.get("applies_env") or {}
         # a lesson needs reusable content: a differential, a stated reason, or a reopen
