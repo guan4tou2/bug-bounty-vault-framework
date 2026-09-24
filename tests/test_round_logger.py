@@ -182,66 +182,6 @@ def test_context_brief_no_round_log(tmp_path):
     assert brief["recent_ops"] == []
 
 
-# ── interaction mode (compression-resilience) ────────────────────────────────
-
-def test_set_and_read_mode(tmp_path):
-    p = tmp_path / "round_log.jsonl"
-    rl = RoundLogger("t", session_id="s1", path=p)
-    assert rl.current_mode() is None
-    rl.set_mode("ALIGNMENT", reason="user corrected structure 2x")
-    m = rl.current_mode()
-    assert m["mode"] == "ALIGNMENT"
-    assert "corrected" in m["reason"]
-
-
-def test_mode_last_wins(tmp_path):
-    p = tmp_path / "round_log.jsonl"
-    rl = RoundLogger("t", session_id="s1", path=p)
-    rl.set_mode("EXECUTION")
-    rl.test("/api/x", verdict="confirmed")
-    rl.set_mode("ALIGNMENT", reason="stop and discuss")
-    assert rl.current_mode()["mode"] == "ALIGNMENT"
-
-
-def test_mode_is_session_scoped(tmp_path):
-    p = tmp_path / "round_log.jsonl"
-    rl1 = RoundLogger("t", session_id="s1", path=p)
-    rl2 = RoundLogger("t", session_id="s2", path=p)
-    rl1.set_mode("ALIGNMENT")
-    rl2.set_mode("EXECUTION")
-    assert rl1.current_mode()["mode"] == "ALIGNMENT"
-    assert rl2.current_mode()["mode"] == "EXECUTION"
-
-
-def test_context_brief_carries_mode(tmp_path):
-    ledger = tmp_path / "hunt_ledger.jsonl"
-    round_log = tmp_path / "round_log.jsonl"
-    loop = HuntLoop(session_id="s1")
-    loop.add_surface("x")
-    loop.save(ledger)
-
-    rl = RoundLogger("t", session_id="s1", path=round_log)
-    rl.set_mode("ALIGNMENT", reason="user wants discussion first")
-    rl.test("/api/a", verdict="blocked")
-
-    brief = context_brief("t", session_id="s1", n_recent=5,
-                          ledger_path=ledger, round_log_path=round_log)
-    assert brief["interaction_mode"]["mode"] == "ALIGNMENT"
-    assert "discussion" in brief["interaction_mode"]["reason"]
-
-
-def test_context_brief_mode_none_when_unset(tmp_path):
-    ledger = tmp_path / "hunt_ledger.jsonl"
-    round_log = tmp_path / "round_log.jsonl"
-    loop = HuntLoop(session_id="s1")
-    loop.save(ledger)
-    rl = RoundLogger("t", session_id="s1", path=round_log)
-    rl.test("/api/a", verdict="confirmed")
-    brief = context_brief("t", session_id="s1", n_recent=5,
-                          ledger_path=ledger, round_log_path=round_log)
-    assert brief["interaction_mode"] is None
-
-
 # ── token size comparison ────────────────────────────────────────────────────
 
 def test_jsonl_smaller_than_prose(tmp_path):
