@@ -57,6 +57,7 @@ def run_hunt(
     ledger: str | Path | None = None,
     *,
     target: str | None = None,
+    profile: str | None = None,
     owner: str,
     current_env: Env,
     spawn: Callable[[str, str], object],
@@ -79,6 +80,23 @@ def run_hunt(
         ledger = asg.ledger_path(target)
     if ledger is None:
         raise ValueError("run_hunt needs a target= or an explicit ledger=")
+
+    # Validate genesis and profile
+    if target is not None:
+        genesis = asg.has_genesis(target)
+        if not genesis:
+            raise RuntimeError(
+                f"no genesis event for {target!r} — run "
+                f"'python3 automation/engage.py {target} --interactive' first")
+        if profile is not None:
+            gen_profile = genesis.get("profile", "web")
+            if gen_profile != profile:
+                raise RuntimeError(
+                    f"profile mismatch: genesis says '{gen_profile}', "
+                    f"--profile says '{profile}' — re-engage or drop --profile")
+        if not asg.phase_allows(target, "exploit"):
+            asg.advance_phase(target, "exploit",
+                              reason="auto: hunt_run entry")
 
     token = acquire(ledger, owner, ttl_s=ttl_s)
     try:
