@@ -379,7 +379,7 @@ reports/<platform>/
 python3 automation/check_vault.py
 
 # Frontmatter validation
-python3 _automation/lint_frontmatter.py --all
+python3 automation/lint_frontmatter.py --all   # frontmatter linter is not shipped in the public seed
 
 # Workspace audit
 bash automation/audit_workspace.sh

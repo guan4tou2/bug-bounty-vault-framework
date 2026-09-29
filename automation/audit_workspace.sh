@@ -238,7 +238,7 @@ for t in "$TARGETS_ROOT"/*/; do
   done | grep -v '^$' | sort -u)
   orphans=$(comm -23 <(echo "$cleaned") <(echo "$fnd_ids") | grep -v '^$')
   if [ -n "$orphans" ]; then
-    fail "$base orphan: $(echo $orphans | tr '\n' ' ') → bash automation/backfill_finding_stubs.sh $base"
+    fail "$base orphan: $(echo $orphans | tr '\n' ' ') → see docs: backfill helper is not shipped in the public seed"
     n=$((n+1))
   fi
 done
@@ -462,7 +462,10 @@ fi
 # ─────────────────────────────────────────────────────────────────────────
 if want rule-docs; then
 section "12. Rule docs drift (root / Vault agent guide sync)"
-if bash "$SCRIPT_DIR/lint_rule_docs.sh"; then
+# dangling-ref-exempt: not shipped in the public seed; section degrades to a skip.
+if [ ! -e "$SCRIPT_DIR/lint_rule_docs.sh" ]; then
+  echo "  [skip] lint_rule_docs.sh is not part of the public seed"
+elif bash "$SCRIPT_DIR/lint_rule_docs.sh"; then
   :
 else
   FAIL=$((FAIL+1))
@@ -472,7 +475,10 @@ fi
 # ─────────────────────────────────────────────────────────────────────────
 if want portable; then
 section "13. Portable layout readiness（vault-root + external workspace）"
-if bash "$SCRIPT_DIR/check_portable_layout.sh"; then
+# dangling-ref-exempt: not shipped in the public seed; section degrades to a skip.
+if [ ! -e "$SCRIPT_DIR/check_portable_layout.sh" ]; then
+  echo "  [skip] check_portable_layout.sh is not part of the public seed"
+elif bash "$SCRIPT_DIR/check_portable_layout.sh"; then
   :
 else
   FAIL=$((FAIL+1))
@@ -482,7 +488,10 @@ fi
 # ─────────────────────────────────────────────────────────────────────────
 if want skills; then
 section "14. Workspace skills lint (.claude/skills registry)"
-if bash "$SCRIPT_DIR/lint_workspace_skills.sh"; then
+# dangling-ref-exempt: not shipped in the public seed; section degrades to a skip.
+if [ ! -e "$SCRIPT_DIR/lint_workspace_skills.sh" ]; then
+  echo "  [skip] lint_workspace_skills.sh is not part of the public seed"
+elif bash "$SCRIPT_DIR/lint_workspace_skills.sh"; then
   :
 else
   FAIL=$((FAIL+1))
@@ -492,7 +501,10 @@ fi
 # ─────────────────────────────────────────────────────────────────────────
 if want recon-coverage; then
 section "15. Recon coverage (Vault Recon notes / Finding history)"
-if python3 "$SCRIPT_DIR/audit_recon_coverage.py" --vault-root "$VAULT_ROOT" --min-findings 3; then
+# dangling-ref-exempt: not shipped in the public seed; section degrades to a skip.
+if [ ! -e "$SCRIPT_DIR/audit_recon_coverage.py" ]; then
+  echo "  [skip] audit_recon_coverage.py is not part of the public seed"
+elif python3 "$SCRIPT_DIR/audit_recon_coverage.py" --vault-root "$VAULT_ROOT" --min-findings 3; then
   :
 else
   FAIL=$((FAIL+1))

@@ -88,7 +88,8 @@ If your setup provides an index generator script, run it now to rebuild the FIND
 
 ```bash
 # regenerate FINDINGS_QUICK_REF (if your setup provides an index generator)
-# e.g.: bash automation/generate_findings_index.sh <target>
+# The public seed ships no findings-index generator; use the ASG status view instead:
+python3 automation/asg.py status <target>
 ```
 
 If no generator is configured, manually verify that all new Findings committed this session appear in `workspace/workshop/<target>/FINDINGS_QUICK_REF.md`.

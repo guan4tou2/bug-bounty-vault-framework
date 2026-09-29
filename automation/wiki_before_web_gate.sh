@@ -68,7 +68,7 @@ echo "⛔ wiki-before-web gate: check KB before web search." >&2
 echo "" >&2
 echo "This session has not queried the Knowledge Base yet. Check local KB first:" >&2
 echo "" >&2
-echo "  python3 automation/kb_retrieval.py search '<keyword>'" >&2
+echo "  grep -ri '<keyword>' '09 - Knowledge Base/'   # kb_retrieval.py is not shipped in the public seed" >&2
 echo "" >&2
 echo "If KB has nothing, then search the web (receipt auto-created)." >&2
 echo "Technical docs and CVE database WebFetch are exempt." >&2

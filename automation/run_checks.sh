@@ -60,13 +60,17 @@ run_category() {
     [[ "$script" == *.py ]] && runner="python3"
     local args=()
     [[ -n "$TARGET" ]] && args+=("$TARGET")
-    if $runner "$path" "${args[@]}" >/dev/null 2>&1; then
+    # bash 3.2 (the system bash on macOS) errors with "unbound variable" when an
+    # EMPTY array is expanded under `set -u`, and args is always empty when no
+    # TARGET was given -- meaning this runner never finished a single category on
+    # macOS. `${a[@]+"${a[@]}"}` is the 3.2-compatible "expand only if non-empty".
+    if $runner "$path" ${args[@]+"${args[@]}"} >/dev/null 2>&1; then
       echo -e "  ${G}PASS${N} $script"
       pass=$((pass + 1))
     else
       echo -e "  ${R}FAIL${N} $script"
       # Re-run to show output
-      $runner "$path" "${args[@]}" 2>&1 | sed 's/^/       /' | head -10
+      $runner "$path" ${args[@]+"${args[@]}"} 2>&1 | sed 's/^/       /' | head -10
       fail=$((fail + 1))
     fi
   done

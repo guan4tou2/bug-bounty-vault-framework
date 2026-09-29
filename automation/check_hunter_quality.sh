@@ -106,5 +106,5 @@ if never:
     print("   " + ", ".join(never))
 
 print(f"\nAdvisory only — tune/retire in the standalone bbflow repo (human judgement;")
-print(f"a miss may be environmental). Forward edge: bash automation/pull_nuclei_gaps.sh")
+print(f"a miss may be environmental). Forward edge: the nuclei-gap puller is not shipped in the public seed")
 PY
