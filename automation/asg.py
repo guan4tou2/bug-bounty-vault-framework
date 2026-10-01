@@ -77,8 +77,17 @@ FINDING_TRANSITIONS: dict[str, list[str]] = {
     "confirmed":           [],
 }
 
-# Mandatory workers that fire when a finding reaches "confirmed"
-MANDATORY_WORKERS = ("chain", "expand")
+# Mandatory workers that fire when a finding reaches "confirmed".
+# Order matters: `verb-matrix` is a PREREQUISITE for chain/expand (see
+# complete_worker). It forces the read+write verb matrix (GET + PUT/PATCH/DELETE,
+# cross-tenant) to be covered — or explicitly waived with a reason — BEFORE the
+# more engaging chain/expand work can be closed. Root cause it fixes: "stopping at
+# GET" was enforced only by the recall-triggered idor-coverage skill; this makes
+# node-level write-path coverage an automatic gate (surfaces in check_pending_workers
+# → blocks submission). Findings rarely carry vuln_class, so verb-matrix is
+# required for EVERY confirmed finding and waived per-finding when it does not apply
+# (complete-worker <t> <id> verb-matrix "n/a: <why no object/write path>").
+MANDATORY_WORKERS = ("verb-matrix", "chain", "expand")
 
 
 # ── RESOLVER (the single source of ASG paths) ───────────────────────────────
@@ -179,6 +188,27 @@ def advance_phase(target: str | Path, to: str, *, reason: str = "") -> dict:
     to_idx = chain.index(to)
     if to_idx <= cur_idx:
         return {"ok": False, "reason": f"cannot go backward: {cur} -> {to}"}
+    # Coverage-before-report gate: entering the report phase with most of the attack
+    # surface still untested is the harvest-bias failure mode (find a lot ≠ covered).
+    # The number is objective (status()); require a tested-surface floor before report.
+    # Strict by default — being blocked in recon is intended; thorough coverage is the
+    # point. Override: BB_SKIP_COVERAGE_GATE=1 ; tune: BB_COVERAGE_FLOOR (0..1).
+    if to == "report" and os.environ.get("BB_SKIP_COVERAGE_GATE") != "1":
+        st = status(target)
+        tot = st.get("surfaces_total", 0) or 0
+        unt = st.get("surfaces_untested", 0) or 0
+        if tot > 0:
+            tested_ratio = (tot - unt) / tot
+            try:
+                floor = float(os.environ.get("BB_COVERAGE_FLOOR", "0.8"))
+            except ValueError:
+                floor = 0.8
+            if tested_ratio < floor:
+                return {"ok": False, "reason":
+                        f"coverage {tested_ratio:.0%} < {floor:.0%} 門檻"
+                        f"（{tot - unt}/{tot} surface 測過）——surface 大多未測，不進 report。"
+                        f" 先把 surface 測完並在 ledger 標記（surface 事件 untested=False），"
+                        f"或 BB_SKIP_COVERAGE_GATE=1 放行、BB_COVERAGE_FLOOR=<0..1> 調門檻。"}
     append_event(target, "phase", to=to, **{"from": cur}, reason=reason)
     return {"ok": True, "from": cur, "to": to}
 
@@ -282,6 +312,17 @@ def complete_worker(target: str | Path, finding_id: str, worker: str, *,
     cur = finding_state(target, finding_id)
     if cur != "confirmed":
         return {"ok": False, "reason": f"{finding_id} is not confirmed (state: {cur})"}
+    # Prerequisite: node-level verb coverage before chaining/expanding. Only applies
+    # when verb-matrix was actually required for this finding (older confirmed findings
+    # predate it, so they are unaffected).
+    if worker in ("chain", "expand"):
+        pend = {r.get("worker") for r in pending_workers(target, finding_id)}
+        if "verb-matrix" in pend:
+            return {"ok": False, "reason":
+                    f"verb-matrix 未完成——先測完讀寫全動詞矩陣（GET + PUT/PATCH/DELETE、"
+                    f"物件 ID 變體、跨租戶）再 close '{worker}'（別停在 GET）。"
+                    f" 不適用就豁免：python3 automation/asg.py complete-worker "
+                    f"{_basename(target)} {finding_id} verb-matrix \"n/a: <為何無 object/write path>\""}
     append_event(target, "worker_done", finding_id=finding_id, worker=worker,
                  reason=reason, **data)
     remaining = pending_workers(target, finding_id)

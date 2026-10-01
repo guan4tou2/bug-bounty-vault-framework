@@ -239,3 +239,74 @@ nodes: []
     loop = HuntLoop.load(asg.ledger_path("T8"))
     cap = loop.capsule()
     assert "P:cred=admin" in cap["capabilities"]
+
+
+# ── verb-matrix prerequisite + coverage-before-report gate ───────────────────
+def _confirm_finding(target, fid):
+    """Helper: drive a finding hypothesis -> confirmed (auto-queues mandatory workers)."""
+    asg.append_event(target, "genesis", profile="web", phase="engage")
+    asg.record_finding(target, fid)
+    asg.advance_finding(target, fid, "tested")
+    asg.advance_finding(target, fid, "adversary-verified")
+    return asg.advance_finding(target, fid, "confirmed")
+
+
+def test_confirm_queues_verb_matrix_before_chain(tmp_path, monkeypatch):
+    """verb-matrix is queued on confirm and is a prerequisite for chain/expand —
+    the mechanical replacement for the recall-triggered 'don't stop at GET' rule."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    r = _confirm_finding("VM1", "VM-001")
+    assert r["workers_queued"] == ["verb-matrix", "chain", "expand"]
+    # chain blocked while verb-matrix pending
+    blocked = asg.complete_worker("VM1", "VM-001", "chain")
+    assert blocked["ok"] is False and "verb-matrix" in blocked["reason"]
+    # waive verb-matrix, then chain/expand close
+    assert asg.complete_worker("VM1", "VM-001", "verb-matrix", reason="n/a: no object")["ok"]
+    assert asg.complete_worker("VM1", "VM-001", "chain")["ok"]
+    assert asg.complete_worker("VM1", "VM-001", "expand")["ok"]
+
+
+def test_legacy_confirmed_without_verb_matrix_not_blocked(tmp_path, monkeypatch):
+    """A finding confirmed with only (chain, expand) required (pre-verb-matrix) must
+    still close chain — the prerequisite only bites when verb-matrix was required."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    asg.append_event("VM2", "genesis", profile="web", phase="engage")
+    asg.append_events("VM2", [
+        ("finding", {"finding_id": "VM-002"}),
+        ("finding_state", {"finding_id": "VM-002", "to": "confirmed"}),
+        ("worker_required", {"finding_id": "VM-002", "worker": "chain"}),
+        ("worker_required", {"finding_id": "VM-002", "worker": "expand"}),
+    ])
+    assert asg.complete_worker("VM2", "VM-002", "chain")["ok"]
+
+
+def test_report_phase_blocked_until_coverage_floor(tmp_path, monkeypatch):
+    """advance-phase report is blocked while most surfaces are untested (harvest-bias
+    guard); the floor is tunable and overridable."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    asg.append_event("CV1", "genesis", profile="web", phase="engage")
+    asg.append_events("CV1", [
+        ("surface", {"name": "s1", "untested": True}),
+        ("surface", {"name": "s2", "untested": True}),
+    ])
+    for p in ["osint", "recon", "map", "exploit"]:
+        assert asg.advance_phase("CV1", p)["ok"]
+    assert asg.advance_phase("CV1", "report")["ok"] is False          # 0% < 80%
+    asg.append_event("CV1", "surface", name="s1", untested=False)      # 50%
+    assert asg.advance_phase("CV1", "report")["ok"] is False
+    monkeypatch.setenv("BB_SKIP_COVERAGE_GATE", "1")
+    assert asg.advance_phase("CV1", "report")["ok"] is True
+
+
+def test_coverage_floor_env_tunable(tmp_path, monkeypatch):
+    """BB_COVERAGE_FLOOR lowers the bar; 50% coverage passes a 0.5 floor."""
+    monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
+    asg.append_event("CV2", "genesis", profile="web", phase="engage")
+    asg.append_events("CV2", [
+        ("surface", {"name": "s1", "untested": False}),
+        ("surface", {"name": "s2", "untested": True}),
+    ])
+    for p in ["osint", "recon", "map", "exploit"]:
+        asg.advance_phase("CV2", p)
+    monkeypatch.setenv("BB_COVERAGE_FLOOR", "0.5")
+    assert asg.advance_phase("CV2", "report")["ok"] is True
