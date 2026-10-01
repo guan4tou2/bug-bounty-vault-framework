@@ -20,6 +20,10 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/inline_scan_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/curl_gate.sh\"'"
      }
     ]
    },
