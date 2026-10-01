@@ -129,14 +129,16 @@ def lesson_effect_report(loop) -> dict:
     from collections import defaultdict
     verdict_of: dict = {}
     for e in loop.events:
-        if e["kind"] in ("logic_verdict", "verdict"):
+        if e["type"] == "logic_verdict":
             verdict_of[e.get("hyp_id")] = e.get("verdict")
+        elif e["type"] == "verdict":
+            verdict_of[e.get("hypothesis")] = e.get("status")
 
     rep: dict = defaultdict(lambda: {"consulted": 0, "changed_decision": 0,
                                      "decisive_after": 0, "inconclusive_after": 0,
                                      "avoided_retread": 0})
     for e in loop.events:
-        k = e["kind"]
+        k = e["type"]
         if k in ("kb_consulted", "lesson_retrieval"):
             v = verdict_of.get(e.get("hyp_id"))
             for lid in (e.get("kb_lesson_ids") or e.get("lesson_ids") or []):

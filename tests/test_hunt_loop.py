@@ -27,7 +27,7 @@ def test_execution_success_does_not_confirm_or_grant():
 def test_confirmed_with_evidence_grants_capability():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence_ref="poc/proof.txt",
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/proof.txt",
                       provides=["P:read=config"])
     cap = lp.capsule()
     assert cap["capabilities"] == ["P:read=config"]
@@ -38,7 +38,7 @@ def test_confirmed_with_evidence_grants_capability():
 def test_confirmed_without_evidence_grants_nothing():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence_ref=None,
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence=None,
                       provides=["P:exec=shell"])
     assert lp.capsule()["capabilities"] == []
 
@@ -64,8 +64,8 @@ def test_failed_execution_is_inconclusive_not_confirmed():
 def test_contradiction_marks_disputed():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence_ref="poc/a", provides=["P:x"])
-    lp.record_verdict("h1", Verdict.REFUTED, evidence_ref="poc/b")
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/a", provides=["P:x"])
+    lp.record_verdict("h1", Verdict.REFUTED, evidence="poc/b")
     cap = lp.capsule()
     assert cap["disputed"] == ["h1"]
     assert "h1" not in cap["confirmed"]
@@ -78,7 +78,7 @@ def test_reload_recovers_identical_capsule(tmp_path):
     lp = HuntLoop()
     lp.add_surface("ep1", untested=True)
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence_ref="poc/a", provides=["P:x"])
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/a", provides=["P:x"])
     before = lp.capsule()
     f = tmp_path / "loop.jsonl"
     lp.save(f)
@@ -90,7 +90,7 @@ def test_reload_recovers_identical_capsule(tmp_path):
 def test_revoke_blocks_dependent():
     lp = HuntLoop()
     lp.add_hypothesis("gain", )
-    lp.record_verdict("gain", Verdict.CONFIRMED, evidence_ref="poc/a", provides=["P:admin"])
+    lp.record_verdict("gain", Verdict.CONFIRMED, evidence="poc/a", provides=["P:admin"])
     lp.add_hypothesis("use", requires=["P:admin"])
     assert "use" in lp.capsule()["ready_hypotheses"]
     lp.revoke_capability("P:admin", reason="token rotated")
@@ -113,8 +113,8 @@ def test_no_ready_but_untested_surface_is_replanning():
 def test_disputed_is_not_completed():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence_ref="poc/a")
-    lp.record_verdict("h1", Verdict.REFUTED, evidence_ref="poc/b")
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/a")
+    lp.record_verdict("h1", Verdict.REFUTED, evidence="poc/b")
     assert lp.run_state() == RunState.REPLANNING
 
 
@@ -123,7 +123,7 @@ def test_true_exhaustion_is_completed():
     lp = HuntLoop()
     lp.add_surface("ep1", untested=False)      # mapped/tested
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.REFUTED, evidence_ref="poc/a")
+    lp.record_verdict("h1", Verdict.REFUTED, evidence="poc/a")
     assert lp.run_state() == RunState.REPLANNING
     lp.complete("declared controlled-case coverage evaluated")
     assert lp.run_state() == RunState.COMPLETED

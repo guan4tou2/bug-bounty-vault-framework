@@ -105,7 +105,7 @@ def test_full_output_contract_candidate_is_ingested_as_lead(tmp_path):
     lp = HuntLoop()
     assert import_bbflow(lp, tmp_path) == 1
     assert lp.capsule()['confirmed'] == {}                 # I1: a hit is not a finding
-    ev = [e for e in lp.events if e['kind'] == 'bbflow_candidate'][-1]
+    ev = [e for e in lp.events if e['type'] == 'bbflow_candidate'][-1]
     assert ev['candidate']['candidate_type'] == 'idor'
     assert ev['candidate']['review_status'] == 'new'
     assert ev['candidate']['suggested_skill'] == 'bb-attack-chain-review'

@@ -42,8 +42,8 @@ def test_resolver_rejects_traversal(bad_input):
 def test_append_event_is_sole_writer_and_appends(tmp_path, monkeypatch):
     # redirect the vault root so we write into tmp, not the real vault
     monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
-    asg.append_event("T1", "surface", node_id="ep1", untested=True)
-    asg.append_event("T1", "hypothesis", hyp_id="h1", requires=[])
+    asg.append_event("T1", "surface", name="ep1", untested=True)
+    asg.append_event("T1", "hypothesis", id="h1", requires=[])
     led = asg.ledger_path("T1")
     assert led.is_file()
     loop = HuntLoop.load(led)
@@ -55,11 +55,11 @@ def test_append_event_is_sole_writer_and_appends(tmp_path, monkeypatch):
 
 def test_projection_preserves_operator_content(tmp_path, monkeypatch):
     monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
-    asg.append_event("T2", "hypothesis", hyp_id="h1", requires=[])
+    asg.append_event("T2", "hypothesis", id="h1", requires=[])
     from hunt_loop import Verdict
     # confirm via a direct event so the projection has a capability to show
-    asg.append_event("T2", "verdict", hyp_id="h1", verdict=Verdict.CONFIRMED.value,
-                     evidence_ref="poc/x", provides=["P:read=config"])
+    asg.append_event("T2", "verdict", hypothesis="h1", status=Verdict.CONFIRMED.value,
+                     evidence="poc/x", provides=["P:read=config"])
 
     md = asg.markdown_path("T2")
     md.parent.mkdir(parents=True, exist_ok=True)
@@ -78,8 +78,8 @@ def test_projection_preserves_operator_content(tmp_path, monkeypatch):
 
 def test_snapshot_is_dataview_friendly(tmp_path, monkeypatch):
     monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
-    asg.append_event("T3", "surface", node_id="ep1", untested=True)
-    asg.append_event("T3", "hypothesis", hyp_id="h1", requires=[])
+    asg.append_event("T3", "surface", name="ep1", untested=True)
+    asg.append_event("T3", "hypothesis", id="h1", requires=[])
     snap = json.loads(asg.write_snapshot("T3").read_text())
     assert snap["target"] == "T3"
     assert snap["hypotheses_ready"] == 1
@@ -89,7 +89,7 @@ def test_snapshot_is_dataview_friendly(tmp_path, monkeypatch):
 
 def test_new_markdown_gets_generated_block_and_operator_section(tmp_path, monkeypatch):
     monkeypatch.setattr(asg, "vault_root", lambda: tmp_path)
-    asg.append_event("T4", "surface", node_id="ep1", untested=True)
+    asg.append_event("T4", "surface", name="ep1", untested=True)
     md = asg.project_markdown("T4")                             # file did not exist
     txt = md.read_text()
     assert txt.startswith("---")                               # frontmatter
@@ -152,7 +152,7 @@ def test_migration_yaml_to_ledger_is_faithful_and_idempotent(tmp_path, monkeypat
     # node -> surface ; validated finding -> confirmed hypothesis ; dead edge -> dead_end
     assert "/api/config" in cap["untested_surface"]
     assert "P:read=config" in cap["capabilities"]
-    assert any(e["kind"] == "dead_end" for e in loop.events)
+    assert any(e["type"] == "dead_end" for e in loop.events)
 
     # idempotent: unchanged Markdown -> no-op
     r2 = asg.migrate_yaml_to_ledger("T5")

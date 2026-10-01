@@ -108,7 +108,7 @@ def test_cg_chaining_unauth_no_account(tmp_path):
     assert cap["capabilities"] == ["P:cred=api", "P:read=admin"]
     assert len(cap["confirmed"]) == 2
     # the chained hypothesis recorded its precondition in the ledger
-    reqs = [e.get("requires") for e in loop.events if e["kind"] == "hypothesis"]
+    reqs = [e.get("requires") for e in loop.events if e["type"] == "hypothesis"]
     assert any(r == ["P:cred=api"] for r in reqs)
 
 

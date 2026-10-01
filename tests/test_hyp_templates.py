@@ -70,7 +70,7 @@ def test_surface_template_prefills_requires_for_info_retention(tmp_path):
     assert [] in ready_req                               # unauth probe is not blocked
     assert all(r == ["R:auth=session"] for r in blocked_req) and blocked_req
     # the R: capability requirement is now recorded on the ledger (info retention)
-    reqs = [e.get("requires") for e in loop.events if e["kind"] == "hypothesis"]
+    reqs = [e.get("requires") for e in loop.events if e["type"] == "hypothesis"]
     assert ["R:auth=session"] in reqs
 
 
@@ -84,7 +84,7 @@ def test_templater_leverages_a_held_capability(tmp_path):
     h = tp(loop, fake_cap)
     assert h is not None and h.requires == ["P:cred=api"]
     # seeded onto the ledger -> ready because its required capability is (would be) held
-    reqs = [e.get("requires") for e in loop.events if e["kind"] == "hypothesis"]
+    reqs = [e.get("requires") for e in loop.events if e["type"] == "hypothesis"]
     assert ["P:cred=api"] in reqs
 
 

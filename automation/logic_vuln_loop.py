@@ -97,7 +97,7 @@ def resolve_invariant(loop: HuntLoop, inv_id: str) -> Optional[Invariant]:
     'observed' (+ the normal-behaviour evidence that shows it holds)."""
     latest = None
     for e in loop.events:
-        if e.get("kind") == "invariant" and e.get("inv_id") == inv_id:
+        if e.get("type") == "invariant" and e.get("inv_id") == inv_id:
             latest = Invariant(inv_id=e["inv_id"], statement=e.get("statement", ""),
                                scope=e.get("scope", {}), source=e.get("source", "inferred"),
                                confidence=e.get("confidence", "speculative"),
@@ -253,7 +253,7 @@ def reconcile(loop: HuntLoop, action_id: str) -> Optional[dict]:
     it should run fresh. Failed executions (ok=False, timeout, error) are NOT reused
     — the retry should re-execute with the corrected environment."""
     for e in reversed(loop.events):
-        if e.get("kind") == "execution" and e.get("action_id") == action_id:
+        if e.get("type") == "execution" and e.get("action_id") == action_id:
             if e.get("exit_ok"):
                 return e
             return None
@@ -300,7 +300,7 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
 
     block = env_gate(hyp, current_env)
     if block:
-        loop.record_verdict(hyp.hyp_id, Verdict.BLOCKED, evidence_ref=None)
+        loop.record_verdict(hyp.hyp_id, Verdict.BLOCKED, evidence=None)
         return {"verdict": Verdict.BLOCKED, "reason": block, "next": ["acquire matching environment"]}
 
     # interrupted-action reconciliation for the test action
@@ -324,7 +324,7 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
     # I1: only a CONFIRMED verdict carries evidence + grants the hypothesis's
     # declared capabilities to the ledger's capability layer.
     loop.record_verdict(hyp.hyp_id, verdict,
-                        evidence_ref=(test_obs.evidence_ref if verdict == Verdict.CONFIRMED else None),
+                        evidence=(test_obs.evidence_ref if verdict == Verdict.CONFIRMED else None),
                         provides=(hyp.provides if verdict == Verdict.CONFIRMED else []))
     # bookkeeping: a terminal verdict (confirmed/refuted) marks the exercised
     # surface tested, so resume advances instead of looping on replanning.

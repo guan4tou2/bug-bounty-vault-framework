@@ -127,20 +127,20 @@ def compute_strategy_stats(events: list[dict]) -> dict[str, dict]:
     self-adjusts (read log → find root cause → iterate)."""
     hyp_strategy: dict[str, str] = {}
     for e in events:
-        if e.get("kind") == "hypothesis" and e.get("strategy"):
-            hyp_strategy[e["hyp_id"]] = e["strategy"]
+        if e.get("type") == "hypothesis" and e.get("strategy"):
+            hyp_strategy[e["id"]] = e["strategy"]
 
     stats: dict[str, dict] = {}
     for e in events:
-        if e.get("kind") != "verdict":
+        if e.get("type") != "verdict":
             continue
-        strat = hyp_strategy.get(e.get("hyp_id", ""))
+        strat = hyp_strategy.get(e.get("hypothesis", ""))
         if not strat:
             continue
         if strat not in stats:
             stats[strat] = {"total": 0, "confirmed": 0, "refuted": 0, "inconclusive": 0}
         s = stats[strat]
-        v = e.get("verdict", "")
+        v = e.get("status", "")
         s["total"] += 1
         if v == "confirmed":
             s["confirmed"] += 1
