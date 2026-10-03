@@ -48,6 +48,10 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/surface_map_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/poc_path_gate.sh\"'"
      }
     ]
    },
@@ -57,6 +61,19 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/big_read_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/context_intake_gate.sh\"'"
+     }
+    ]
+   },
+   {
+    "matcher": "mcp__burp__http_send_request|mcp__burp__http_send_requests_parallel|mcp__burp__http_send_raw_bytes|mcp__burp__proxy_history|mcp__chrome-devtools__evaluate_script",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/mcp_output_gate.sh\"'"
      }
     ]
    },

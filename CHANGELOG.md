@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.1.9 — 2026-10-04
+
+### Three more generic gates (context hygiene / MCP flood / PoC durability)
+
+- `automation/context_intake_gate.sh` — PreToolUse(Read). During recon/map/exploit
+  phases, blocks reading target deliverables (Findings/, Submissions/, Attempts/, Attack
+  Chains/) into context — old prose contradicts the ledger and the model follows the
+  prose. Allowed in report/foothold phases. Reads phase from asg.py; fails open with no
+  phase. Override: `BB_CONTEXT_OK=1` (logged). Wired.
+- `automation/mcp_output_gate.sh` — PreToolUse(MCP). Blocks Burp send tools without
+  `max_response_length` and DOM-dumping evaluate_script — a "decide the size consciously"
+  gate, not a cap. Override per call: `"_bb_raw_ok": true`. Wired on the Burp/chrome tools.
+- `automation/poc_path_gate.sh` — PreToolUse(Bash). While a target claim is held, blocks
+  writing a PoC/script to an ephemeral path (/tmp, $TMPDIR, scratchpad excepted) — a PoC
+  that vanishes at session end is the start of fake verification. Override: `BB_ALLOW_TMP=1`.
+  Wired.
+
+Not ported (would ship inert or untested): `roe_gate` and `recon_completeness_gate`
+depend on `genesis_lib` (not in the framework) and would fail open always;
+`proactive_hunt_gate`'s detection is tuned to a specific language and needs a calibrated
+rewrite, not a translation.
+
 ## v0.1.8 — 2026-10-03
 
 ### Activate shipped-but-unwired gates + handoff secret gate
