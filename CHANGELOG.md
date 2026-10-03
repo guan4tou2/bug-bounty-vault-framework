@@ -1,6 +1,27 @@
 # Changelog
 
-## v0.1.6 — 2026-09-13
+## v0.1.7 — 2026-10-03
+
+### Three universal gates back-ported from downstream hunting
+
+All three catch a failure that recurred despite an always-loaded prose rule — the
+LL-317 shape: the rule is invisible at the instant it is broken, so only a hook present
+at that instant actually stops it.
+
+**Added:**
+- `automation/git_add_gate.sh` — PreToolUse(Bash). Blocks `git add -A` / `--all` / `.`
+  (stage-everything forms) in a shared single working tree, where they sweep in other
+  sessions' in-flight edits. Allows explicit paths / `-p` / `-u <path>`. Override:
+  `BB_ALLOW_GIT_ADD_ALL=1`. Wired into the Bash hook chain.
+- `automation/subagent_scope_gate.sh` — PreToolUse(Agent|Task). Universal default:
+  refuses to dispatch a subagent told to send packets (curl/wget/Burp-send); packets
+  stay on the main thread (audit chain, rate visibility, authorization boundary —
+  LL-338). Desk work (parse landed files, read proxy_history, review, draft) is not
+  matched. Override per-dispatch: `BB_SUBAGENT_NET_OK=1`. New Agent|Task matcher wired.
+- `automation/check_asg_note_contradictions.py` — a surface note that claims a READ
+  (IDOR/oracle/leaks/enumerate) on a WRITE-semantic endpoint is flagged, so nobody
+  enumerates a write endpoint on the strength of a mislabel. Reuses
+  `risk_tier.classify_text`. Wired into `run_checks.sh` asg category.
 
 ### Strategy effectiveness feedback loop + deterministic hypothesis templates
 

@@ -24,6 +24,10 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/curl_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/git_add_gate.sh\"'"
      }
     ]
    },
@@ -33,6 +37,15 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/big_read_gate.sh\"'"
+     }
+    ]
+   },
+   {
+    "matcher": "Agent|Task",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/subagent_scope_gate.sh\"'"
      }
     ]
    }
