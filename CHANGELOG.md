@@ -45,6 +45,29 @@ at that instant actually stops it.
 - First two entries in `Lessons Learned.md`: gate the shipped artifact not its source;
   proxy signals (status code / counts / memory / stale notes) are not truth.
 
+**Vendor-form submission subsystem (generalized, English, vendor-agnostic):**
+- `automation/form_to_docx.py` — render FORM markdown into a copy of YOUR vendor's Word
+  form (`--template` required, no default). Language-agnostic section detection (a section
+  with `###` subheadings = prose rows, else a key/value table), configurable image field
+  and filename prefix. Embeds screenshots, strips filenames from body and image metadata,
+  and removes any media/thumbnail inherited from the template (so one finding's screenshot
+  can't leak into another report).
+- `automation/check_docx_package.py` — gate the shipped docx, not its md source: stale vs
+  source, stray filenames in body/metadata, unattached-file promises, explanatory padding,
+  screenshot-field-but-no-image. Phrase lists default to English, env-overridable. Wired
+  into `run_checks.sh` report category.
+- `automation/check_submission_layout.py` — enforce the Submissions/ folder conventions
+  (no duplicate batches, archive beside not inside the folder, no orphan evidence, sent
+  FORM not left in a pending folder). Wired into `run_checks.sh` report category.
+- `automation/mark_submitted.sh` — after sending, flip FORM status + submitted_date,
+  rename the batch folder to -submitted, log a ledger event (don't rely on memory).
+- `09 - Knowledge Base/Playbook - Vendor Form Submission.md` — the end-to-end process
+  tying the tools and gates together, with "adapting to your vendor form" notes.
+- `09 - Knowledge Base/Reference Card - Report Writing Standard.md` — the content
+  discipline: only the form's fields, evidence field holds evidence, don't promise
+  unattached files, answer three questions and delete the rest, "re-test" vs
+  "verification", lean length, one-root-cause-one-report.
+
 ### Strategy effectiveness feedback loop + deterministic hypothesis templates
 
 Closes the UCCU-inspired auto-improvement loop: the hunt loop now records which
