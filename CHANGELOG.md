@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.8 — 2026-10-03
+
+### Activate shipped-but-unwired gates + handoff secret gate
+
+Six gate scripts already shipped in `automation/` but were never wired into
+`.claude/settings.json`, so they never ran. All six fail open on benign input (they only
+act on their specific condition), verified before wiring:
+
+- `engage_gate.sh`, `phase_gate.sh`, `surface_map_gate.sh` → PreToolUse(Bash)
+- `wiki_before_web_gate.sh` → PreToolUse(WebSearch|WebFetch) (new matcher)
+- `finding_write_gate.sh` → PostToolUse(Write|Edit)
+- `cleanup_ledger_gate.sh` → Stop
+
+**Added:**
+- `automation/handoff_secret_gate.sh` — PreToolUse(Write). Blocks writing a HANDOFF.md
+  whose body contains a raw secret (JWT / Bearer token / PEM private key); points to the
+  codename-based handoff instead. Override: `BB_HANDOFF_OVERRIDE=1`. Wired.
+
 ## v0.1.7 — 2026-10-03
 
 ### Three universal gates back-ported from downstream hunting
