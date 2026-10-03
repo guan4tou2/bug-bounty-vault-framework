@@ -22,6 +22,28 @@ at that instant actually stops it.
   (IDOR/oracle/leaks/enumerate) on a WRITE-semantic endpoint is flagged, so nobody
   enumerates a write endpoint on the strength of a mislabel. Reuses
   `risk_tier.classify_text`. Wired into `run_checks.sh` asg category.
+- `automation/shell_write_gate.sh` — PreToolUse(Bash). Blocks shell edits to durable
+  doc/source files (`cat >`, heredoc, `sed -i`, `echo >>`, and `python3 - <<PY` with a
+  file write inside), steering to the Edit/Write tools. Narrow scope (data/output
+  extensions, temp paths, `tee`, and command-fed heredocs are exempt). Override:
+  `BB_ALLOW_SHELL_WRITE=1`. Wired into the Bash hook chain.
+- `automation/redact_evidence.py` — redact third-party identity (names, company names,
+  tenant/id numbers) from raw responses before they enter version control, keeping
+  structure (status, counts, field names). Handles nested escaped JSON and has a
+  self-test. Key-name matching always lags, so run a format scan (national/tax ID, phone,
+  card) as a second pass.
+
+**Docs / methodology:**
+- `09 - Knowledge Base/Reference Card - Passive Recon is Always In-Scope.md` + a scope
+  note in `CLAUDE.md` — scope gates WHERE you send traffic (active testing), not WHAT you
+  read from public sources (passive recon: web archive, app reversing, parsing an
+  already-downloaded JS bundle, CT logs, public GitHub, dorks). This does NOT loosen the
+  strict in-scope boundary — the instant a request reaches a target host it is active.
+- `bb-surface-mapping` recon floor — JS bundle / large-file analysis defaults to a desk
+  subagent (main thread fetches to disk, subagent parses the landed file): keeps multi-MB
+  raw content and parse noise out of the main context.
+- First two entries in `Lessons Learned.md`: gate the shipped artifact not its source;
+  proxy signals (status code / counts / memory / stale notes) are not truth.
 
 ### Strategy effectiveness feedback loop + deterministic hypothesis templates
 
