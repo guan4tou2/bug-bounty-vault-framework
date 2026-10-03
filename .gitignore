@@ -1,3 +1,9 @@
+# Per-target .state/ runtime files (gate logs, caches) — but keep the ASG ledger tracked.
+# Exclude the CONTENTS, not the directory, so git still descends into it.
+**/.state/*
+!**/.state/asg-events.jsonl
+!**/.state/asg-snapshot.json
+
 # Obsidian workspace state (machine-local)
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
