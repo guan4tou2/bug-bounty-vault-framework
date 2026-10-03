@@ -1,6 +1,112 @@
 # Changelog
 
-## v0.1.6 — 2026-09-13
+## v0.1.9 — 2026-10-04
+
+### Three more generic gates (context hygiene / MCP flood / PoC durability)
+
+- `automation/context_intake_gate.sh` — PreToolUse(Read). During recon/map/exploit
+  phases, blocks reading target deliverables (Findings/, Submissions/, Attempts/, Attack
+  Chains/) into context — old prose contradicts the ledger and the model follows the
+  prose. Allowed in report/foothold phases. Reads phase from asg.py; fails open with no
+  phase. Override: `BB_CONTEXT_OK=1` (logged). Wired.
+- `automation/mcp_output_gate.sh` — PreToolUse(MCP). Blocks Burp send tools without
+  `max_response_length` and DOM-dumping evaluate_script — a "decide the size consciously"
+  gate, not a cap. Override per call: `"_bb_raw_ok": true`. Wired on the Burp/chrome tools.
+- `automation/poc_path_gate.sh` — PreToolUse(Bash). While a target claim is held, blocks
+  writing a PoC/script to an ephemeral path (/tmp, $TMPDIR, scratchpad excepted) — a PoC
+  that vanishes at session end is the start of fake verification. Override: `BB_ALLOW_TMP=1`.
+  Wired.
+
+Not ported (would ship inert or untested): `roe_gate` and `recon_completeness_gate`
+depend on `genesis_lib` (not in the framework) and would fail open always;
+`proactive_hunt_gate`'s detection is tuned to a specific language and needs a calibrated
+rewrite, not a translation.
+
+## v0.1.8 — 2026-10-03
+
+### Activate shipped-but-unwired gates + handoff secret gate
+
+Six gate scripts already shipped in `automation/` but were never wired into
+`.claude/settings.json`, so they never ran. All six fail open on benign input (they only
+act on their specific condition), verified before wiring:
+
+- `engage_gate.sh`, `phase_gate.sh`, `surface_map_gate.sh` → PreToolUse(Bash)
+- `wiki_before_web_gate.sh` → PreToolUse(WebSearch|WebFetch) (new matcher)
+- `finding_write_gate.sh` → PostToolUse(Write|Edit)
+- `cleanup_ledger_gate.sh` → Stop
+
+**Added:**
+- `automation/handoff_secret_gate.sh` — PreToolUse(Write). Blocks writing a HANDOFF.md
+  whose body contains a raw secret (JWT / Bearer token / PEM private key); points to the
+  codename-based handoff instead. Override: `BB_HANDOFF_OVERRIDE=1`. Wired.
+
+## v0.1.7 — 2026-10-03
+
+### Three universal gates back-ported from downstream hunting
+
+All three catch a failure that recurred despite an always-loaded prose rule — the
+LL-317 shape: the rule is invisible at the instant it is broken, so only a hook present
+at that instant actually stops it.
+
+**Added:**
+- `automation/git_add_gate.sh` — PreToolUse(Bash). Blocks `git add -A` / `--all` / `.`
+  (stage-everything forms) in a shared single working tree, where they sweep in other
+  sessions' in-flight edits. Allows explicit paths / `-p` / `-u <path>`. Override:
+  `BB_ALLOW_GIT_ADD_ALL=1`. Wired into the Bash hook chain.
+- `automation/subagent_scope_gate.sh` — PreToolUse(Agent|Task). Universal default:
+  refuses to dispatch a subagent told to send packets (curl/wget/Burp-send); packets
+  stay on the main thread (audit chain, rate visibility, authorization boundary —
+  LL-338). Desk work (parse landed files, read proxy_history, review, draft) is not
+  matched. Override per-dispatch: `BB_SUBAGENT_NET_OK=1`. New Agent|Task matcher wired.
+- `automation/check_asg_note_contradictions.py` — a surface note that claims a READ
+  (IDOR/oracle/leaks/enumerate) on a WRITE-semantic endpoint is flagged, so nobody
+  enumerates a write endpoint on the strength of a mislabel. Reuses
+  `risk_tier.classify_text`. Wired into `run_checks.sh` asg category.
+- `automation/shell_write_gate.sh` — PreToolUse(Bash). Blocks shell edits to durable
+  doc/source files (`cat >`, heredoc, `sed -i`, `echo >>`, and `python3 - <<PY` with a
+  file write inside), steering to the Edit/Write tools. Narrow scope (data/output
+  extensions, temp paths, `tee`, and command-fed heredocs are exempt). Override:
+  `BB_ALLOW_SHELL_WRITE=1`. Wired into the Bash hook chain.
+- `automation/redact_evidence.py` — redact third-party identity (names, company names,
+  tenant/id numbers) from raw responses before they enter version control, keeping
+  structure (status, counts, field names). Handles nested escaped JSON and has a
+  self-test. Key-name matching always lags, so run a format scan (national/tax ID, phone,
+  card) as a second pass.
+
+**Docs / methodology:**
+- `09 - Knowledge Base/Reference Card - Passive Recon is Always In-Scope.md` + a scope
+  note in `CLAUDE.md` — scope gates WHERE you send traffic (active testing), not WHAT you
+  read from public sources (passive recon: web archive, app reversing, parsing an
+  already-downloaded JS bundle, CT logs, public GitHub, dorks). This does NOT loosen the
+  strict in-scope boundary — the instant a request reaches a target host it is active.
+- `bb-surface-mapping` recon floor — JS bundle / large-file analysis defaults to a desk
+  subagent (main thread fetches to disk, subagent parses the landed file): keeps multi-MB
+  raw content and parse noise out of the main context.
+- First two entries in `Lessons Learned.md`: gate the shipped artifact not its source;
+  proxy signals (status code / counts / memory / stale notes) are not truth.
+
+**Vendor-form submission subsystem (generalized, English, vendor-agnostic):**
+- `automation/form_to_docx.py` — render FORM markdown into a copy of YOUR vendor's Word
+  form (`--template` required, no default). Language-agnostic section detection (a section
+  with `###` subheadings = prose rows, else a key/value table), configurable image field
+  and filename prefix. Embeds screenshots, strips filenames from body and image metadata,
+  and removes any media/thumbnail inherited from the template (so one finding's screenshot
+  can't leak into another report).
+- `automation/check_docx_package.py` — gate the shipped docx, not its md source: stale vs
+  source, stray filenames in body/metadata, unattached-file promises, explanatory padding,
+  screenshot-field-but-no-image. Phrase lists default to English, env-overridable. Wired
+  into `run_checks.sh` report category.
+- `automation/check_submission_layout.py` — enforce the Submissions/ folder conventions
+  (no duplicate batches, archive beside not inside the folder, no orphan evidence, sent
+  FORM not left in a pending folder). Wired into `run_checks.sh` report category.
+- `automation/mark_submitted.sh` — after sending, flip FORM status + submitted_date,
+  rename the batch folder to -submitted, log a ledger event (don't rely on memory).
+- `09 - Knowledge Base/Playbook - Vendor Form Submission.md` — the end-to-end process
+  tying the tools and gates together, with "adapting to your vendor form" notes.
+- `09 - Knowledge Base/Reference Card - Report Writing Standard.md` — the content
+  discipline: only the form's fields, evidence field holds evidence, don't promise
+  unattached files, answer three questions and delete the rest, "re-test" vs
+  "verification", lean length, one-root-cause-one-report.
 
 ### Strategy effectiveness feedback loop + deterministic hypothesis templates
 

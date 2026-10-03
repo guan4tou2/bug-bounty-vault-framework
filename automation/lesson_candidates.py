@@ -60,19 +60,25 @@ def draft_candidates(target: str | Path) -> list[dict]:
                                     # for hand-recorded / non-logic-loop verdicts)
     dead: dict[str, dict] = {}
     for e in loop.events:
-        k, hid = e.get("kind"), e.get("hyp_id")
-        if not hid:
-            continue
+        k = e.get("type")
         if k == "logic_hypothesis":
-            lh[hid] = e
+            hid = e.get("hyp_id")
+            if hid:
+                lh[hid] = e
         elif k == "logic_verdict":
-            lv[hid] = e
+            hid = e.get("hyp_id")
+            if hid:
+                lv[hid] = e
         elif k == "verdict":
-            verdicts[hid] = e.get("verdict")
-            if e.get("evidence_ref"):
-                evidence[hid] = e["evidence_ref"]
+            hid = e.get("hypothesis")
+            if hid:
+                verdicts[hid] = e.get("status")
+                if e.get("evidence"):
+                    evidence[hid] = e["evidence"]
         elif k == "dead_end":
-            dead[hid] = e            # last one wins
+            hid = e.get("hyp_id")
+            if hid:
+                dead[hid] = e            # last one wins
 
     out: list[dict] = []
     seen: set[str] = set()

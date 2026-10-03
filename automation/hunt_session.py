@@ -35,16 +35,16 @@ def inflight_actions(loop: HuntLoop) -> list[str]:
     unverified action is not blindly repeated."""
     started, finished = {}, set()
     for e in loop.events:
-        if e.get("kind") == "action_started":
+        if e.get("type") == "action_started":
             started[e["action_id"]] = e
-        elif e.get("kind") == "action_finished":
+        elif e.get("type") == "action_finished":
             finished.add(e["action_id"])
     return sorted(a for a in started if a not in finished)
 
 
 def _objective(loop: HuntLoop) -> str | None:
     for e in loop.events:
-        if e.get("kind") == "objective":
+        if e.get("type") == "objective":
             return e.get("text")
     return None
 
@@ -58,7 +58,7 @@ def dead_paths(loop: HuntLoop) -> list[dict]:
     keep "dead for role=anon" from being read as "dead for every role"."""
     latest: dict[str, dict] = {}
     for e in loop.events:
-        if e.get("kind") == "dead_end":
+        if e.get("type") == "dead_end":
             latest[e["hyp_id"]] = {
                 "hyp_id": e["hyp_id"], "cause": e.get("cause"),
                 "scope": e.get("scope"), "reopen_when": e.get("reopen_when"),
@@ -89,11 +89,11 @@ def resume_brief(loop: HuntLoop) -> dict:
     # run_state: a genuine interrupt keeps us in RUNNING-with-work, but the brief
     # surfaces the interrupt explicitly via inflight + next_action.
     run_state = loop.run_state()
-    lessons = sorted({e["lesson_id"] for e in loop.events if e.get("kind") == "lesson"})
+    lessons = sorted({e["lesson_id"] for e in loop.events if e.get("type") == "lesson"})
     # surfaces positively swept clean (probed, uniformly gated, no anomaly). Without
     # this, resume can't tell "checked and clean" from "never checked" — live wms-r1
     # friction #1. These are already excluded from untested_surface.
-    swept = sorted({s for e in loop.events if e.get("kind") == "surface_swept"
+    swept = sorted({s for e in loop.events if e.get("type") == "surface_swept"
                     for s in e.get("surfaces", [])})
     return {
         "objective": _objective(loop),

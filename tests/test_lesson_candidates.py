@@ -24,18 +24,18 @@ def test_drafts_only_generalisable_refuted_and_deadends(tmp_path, monkeypatch):
         ("logic_hypothesis", {"hyp_id": "H1", "dimension": "trust", "invariant": "denylist blocks proto"}),
         ("logic_verdict", {"hyp_id": "H1", "verdict": "refuted", "reason": "control also 403; default behaviour",
                            "test_outcome": "403", "control_outcome": "403"}),
-        ("verdict", {"hyp_id": "H1", "verdict": "refuted"}),
+        ("verdict", {"hypothesis": "H1", "status": "refuted"}),
         # refuted via hand-recorded evidence_ref (no logic_verdict) -> candidate
-        ("verdict", {"hyp_id": "H2", "verdict": "refuted", "evidence_ref": "explicit path guards present"}),
+        ("verdict", {"hypothesis": "H2", "status": "refuted", "evidence": "explicit path guards present"}),
         # dead_end generalisable + reopen -> candidate
         ("dead_end", {"hyp_id": "H3", "cause": "inconclusive-exhausted",
                       "reopen_when": "dynamic env ready", "scope": {"role": "anon"}}),
         # BLOCKED (env-gated) -> NOT a lesson
-        ("verdict", {"hyp_id": "H4", "verdict": "blocked"}),
+        ("verdict", {"hypothesis": "H4", "status": "blocked"}),
         # CONFIRMED (a finding) -> NOT a candidate
-        ("verdict", {"hyp_id": "H5", "verdict": "confirmed", "evidence_ref": "poc/x", "provides": ["P:x"]}),
+        ("verdict", {"hypothesis": "H5", "status": "confirmed", "evidence": "poc/x", "provides": ["P:x"]}),
         # refuted with NO reusable content -> skipped
-        ("verdict", {"hyp_id": "H6", "verdict": "refuted"}),
+        ("verdict", {"hypothesis": "H6", "status": "refuted"}),
     ])
     monkeypatch.setattr(asg, "ledger_path", lambda t: led)
     monkeypatch.setattr(lc, "_existing_ll_titles", lambda: [])  # no dedup interference
@@ -53,7 +53,7 @@ def test_write_stages_outside_the_LL_glob_and_dedups(tmp_path, monkeypatch):
     led = _ledger(tmp_path, [
         ("logic_hypothesis", {"hyp_id": "H1", "dimension": "trust", "invariant": "denylist protocol validation bypass"}),
         ("logic_verdict", {"hyp_id": "H1", "verdict": "refuted", "reason": "r", "test_outcome": "a", "control_outcome": "a"}),
-        ("verdict", {"hyp_id": "H1", "verdict": "refuted"}),
+        ("verdict", {"hypothesis": "H1", "status": "refuted"}),
     ])
     stage = tmp_path / "stage"
     monkeypatch.setattr(asg, "ledger_path", lambda t: led)

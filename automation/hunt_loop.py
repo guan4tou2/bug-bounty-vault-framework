@@ -85,7 +85,7 @@ def _now() -> str:
 
 
 def _event(kind: str, *, session_id: str = "", **data) -> dict:
-    ev = {"kind": kind, "ts": _now()}
+    ev = {"type": kind, "ts": _now()}
     if session_id:
         ev["sid"] = session_id
     ev.update(data)
@@ -129,12 +129,12 @@ class HuntLoop:
         self.events.append(_event(kind, session_id=self.session_id, **data))
 
     # --- domain ops ---
-    def add_surface(self, node_id: str, untested: bool = True) -> None:
-        self.append("surface", node_id=node_id, untested=untested)
+    def add_surface(self, name: str, untested: bool = True) -> None:
+        self.append("surface", name=name, untested=untested)
 
     def add_hypothesis(self, hyp_id: str, requires: Optional[list[str]] = None,
                        strategy: Optional[str] = None) -> None:
-        ev = dict(hyp_id=hyp_id, requires=requires or [])
+        ev: dict = {"id": hyp_id, "requires": requires or []}
         if strategy:
             ev["strategy"] = strategy
         self.append("hypothesis", **ev)
@@ -147,12 +147,12 @@ class HuntLoop:
                     outcome=r.outcome)
 
     def record_verdict(self, hyp_id: str, verdict: Verdict,
-                       evidence_ref: Optional[str] = None,
+                       evidence: Optional[str] = None,
                        provides: Optional[list[str]] = None,
                        confidence: str = "static") -> None:
         # I1: CONFIRMED must carry evidence to be trusted for a capability grant.
-        self.append("verdict", hyp_id=hyp_id, verdict=verdict.value,
-                    evidence_ref=evidence_ref, provides=provides or [],
+        self.append("verdict", hypothesis=hyp_id, status=verdict.value,
+                    evidence=evidence, provides=provides or [],
                     confidence=confidence)
 
     def revoke_capability(self, cap: str, reason: str) -> None:
@@ -178,13 +178,13 @@ class HuntLoop:
         revoked: set[str] = set()
 
         for e in self.events:
-            k = e["kind"]
+            k = e["type"]
             if k == "surface":
-                surfaces[e["node_id"]] = e.get("untested", True)
+                surfaces[e["name"]] = e.get("untested", True)
             elif k == "hypothesis":
-                hyp_requires.setdefault(e["hyp_id"], e.get("requires", []))
+                hyp_requires.setdefault(e["id"], e.get("requires", []))
             elif k == "verdict":
-                hid, v = e["hyp_id"], e["verdict"]
+                hid, v = e["hypothesis"], e["status"]
                 confidence[hid] = e.get("confidence", "static")
                 if v == Verdict.CONFIRMED.value:
                     if hid in refuted:                      # I3: conflict
@@ -193,7 +193,7 @@ class HuntLoop:
                         pass
                     else:
                         # I1: capability only from a CONFIRMED verdict WITH evidence.
-                        if e.get("evidence_ref"):
+                        if e.get("evidence"):
                             confirmed[hid] = e.get("provides", [])
                 elif v == Verdict.REFUTED.value:
                     if hid in confirmed:                    # I3: conflict
@@ -272,7 +272,7 @@ class HuntLoop:
             return RunState.REPLANNING
         if cap["blocked_hypotheses"]:
             return RunState.BLOCKED
-        if self.events and self.events[-1]["kind"] == "completion":
+        if self.events and self.events[-1]["type"] == "completion":
             return RunState.COMPLETED
         return RunState.REPLANNING
 
@@ -294,6 +294,6 @@ def step_execute_and_judge(loop: HuntLoop, hyp_id: str,
         loop.record_verdict(hyp_id, Verdict.INCONCLUSIVE)
         return Verdict.INCONCLUSIVE
     loop.record_execution(r)
-    verdict, evidence_ref, provides = judge(r)
-    loop.record_verdict(hyp_id, verdict, evidence_ref=evidence_ref, provides=provides)
+    verdict, evidence, provides = judge(r)
+    loop.record_verdict(hyp_id, verdict, evidence=evidence, provides=provides)
     return verdict

@@ -104,7 +104,7 @@ def test_orchestrator_runs_autonomously_then_hands_back_cleanly():
     # refuted path proposed at most once, never re-proposed
     assert sum(1 for hid, v, _ in rep.trace if hid == "b-public") == 1
     # a dead-end was recorded for the refuted + the exhausted-inconclusive, scoped
-    dead = [e for e in loop.events if e["kind"] == "dead_end"]
+    dead = [e for e in loop.events if e["type"] == "dead_end"]
     causes = {e["hyp_id"]: e["cause"] for e in dead}
     assert causes.get("b-public") == "refuted"
     assert causes.get("c-flaky") == "inconclusive-exhausted"

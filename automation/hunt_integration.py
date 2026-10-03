@@ -20,7 +20,7 @@ def import_bbflow(loop, directory):
             raise ValueError(f'missing manifest field: {key}')
     rows = [json.loads(line) for line in (root / 'candidates.jsonl').read_text().splitlines() if line.strip()]
     staged = []
-    known = {e['import_key']: e for e in loop.events if e['kind'] == 'bbflow_candidate'}
+    known = {e['import_key']: e for e in loop.events if e['type'] == 'bbflow_candidate'}
     for row in rows:
         # bbflow output-contract core (bbflow/output-contract.md). Candidates are
         # review-oriented LEADS, never findings; the rest of the contract fields
@@ -86,9 +86,9 @@ def record_lesson(loop, lesson_id, tags, rule, evidence_ref, *, trigger=None,
 
 
 def retrieve_lessons(loop, hyp_id, tags):
-    if hyp_id not in {e.get('hyp_id') for e in loop.events if e['kind'] == 'hypothesis'}:
+    if hyp_id not in {e.get('id') for e in loop.events if e['type'] == 'hypothesis'}:
         raise ValueError('unknown hypothesis')
-    latest = {e['lesson_id']: e for e in loop.events if e['kind'] == 'lesson'}
+    latest = {e['lesson_id']: e for e in loop.events if e['type'] == 'lesson'}
     matched = [e for e in latest.values() if set(e['tags']) & set(tags)]
     loop.append('lesson_retrieval', hyp_id=hyp_id, lesson_ids=sorted(e['lesson_id'] for e in matched))
     return matched
@@ -155,22 +155,22 @@ def graph_views(loop):
 
     This is not a complete ASG or a hard-precedence Work DAG scheduler.
     """
-    hypotheses = [e for e in loop.events if e['kind'] == 'hypothesis']
+    hypotheses = [e for e in loop.events if e['type'] == 'hypothesis']
     state = loop.capsule()
-    return {'cg': {'requires': [{'hypothesis': e['hyp_id'], 'capability': c}
+    return {'cg': {'requires': [{'hypothesis': e['id'], 'capability': c}
                                for e in hypotheses for c in e['requires']],
                    'provides': [{'hypothesis': h, 'capability': c}
                                 for h, cs in state['confirmed'].items() for c in cs]},
-            'decisions': [e for e in loop.events if e['kind'] == 'verdict']}
+            'decisions': [e for e in loop.events if e['type'] == 'verdict']}
 
 
 def handoff(loop):
     state = loop.capsule()
-    artifacts = [a for e in loop.events if e['kind'] == 'bbflow_candidate' for a in e['artifacts']]
+    artifacts = [a for e in loop.events if e['type'] == 'bbflow_candidate' for a in e['artifacts']]
     artifacts += [{'path': e['output_ref'], 'sha256': e['sha256']} for e in loop.events
-                  if e['kind'] == 'action_finished' and e.get('sha256')]
-    finished = {e['action_id'] for e in loop.events if e['kind'] == 'action_finished'}
-    in_flight = [e for e in loop.events if e['kind'] == 'action_started' and e['action_id'] not in finished]
+                  if e['type'] == 'action_finished' and e.get('sha256')]
+    finished = {e['action_id'] for e in loop.events if e['type'] == 'action_finished'}
+    in_flight = [e for e in loop.events if e['type'] == 'action_started' and e['action_id'] not in finished]
     problems = [a['path'] for a in artifacts if not Path(a['path']).is_file()
                 or hashlib.sha256(Path(a['path']).read_bytes()).hexdigest() != a['sha256']]
     return {'priority': {'run_state': loop.run_state().value,
@@ -179,7 +179,7 @@ def handoff(loop):
                          'blocked': state['blocked_hypotheses'],
                          'disputed': state['disputed'], 'evidence_problems': problems},
             'canonical_state': state,
-            'lesson_retrievals': [e for e in loop.events if e['kind'] == 'lesson_retrieval'],
+            'lesson_retrievals': [e for e in loop.events if e['type'] == 'lesson_retrieval'],
             'evidence': artifacts}
 
 

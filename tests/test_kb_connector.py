@@ -54,7 +54,7 @@ def test_retrieve_all_records_consultation(tmp_path):
     lp.add_hypothesis("h1")
     res = retrieve_all(lp, "h1", ["payment"], kb_dir=tmp_path)
     assert [h["lesson_id"] for h in res["kb"]] == ["LL-900"]
-    ev = [e for e in lp.events if e["kind"] == "kb_consulted"]
+    ev = [e for e in lp.events if e["type"] == "kb_consulted"]
     assert ev and ev[-1]["hyp_id"] == "h1" and "LL-900" in ev[-1]["kb_lesson_ids"]
 
 
@@ -63,5 +63,5 @@ def test_mark_influence_is_explicit(tmp_path):
     lp = HuntLoop()
     lp.add_hypothesis("h1")
     mark_influence(lp, "h1", "LL-900", changed_decision=True, note="narrowed to write-path")
-    ev = [e for e in lp.events if e["kind"] == "lesson_influence"][-1]
+    ev = [e for e in lp.events if e["type"] == "lesson_influence"][-1]
     assert ev["changed_decision"] is True and ev["lesson_id"] == "LL-900"

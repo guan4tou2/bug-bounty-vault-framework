@@ -128,14 +128,14 @@ def test_compute_strategy_stats_empty():
 def test_compute_strategy_stats_basic():
     """Strategy→verdict correlation produces correct counts and rates."""
     events = [
-        {"kind": "hypothesis", "hyp_id": "h1", "strategy": "CHAIN_ESCALATION"},
-        {"kind": "hypothesis", "hyp_id": "h2", "strategy": "CHAIN_ESCALATION"},
-        {"kind": "hypothesis", "hyp_id": "h3", "strategy": "SEMANTIC_GAP"},
-        {"kind": "hypothesis", "hyp_id": "h4"},  # no strategy
-        {"kind": "verdict", "hyp_id": "h1", "verdict": "confirmed"},
-        {"kind": "verdict", "hyp_id": "h2", "verdict": "refuted"},
-        {"kind": "verdict", "hyp_id": "h3", "verdict": "confirmed"},
-        {"kind": "verdict", "hyp_id": "h4", "verdict": "confirmed"},  # no strategy → ignored
+        {"type": "hypothesis", "id": "h1", "strategy": "CHAIN_ESCALATION"},
+        {"type": "hypothesis", "id": "h2", "strategy": "CHAIN_ESCALATION"},
+        {"type": "hypothesis", "id": "h3", "strategy": "SEMANTIC_GAP"},
+        {"type": "hypothesis", "id": "h4"},  # no strategy
+        {"type": "verdict", "hypothesis": "h1", "status": "confirmed"},
+        {"type": "verdict", "hypothesis": "h2", "status": "refuted"},
+        {"type": "verdict", "hypothesis": "h3", "status": "confirmed"},
+        {"type": "verdict", "hypothesis": "h4", "status": "confirmed"},  # no strategy → ignored
     ]
     stats = compute_strategy_stats(events)
     assert "CHAIN_ESCALATION" in stats
@@ -152,8 +152,8 @@ def test_compute_strategy_stats_basic():
 def test_compute_strategy_stats_inconclusive():
     """INCONCLUSIVE verdicts are counted but don't affect the confirmation rate."""
     events = [
-        {"kind": "hypothesis", "hyp_id": "h1", "strategy": "DEFENSE_INVERSION"},
-        {"kind": "verdict", "hyp_id": "h1", "verdict": "inconclusive"},
+        {"type": "hypothesis", "id": "h1", "strategy": "DEFENSE_INVERSION"},
+        {"type": "verdict", "hypothesis": "h1", "status": "inconclusive"},
     ]
     stats = compute_strategy_stats(events)
     assert stats["DEFENSE_INVERSION"]["inconclusive"] == 1
@@ -211,21 +211,21 @@ def test_strategy_recorded_on_ledger(tmp_path):
         tmp_path / "s.jsonl", owner="A", scope_desc="x", hosts=["h"], env=Env(),
         spawn=stub_spawn, budget=Budget(max_actions=1, max_replans=1))
 
-    hyp_events = [e for e in loop.events if e["kind"] == "hypothesis"]
+    hyp_events = [e for e in loop.events if e["type"] == "hypothesis"]
     assert any(e.get("strategy") == "ARCHITECTURE_CONFUSION" for e in hyp_events)
 
 
 def test_effectiveness_feeds_back_into_format():
     """After computing stats from events, format_strategies annotates the prompt."""
     events = [
-        {"kind": "hypothesis", "hyp_id": "h1", "strategy": "CHAIN_ESCALATION"},
-        {"kind": "hypothesis", "hyp_id": "h2", "strategy": "CHAIN_ESCALATION"},
-        {"kind": "hypothesis", "hyp_id": "h3", "strategy": "DEFENSE_INVERSION"},
-        {"kind": "hypothesis", "hyp_id": "h4", "strategy": "DEFENSE_INVERSION"},
-        {"kind": "verdict", "hyp_id": "h1", "verdict": "confirmed"},
-        {"kind": "verdict", "hyp_id": "h2", "verdict": "confirmed"},
-        {"kind": "verdict", "hyp_id": "h3", "verdict": "refuted"},
-        {"kind": "verdict", "hyp_id": "h4", "verdict": "refuted"},
+        {"type": "hypothesis", "id": "h1", "strategy": "CHAIN_ESCALATION"},
+        {"type": "hypothesis", "id": "h2", "strategy": "CHAIN_ESCALATION"},
+        {"type": "hypothesis", "id": "h3", "strategy": "DEFENSE_INVERSION"},
+        {"type": "hypothesis", "id": "h4", "strategy": "DEFENSE_INVERSION"},
+        {"type": "verdict", "hypothesis": "h1", "status": "confirmed"},
+        {"type": "verdict", "hypothesis": "h2", "status": "confirmed"},
+        {"type": "verdict", "hypothesis": "h3", "status": "refuted"},
+        {"type": "verdict", "hypothesis": "h4", "status": "refuted"},
     ]
     stats = compute_strategy_stats(events)
     section = format_strategies(effectiveness=stats)

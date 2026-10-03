@@ -93,13 +93,13 @@ def _dead_ended(loop: HuntLoop) -> dict:
     """hyp_id -> the last dead_end record (used to skip re-proposing it)."""
     out: dict[str, dict] = {}
     for e in loop.events:
-        if e.get("kind") == "dead_end":
+        if e.get("type") == "dead_end":
             out[e["hyp_id"]] = e
     return out
 
 
 def _inconclusive_count(loop: HuntLoop, hyp_id: str) -> int:
-    return sum(1 for e in loop.events if e.get("kind") == "logic_verdict"
+    return sum(1 for e in loop.events if e.get("type") == "logic_verdict"
                and e.get("hyp_id") == hyp_id and e.get("verdict") == Verdict.INCONCLUSIVE.value)
 
 
@@ -121,9 +121,9 @@ def value_rank(ready: list[str], cap: dict, loop: HuntLoop) -> list[str]:
     order: dict[str, int] = {}
     tested_dims: set = set()
     for i, e in enumerate(loop.events):
-        k = e["kind"]
+        k = e["type"]
         if k == "hypothesis":
-            order.setdefault(e["hyp_id"], i)
+            order.setdefault(e["id"], i)
         elif k == "logic_hypothesis":
             dim[e["hyp_id"]] = e.get("dimension")
         elif k == "bbflow_candidate":
@@ -259,7 +259,7 @@ def autodrive(
             continue
 
         # 4) ensure hypothesis is on the ledger (with strategy for the feedback loop)
-        if hyp.hyp_id not in {e.get("hyp_id") for e in loop.events if e["kind"] == "hypothesis"}:
+        if hyp.hyp_id not in {e.get("id") for e in loop.events if e["type"] == "hypothesis"}:
             loop.add_hypothesis(hyp.hyp_id, strategy=getattr(hyp, "strategy", None))
 
         # 4b) KB/LL in-loop BEFORE the task, and actually FEED it to the worker (the

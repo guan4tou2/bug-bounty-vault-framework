@@ -137,7 +137,7 @@ def test_context_brief_with_capsule(tmp_path):
     loop = HuntLoop(session_id="brief_test")
     loop.add_surface("endpoint_a")
     loop.add_hypothesis("h1")
-    loop.record_verdict("h1", Verdict.CONFIRMED, evidence_ref="poc.png",
+    loop.record_verdict("h1", Verdict.CONFIRMED, evidence="poc.png",
                         provides=["cap_read"])
     loop.save(ledger)
 

@@ -7,6 +7,10 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/protect_critical_writes.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/handoff_secret_gate.sh\"'"
      }
     ]
    },
@@ -24,6 +28,30 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/curl_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/shell_write_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/git_add_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/engage_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/phase_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/surface_map_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/poc_path_gate.sh\"'"
      }
     ]
    },
@@ -33,6 +61,37 @@
      {
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/big_read_gate.sh\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/context_intake_gate.sh\"'"
+     }
+    ]
+   },
+   {
+    "matcher": "mcp__burp__http_send_request|mcp__burp__http_send_requests_parallel|mcp__burp__http_send_raw_bytes|mcp__burp__proxy_history|mcp__chrome-devtools__evaluate_script",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/mcp_output_gate.sh\"'"
+     }
+    ]
+   },
+   {
+    "matcher": "Agent|Task",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/subagent_scope_gate.sh\"'"
+     }
+    ]
+   },
+   {
+    "matcher": "WebSearch|WebFetch",
+    "hooks": [
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/wiki_before_web_gate.sh\"'"
      }
     ]
    }
@@ -55,6 +114,11 @@
       "type": "command",
       "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/audit_workspace.sh\" meta >/dev/null 2>&1 || true'",
       "async": true
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/finding_write_gate.sh\" >/dev/null 2>&1 || true'",
+      "async": true
      }
     ]
    }
@@ -65,6 +129,10 @@
      {
       "type": "command",
       "command": "bash -lc 'echo \"[session-end] Loop close-out is NOT automatic \u2014 run: bash automation/session_end_checklist.sh <target> (Knowledge Capture + audit + lock release). Skipping leaves the 4-ring learning loop open.\"'"
+     },
+     {
+      "type": "command",
+      "command": "bash -lc 'root=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; bash \"$root/automation/cleanup_ledger_gate.sh\" 2>/dev/null || true'"
      }
     ]
    }
