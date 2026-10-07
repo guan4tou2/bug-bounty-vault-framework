@@ -91,6 +91,10 @@ If the adopter prefers another platform, they can copy this generic draft into t
 
 ## Rules
 
+- **Write the prose to `09 - Knowledge Base/Reference Card - Report Writing Standard.md`.** It
+  carries the sentence-level rules (ASD-STE100 subset), the conclusion vocabulary, and the
+  partitioned-application rule that keeps short sentences from flattening a hedge into a fact.
+  Apply those rules to the fact sections; leave the uncertainty sections hedged.
 - Keep the draft platform-neutral.
 - Do not include platform-only field names, platform case numbers, or platform vulnerability taxonomies.
 - Do not create platform-specific templates in this public seed.
@@ -102,5 +106,6 @@ If the adopter prefers another platform, they can copy this generic draft into t
 - `bb-submission-readiness`
 - `bb-evidence-readiness`
 - `bb-cve-citation`
+- `09 - Knowledge Base/Reference Card - Report Writing Standard.md`
 - `templates/form.md`
 - `templates/submission.md`

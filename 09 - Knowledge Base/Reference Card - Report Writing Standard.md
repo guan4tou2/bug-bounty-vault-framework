@@ -51,6 +51,111 @@ Running your own check again before submitting is **verification**, not a re-tes
 means the vendor fixed it and you checked the fix. Using it wrong implies a second round
 that didn't happen, and makes "you have patched this" unsupportable.
 
+## Sentence-level rules (ASD-STE100 subset)
+
+The rules above govern *what goes in the document*. These govern *how each sentence is
+built*. They are a subset of ASD-STE100 (Simplified Technical English), the controlled
+language written for aircraft maintenance manuals, where a misread sentence has a physical
+cost. A finding report has the same property: the reader is often not the person who wrote
+the code, and may not be a native speaker of the language you wrote in.
+
+| Rule | What it means |
+|---|---|
+| One word, one meaning | Each noun and verb has exactly one reading. No rhetoric, no idiom, no subjective adjectives. |
+| Active voice | "The program copies the value", not "the value is copied". Passive voice hides the actor, and the actor is the whole point of a security report. |
+| Sentence length | Descriptive sentences: one clause, one idea. Instruction steps: shorter still. If you need a comma to join two actions, make it two sentences. |
+| One idea per sentence | A sentence states one action or one concept. |
+| Consistent terminology | One component, one word, for the whole document. No synonym variation — once you pick "buffer", never write "temporary store" for the same thing. |
+
+> **Consistent terminology matters more than it looks.** A reader who is not a specialist
+> reads three words for one component as three components. Synonym variation is a habit
+> that good prose style actively teaches, and it is wrong here.
+
+### Do not use metaphors
+
+No "it is like", "think of it as", "this is essentially the equivalent of". To explain a
+mechanism, state the mechanism: who, at what moment, made what decision. Do not switch to
+a different scene to explain it.
+
+### Code blocks are for commands
+
+| Content | Form |
+|---|---|
+| A directly runnable command | fenced block, **one command per block** |
+| Quoted source code from the target | fenced block with the language tag |
+| Values to be copied verbatim (URLs, parameter strings) | fenced block, no language tag |
+| **Everything else** — description, reproduce prose, notes, remediation | plain paragraphs and tables |
+
+Wrapping a whole field in one big fenced block is a copy-paste habit from form-filling. It
+makes the evidence and the prose look like the same kind of object, which is exactly the
+distinction the report needs to keep.
+
+### Partitioned application — the rule that keeps this from backfiring
+
+**Do not apply the sentence rules to statements of uncertainty.**
+
+ASD-STE100 was written for maintenance manuals, which assume the facts are settled. Half
+the value of a security finding is its **calibrated uncertainty**. Compressing "most likely
+unreachable; the residual uncertainty is the content of the factory environment block" into
+a short declarative sentence produces "unreachable" — an inference rewritten as a fact.
+
+| Apply the sentence rules | Do not apply them |
+|---|---|
+| Summary, mechanism, affected code, reproduce steps, remediation | Reachability assessment, evidence tiering, per-metric severity rationale, known gaps |
+
+In the second column, keep the hedging words: *most likely*, *not confirmed*, *could not be
+determined*, *this report does not claim*. A hedge is not padding; it is the evidence tier,
+written in words.
+
+> **This does not contradict "delete the rest" above.** That rule bans the *narrative of how
+> you reached the conclusion* (score defense, self-correction story, methodology confession).
+> This rule preserves the *hedge attached to the claim itself*. Ban the journey, keep the
+> error bar.
+
+## Conclusion vocabulary
+
+State conclusions with **a number and an existing term**. Do not invent a word that sounds
+professional.
+
+The vocabulary already exists — reuse it instead of coining one. `automation/asg.py` defines
+`FINDING_STATES` as the progression `hypothesis` → `tested` → `adversary-verified` →
+`confirmed`, and a recorded verdict is one of `confirmed` / `refuted` / `inconclusive`.
+Reports, finding files, and status updates use those words.
+
+| Invented euphemism | Write instead |
+|---|---|
+| "negative convergence", "net result", "consolidation of findings" | "6 refuted after review, 2 severity reduced" |
+| "overall posture is sound" | "this assessment found no issues above Medium" |
+
+> **Euphemism is overclaiming in a lighter form, and it is the harder one to catch.**
+> "Negative convergence" sounds like progress. It means "half of what we reported was
+> wrong." The reader cannot parse the phrase but can parse the number.
+>
+### The impact ladder
+
+Impact wording has its own ladder. Each rung is a different claim needing different
+evidence, so using a higher word than you earned is an overclaim:
+
+*reachable* → *accepted* → *statement produced* → *record created* → *executed* →
+*data retrieved*
+
+The two rules are a pair. The ladder stops the **strength of the impact** from skipping a
+rung; the section above stops the **wording of the conclusion** from being packaged.
+
+### The floor: register may change, evidence tier may not
+
+Whatever register you write in, these stay literal:
+
+| Must stay literal | Must not become |
+|---|---|
+| "This assessment **did not retrieve** any user data" | "data was not retained", "no further access was taken" |
+| "This is an **architectural inference, not a direct proof**" | "impact is assessed as unlikely" |
+| "**Not verified**" / "**not demonstrated**" | "initial indications suggest", "appears to be safe" |
+
+Test: **raising or lowering the register may change the sentence shape; it may never change
+a claim's evidence tier.** If a reader of the rewritten sentence can no longer tell
+"verified" from "inferred", the rewrite broke it.
+
 ## What is worth submitting
 
 **Submit** — there is actual exploitation evidence: a result was observed (data read that

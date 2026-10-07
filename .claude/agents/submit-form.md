@@ -52,9 +52,17 @@ Alignment chain: Finding (Discovery Log) -> Submission (canonical report) -> FOR
 
 Read the relevant reference:
 ```bash
+# Always read — governs the prose of every form, on every platform:
+cat "09 - Knowledge Base/Reference Card - Report Writing Standard.md"
+
 # Always read for HITCON:
 cat "09 - Knowledge Base/Reference Card - HITCON ZeroDay Form.md"
 ```
+
+> The writing standard is platform-neutral and **not optional**. Its sentence-level rules
+> (ASD-STE100 subset) apply to the fact sections; its partitioned-application rule says to
+> leave the uncertainty sections hedged. Applying short declarative sentences to a
+> reachability assessment turns an inference into a claimed fact.
 
 Platform-specific rules (NEVER violate):
 
