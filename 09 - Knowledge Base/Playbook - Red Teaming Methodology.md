@@ -1,6 +1,6 @@
 ---
 type: playbook
-title: "Ultimate Guide to Red Teaming (Bugcrowd Summary)"
+title: "Red Teaming Methodology"
 tags: [red-team, methodology, framework, mitre-attack, kill-chain, purple-team, ttps]
 status: draft
 last_updated: 2026-08-12
@@ -8,11 +8,11 @@ category: hunting
 estimated_time: "20-30 min reading/reference"
 ---
 
-# Playbook - Ultimate Guide to Red Teaming (Bugcrowd Summary)
+# Playbook - Red Teaming Methodology
 
 > **TL;DR**: Red teaming traces back to 1960s RAND Corporation Cold War wargaming, where Soviet forces were marked red and friendly forces blue — the red-team-vs-blue-team framing has persisted ever since. Unlike bug bounty or standard pentesting, a red team engagement is fully adversarial, open in scope, and typically conducted without the defending (blue) team's knowledge. This playbook summarizes the four-phase red team kill chain (IN -> THROUGH -> OUT -> ASSESS), the common governing frameworks, and how red-team thinking translates into stronger bug-bounty reporting.
 >
-> Source: adapted from Bugcrowd's "Ultimate Guide to Red Teaming" (bugcrowd.com, published 2025-04).
+> Source: summary of publicly available industry guidance on red teaming (2025).
 
 ## Scope / When to use
 

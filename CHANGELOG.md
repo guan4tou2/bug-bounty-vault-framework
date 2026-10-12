@@ -23,6 +23,24 @@
   Scheme Handler Injection` gains the three characters that silently break a payload carried in a URL parameter.
 - All new checks are wired into `run_checks.sh` and covered by tests.
 
+### Agents, skill, knowledge base, templates
+
+- Agents: `cvss-adversary` (adversarial review of a score; never produces a vector —
+  scoring stays the `bb-cvss-score` skill), `detection-rule-writer` (verified Finding →
+  passive blue-team detection rules).
+- Skill: `bb-ai-audit` (AI / LLM / agentic / MCP products; platform layer before model
+  layer; "model said" ≠ "system did").
+- Knowledge base: `Pattern - JWT Clock Tolerance Bypass`, `Pattern - CDN Origin Discovery
+  via Subnet Scan`, `Checklist - Post-Primitive Exploitation`, `Checklist - Target
+  Feasibility Pre-Screen`, `Checklist - Submission State Integrity`, `Checklist -
+  Subagent Pre-Flight`.
+- Templates: `Template - Cleanup Ledger` (the template `cleanup_ledger_gate.sh` points
+  users to; saved as `Cleanup Ledger - <target>.md`), `Template - Attack Narrative`.
+- Fixes: `cleanup_ledger_gate.sh` status parse works on BSD sed (macOS) and is tested;
+  `check_harness_invariants.sh` finds a runner that has pytest (uv fallback) instead of
+  reporting a false red; `HANDOFF_template.md` gains Continuation Point, Parked Items and
+  stable lead/task IDs; the red-teaming playbook has a platform-neutral name.
+
 ## v0.1.9 — 2026-10-04
 
 ### Three more generic gates (context hygiene / MCP flood / PoC durability)

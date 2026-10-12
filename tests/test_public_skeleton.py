@@ -92,6 +92,7 @@ def test_claude_agents_exist():
         "recon-diff.md", "regression-tester.md", "submit-form.md", "triage-classifier.md", "web-hunter.md",
         "cve-monitor.md", "auto-poc-gen.md", "nuclei-template-gen.md",
         "sandbox-replay.md", "chain-tracker.md", "agent-team-orchestrator.md", "skill-synthesizer.md",
+        "cvss-adversary.md", "detection-rule-writer.md",
     ]
     for name in expected:
         assert (agents_dir / name).exists(), f"Missing agent: {name}"

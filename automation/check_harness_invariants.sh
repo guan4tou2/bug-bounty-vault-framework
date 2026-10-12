@@ -13,7 +13,18 @@ fail() { echo "❌ $1"; echo "   fix: $2"; fails=$((fails+1)); }
 echo "── harness invariants (see golden-rules.md) ──"
 
 # S1/S2/A1/S3/R1/R2 — the authoritative public-skeleton test suite
-if python3 -m pytest tests/test_public_skeleton.py -q >/tmp/fw_hinv_test.txt 2>&1; then
+# Pick a runner that actually has pytest: a bare system python often lacks it, and
+# reporting that as "suite failed" is a false red that trains people to ignore the gate.
+if python3 -c 'import pytest, yaml' >/dev/null 2>&1; then
+  PYTEST=(python3 -m pytest)
+elif command -v uv >/dev/null 2>&1; then
+  PYTEST=(uv run --no-project --with pytest --with pyyaml python -m pytest)
+else
+  PYTEST=()
+fi
+if [ "${#PYTEST[@]}" -eq 0 ]; then
+  fail "no test runner: python3 has no pytest/pyyaml and uv is not installed" "install uv, or: python3 -m pip install pytest pyyaml"
+elif "${PYTEST[@]}" tests/test_public_skeleton.py -q >/tmp/fw_hinv_test.txt 2>&1; then
   pass "S1/S2/A1/S3/R1/R2 public-skeleton suite (skills · agents · mirrors · nuclei shape-only · platform-neutral)"
 else
   fail "public-skeleton suite failed" "python3 -m pytest tests/test_public_skeleton.py -q   (detail: /tmp/fw_hinv_test.txt)"

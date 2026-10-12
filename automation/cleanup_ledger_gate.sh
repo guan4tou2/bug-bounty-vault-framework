@@ -59,7 +59,12 @@ if [[ -z "$cleanup_file" ]]; then
 fi
 
 # Check status
-status=$(grep -m1 'status:' "$cleanup_file" | sed 's/.*status:\s*//' | sed 's/\s*#.*//' | tr -d ' ' 2>/dev/null || echo "unknown")
+# POSIX classes only: BSD sed (macOS) does not understand \s. Anchored so prose such as
+# "all-clear status: ..." later in the file cannot match; quotes are stripped too.
+status=$(grep -m1 -E '^[[:space:]]*status:' "$cleanup_file" \
+  | sed -E 's/^[[:space:]]*status:[[:space:]]*//; s/[[:space:]]*#.*$//' \
+  | tr -d " \"'")
+[[ -z "$status" ]] && status="unknown"
 if [[ "$status" == "open" ]]; then
   echo "" >&2
   echo "WARNING: ENGAGEMENT CLEANUP: '$target' cleanup ledger status is still 'open'." >&2
