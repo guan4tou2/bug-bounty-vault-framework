@@ -107,6 +107,18 @@ On macOS this path is **more reliable than the protocol handler** (it isn't affe
 5. **Find Notification handlers**: grep `Notification`, `notif.on("click"`, `new Notification`
 6. **Annotate every sink**: input source (URL params / server JSON / IPC arg) + sanitization status
 
+### Dynamic verification: the payload can be silently broken on the way in
+
+When you carry JavaScript inside a URL parameter (for example `myapp://open/?action=x&data=<JS>`), three characters corrupt the payload at different layers and produce no error, so a failed attempt looks like "not vulnerable":
+
+| Character | Layer that breaks it | Symptom |
+|---|---|---|
+| `!` | Windows `cmd.exe` delayed expansion expands `!var!` | operators such as `!==` are swallowed |
+| `+` | `URLSearchParams.get()` decodes `+` as a space | `r=r+'x'` becomes `r=r 'x'` (syntax error) |
+| `&` | treated as the query-parameter separator | `fetch(url+'&k=v')` is truncated at the `&` |
+
+How to write the probe: use one standalone `fetch()` per probe instead of string concatenation; avoid `!==` and `!=` (use `typeof x === 'undefined'`); never put `&` inside a JS string — return each value separately rather than building a query string. If a payload "does nothing", check these three layers before concluding the sink is safe.
+
 ## Variants
 
 ### Variant A — raw executeJavaScript

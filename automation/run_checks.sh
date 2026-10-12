@@ -19,11 +19,11 @@ G="\033[0;32m" Y="\033[0;33m" R="\033[0;31m" B="\033[0;34m" N="\033[0m"
 # Format: category:description:script1,script2,...
 # Scripts are basenames under automation/; .sh/.py auto-detected.
 declare -a CATEGORIES=(
-  "pre-hunt:Pre-hunt readiness:check_disclosed_preread.sh"
+  "pre-hunt:Pre-hunt readiness:check_disclosed_preread.sh,check_scope_channel.py"
   "asg:ASG integrity:check_vault.py,check_asg_note_contradictions.py"
-  "harness:Harness/skill/hook integrity:check_harness_invariants.sh,check_orphan_scripts.sh"
+  "harness:Harness/skill/hook integrity:check_harness_invariants.sh,check_orphan_scripts.sh,check_workspace_boundary.sh"
   "kb:KB health:check_kb_health.sh,check_learning_capture.sh"
-  "report:Report quality:check_report_quality.sh,check_submission_layout.py,check_docx_package.py"
+  "report:Report quality:check_report_quality.sh,check_submission_layout.py,check_docx_package.py,check_poc_controls.sh"
 )
 
 category="${1:-}"

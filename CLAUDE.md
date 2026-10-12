@@ -199,6 +199,16 @@ python3 automation/check_vault.py
 bash automation/check_harness_invariants.sh   # enforces golden-rules.md
 ```
 
+Other maintenance commands (all also run through `bash automation/run_checks.sh [category]`):
+
+```bash
+bash automation/generate_findings_index.sh <target>  # (re)generate FINDINGS_QUICK_REF.md in workshop + vault; MANUAL blocks survive
+python3 automation/check_scope_channel.py            # every active target records its platform + program URL (pre-hunt)
+bash automation/check_poc_controls.sh [<target>]     # PoCs that print a verdict must carry a control group (report)
+bash automation/check_workspace_boundary.sh          # no working material or binaries tracked in git (harness)
+bash automation/vault_backup_config.sh               # back up your user-level ~/.claude config (git-ignored by default)
+```
+
 ---
 
 ## Quick Pointer Table

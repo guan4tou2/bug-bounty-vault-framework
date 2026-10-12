@@ -50,6 +50,8 @@ Work through the sections below in order. A single unchecked item is a reason to
 - [ ] Phrases like "an attacker could," "this may allow," or "in theory" are either removed or accompanied by a verified PoC that demonstrates the path.
 - [ ] The worst-case scenario written in the report has been at least partially validated (e.g., PII read, not just "PII could be read").
 - [ ] No impact has been elevated based on chaining with unverified or out-of-scope primitives.
+- [ ] Every link of a claimed chain has its own verification — including the intermediate transitions, not just the entry and the exit. "A holds" plus "C holds" does not mean "A → B → C holds"; two separately demonstrated primitives are two findings, not one chain.
+- [ ] Each link is labelled **dynamically verified**, **source-only**, or **assumed**. Any assumed link caps the verification level and blocks a severity upgrade; a chain made only of source-only links stays at the static-analysis level; only an all-dynamic chain can claim the top level.
 
 ---
 
