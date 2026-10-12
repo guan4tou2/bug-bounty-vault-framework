@@ -62,6 +62,11 @@ memory/
 # Claude local settings
 .claude/settings.local.json
 
+# Personal user-level Claude config backup (automation/vault_backup_config.sh).
+# It is YOUR configuration, so it must not land in a public fork by accident.
+# Delete this line only if your vault is a PRIVATE repository and you want it versioned.
+10 - Meta/Environment/user-claude/
+
 # promptfoo eval run artifacts/cache
 automation/evals/output/
 **/.promptfoo/

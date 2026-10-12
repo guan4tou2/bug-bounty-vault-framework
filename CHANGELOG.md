@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### Generic checks and generators back-ported from a private working vault
+
+- `automation/check_workspace_boundary.sh` — structural guard: only scaffolding tracked under `workspace/`, no
+  process directories at the repo root, no archives/binaries tracked (allowlist via `BOUNDARY_ALLOW_REGEX`).
+- `automation/check_poc_controls.sh` — flags PoCs that print a verdict but carry no control group / calibration /
+  version stamp, so a negative result can be told apart from "the tool was broken". Fails by default; explicit
+  `no-control-needed:` escape hatch. Self-checked by synthetic fixtures (`tests/test_poc_controls_gate.py`).
+- `automation/check_scope_channel.py` — every active target must record where findings are delivered
+  (`Platform:`/`Program URL:` in SCOPE.md, or `platform:`/`channel:` on the canonical Target page).
+- `automation/generate_findings_index.sh` — generates `FINDINGS_QUICK_REF.md` (workshop + vault copy, de-duplicated by
+  `finding_id`, `<!-- MANUAL -->` blocks preserved). The dedup flow already reads this file, but until now only
+  `init_target.sh` wrote an empty skeleton and nothing kept it up to date.
+- `automation/vault_backup_config.sh` — backs up user-level `~/.claude` config. Every file is scanned for
+  secret-shaped strings (private keys, JWTs, provider tokens, webhook URLs, bearer headers) BEFORE it is copied; a
+  hit — or a failed scan — means the file is not copied and the script exits 1. `settings.json` is written as a
+  sanitized copy (hooks, sandbox, env, apiKeyHelper and mcpServers dropped; home path → `$HOME`; IP addresses and
+  long opaque values refused). The destination is git-ignored by default so a public fork cannot publish it by accident.
+- KB: `Checklist - Pre-Submission Validation` gains the "verify every link of a chain" rule; `Pattern - Electron Custom
+  Scheme Handler Injection` gains the three characters that silently break a payload carried in a URL parameter.
+- All new checks are wired into `run_checks.sh` and covered by tests.
+
 ## v0.1.9 — 2026-10-04
 
 ### Three more generic gates (context hygiene / MCP flood / PoC durability)
