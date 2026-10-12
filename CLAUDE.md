@@ -21,6 +21,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-surface-mapping** | Start of any target, after recon, before any pattern/hunter/scan; "start hunting"; "explore"; "map attack surface" (anti-streetlight FRONT gate) | `.claude/skills/bb-surface-mapping/SKILL.md` |
 | **bb-web-vuln-scan** | Testing a web target; "scan"; "test"; "pentest"; "find vulns" (after surface mapping) | `.claude/skills/bb-web-vuln-scan/SKILL.md` |
 | **bb-electron-audit** | Electron / desktop app static audit; asar / shell.openExternal / preload / contextIsolation / custom scheme (ELECTRON-SPECIFIC audit procedure) | `.claude/skills/bb-electron-audit/SKILL.md` |
+| **bb-ai-audit** | AI / LLM / agentic / MCP product audit; prompt injection (direct + indirect), system prompt extraction, AI memory/history endpoints, MCP OAuth (AI-SPECIFIC audit procedure; "model said" ≠ "system did") | `.claude/skills/bb-ai-audit/SKILL.md` |
 | **bb-firmware-audit** | Router / IoT / camera firmware or embedded binary; binwalk / CGI injection / default creds / authorized_keys backdoor (after version-cve-precheck) | `.claude/skills/bb-firmware-audit/SKILL.md` |
 | **bb-actuator-cloud-chain** | Exposed Spring Boot management endpoints (actuator / eureka / nacos / jolokia) → config/credential → cloud-metadata audit chain | `.claude/skills/bb-actuator-cloud-chain/SKILL.md` |
 | **bb-dedup-finding** | Before new Finding/FORM; "wasn't this already found"; "same vulnerability" | `.claude/skills/bb-dedup-finding/SKILL.md` |
@@ -72,6 +73,8 @@ Agents live in `.claude/agents/<name>.md`. Use the Agent tool with `subagent_typ
 | **cve-monitor** | Check CVEs for target tech stack; "check CVEs"; "new vulnerabilities"; "advisory check" | `.claude/agents/cve-monitor.md` |
 | **auto-poc-gen** | Generate PoC scripts from Findings; "generate PoC"; "create exploit script"; "reproduce this" | `.claude/agents/auto-poc-gen.md` |
 | **nuclei-template-gen** | Generate nuclei detection templates from Findings; "nuclei template"; "detection template" | `.claude/agents/nuclei-template-gen.md` |
+| **cvss-adversary** | Before any Finding gets C/I/A = H, before report writing; "is this score right?"; "challenge this Finding" (adversarial review — scoring itself is `bb-cvss-score`) | `.claude/agents/cvss-adversary.md` |
+| **detection-rule-writer** | Verified Finding → passive detection rules for the blue team (Sigma + platform query, FP/evasion notes); "sigma rule"; "purple team"; "how to detect this attack" | `.claude/agents/detection-rule-writer.md` |
 | **sandbox-replay** | Replay findings in Docker/QEMU sandbox; "replay in sandbox"; "digital twin"; "test environment" | `.claude/agents/sandbox-replay.md` |
 | **chain-tracker** | Persistent attack chain graph across sessions; "update chain"; "chain status"; "attack paths" | `.claude/agents/chain-tracker.md` |
 | **agent-team-orchestrator** | Multi-agent team hunting coordination; "team hunt"; "coordinate agents"; "parallel hunting" | `.claude/agents/agent-team-orchestrator.md` |

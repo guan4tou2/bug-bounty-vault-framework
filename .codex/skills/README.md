@@ -13,6 +13,7 @@ Generated wrappers:
 |---|---|
 | `bb-actuator-cloud-chain` | `.codex/skills/bb-actuator-cloud-chain/SKILL.md` |
 | `bb-agent-prompts` | `.codex/skills/bb-agent-prompts/SKILL.md` |
+| `bb-ai-audit` | `.codex/skills/bb-ai-audit/SKILL.md` |
 | `bb-attack-chain-review` | `.codex/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-bucket-ownership` | `.codex/skills/bb-bucket-ownership/SKILL.md` |

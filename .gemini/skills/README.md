@@ -13,6 +13,7 @@ Generated wrappers:
 |---|---|
 | `bb-actuator-cloud-chain` | `.gemini/skills/bb-actuator-cloud-chain/SKILL.md` |
 | `bb-agent-prompts` | `.gemini/skills/bb-agent-prompts/SKILL.md` |
+| `bb-ai-audit` | `.gemini/skills/bb-ai-audit/SKILL.md` |
 | `bb-attack-chain-review` | `.gemini/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.gemini/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-bucket-ownership` | `.gemini/skills/bb-bucket-ownership/SKILL.md` |

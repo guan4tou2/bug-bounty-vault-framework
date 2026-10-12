@@ -1,6 +1,6 @@
 ---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, agent-team-orchestrator, attack-chain-deep-dive, auto-poc-gen, bbflow-runner, chain-tracker, cve-monitor, cve-pattern-cross-gen, debug-leak-scanner, disclosed-report-researcher, endpoint-interest-scorer, js-sourcemap-miner, lessons-miner, nuclei-template-gen, pre-recon, recon-diff, regression-tester, report-writer, sandbox-replay, skill-synthesizer, submit-form, triage-classifier, vault-sync, web-hunter, or to mirror bug bounty agent behavior in Codex.
+description: Use when asked to use project Claude agents, agent-team-orchestrator, attack-chain-deep-dive, auto-poc-gen, bbflow-runner, chain-tracker, cve-monitor, cve-pattern-cross-gen, cvss-adversary, debug-leak-scanner, detection-rule-writer, disclosed-report-researcher, endpoint-interest-scorer, js-sourcemap-miner, lessons-miner, nuclei-template-gen, pre-recon, recon-diff, regression-tester, report-writer, sandbox-replay, skill-synthesizer, submit-form, triage-classifier, vault-sync, web-hunter, or to mirror bug bounty agent behavior in Codex.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -18,7 +18,9 @@ Codex does not run Claude Code workspace agents natively. This skill makes their
 | `chain-tracker` | `.claude/agents/chain-tracker.md` |
 | `cve-monitor` | `.claude/agents/cve-monitor.md` |
 | `cve-pattern-cross-gen` | `.claude/agents/cve-pattern-cross-gen.md` |
+| `cvss-adversary` | `.claude/agents/cvss-adversary.md` |
 | `debug-leak-scanner` | `.claude/agents/debug-leak-scanner.md` |
+| `detection-rule-writer` | `.claude/agents/detection-rule-writer.md` |
 | `disclosed-report-researcher` | `.claude/agents/disclosed-report-researcher.md` |
 | `endpoint-interest-scorer` | `.claude/agents/endpoint-interest-scorer.md` |
 | `js-sourcemap-miner` | `.claude/agents/js-sourcemap-miner.md` |

@@ -12,7 +12,7 @@
 - **S4** Counts agree: `# bb-* skill dirs` == `# rows in skills/README` == `# rows in CLAUDE.md skill table`. → `check_harness_invariants.sh`
 
 ## Agents
-- **A1** Every expected agent exists; CVSS scoring is the `bb-cvss-score` skill, not an agent; `submit-form` is not in the public seed (use `report-writer`). → `tests/test_public_skeleton.py::test_claude_agents_exist`
+- **A1** Every expected agent exists; CVSS scoring is the `bb-cvss-score` skill, not an agent (the `cvss-adversary` agent only challenges a score and never produces a vector); `submit-form` is not in the public seed (use `report-writer`). → `tests/test_public_skeleton.py::test_claude_agents_exist`
 - **A2** No agent carries a `model:` pin unless a specific tier is required (deep reasoning inherits the strong default). → review
 
 ## Flow / gates
