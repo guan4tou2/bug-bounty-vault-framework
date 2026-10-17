@@ -186,3 +186,22 @@ be as long as they need to be. Everything else is.
 - Is there any invented section / unattached-file promise / explanatory padding?
 - Did I verify the **shipped artifact** (the docx/pdf), not just its markdown source?
 - Is all third-party PII redacted in text, and are embedded-image leaks handled?
+
+## Plain-language review (an editing pass, separate from the evidence check)
+
+The triager is a person. Jargon is fine where it carries meaning and costly where it only
+decorates. This pass changes **presentation only**; it never changes how sure a claim is.
+
+| May change | May not change |
+|---|---|
+| Replace a term with plain wording, or gloss it once at first use | Delete a hedge (*most likely*, *not confirmed*, *this report does not claim*) |
+| Move step-by-step derivations to an appendix; keep the conclusion and one line of reason in the body | Turn "most likely unreachable" into "unreachable" |
+| Split long sentences, use active voice, keep one word per component | Swap a conclusion word for a softer or stronger one |
+| Cut build-up and repetition | Cut the impact boundary or the known gaps |
+
+Test: after the edit, every conclusion is exactly as certain as before. More certain is
+overclaim; less certain is dilution.
+
+Run it as a single pass by a reviewer with fresh context, and report three lists: terms that
+can be made plain, details that belong in an appendix, and hedges that were removed (compare
+the draft against the Finding). The reviewer suggests; the author decides.

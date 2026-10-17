@@ -22,6 +22,8 @@ If the Finding does not exist, stop and ask the main session to create it first.
 1. Read the parent Finding completely.
 2. Confirm `bb-evidence-readiness` has passed or mark the output as `needs_evidence`.
 3. Confirm `bb-submission-readiness` has passed before marking anything ready.
+   Write to `09 - Knowledge Base/Reference Card - Report Writing Standard.md`: lean, plain
+   wording, impact only as far as observed, and never delete a hedge to save space.
 4. Create or update a generic Submission under:
 
    ```text

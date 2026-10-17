@@ -31,6 +31,7 @@ Run before:
 | Report hygiene | No internal IDs, no unverified CVEs, no theoretical overclaim |
 | **Quality gate (mechanical)** | Run `bash automation/check_report_quality.sh <FORM/Submission.md>` — must have 0 ❌ (exaggeration words + internal IDs). Catches what hygiene review misses. |
 | **Adversarial calibration (judgment)** | Run the calibration pass below — does the evidence support the *claimed* severity/impact? Catches confident-but-unproven overclaim the keyword gate can't see. **Advisory: calibrates wording/severity, never auto-kills.** |
+| **Language review (judgment)** | Plain-language pass per `Reference Card - Report Writing Standard`: too much jargon? derivations that belong in an appendix? hedges removed by editing? **Advisory: suggests wording only, never changes how sure a conclusion is; single pass.** Separate from calibration — that asks whether the evidence supports the claim; this asks whether the reader can follow it and the tone stayed true. |
 | Knowledge capture | New reusable learning routed to KB / Lessons / Pattern |
 
 ## Adversarial Calibration — two-directional, not just anti-overclaim
@@ -75,6 +76,7 @@ Run before:
 - Severity / CVSS:
 - Channel fit:
 - Report hygiene:
+- Language review: <ok / revise> — <jargon / appendix / removed-hedge counts>
 - Knowledge capture:
 - Next action:
 ```
