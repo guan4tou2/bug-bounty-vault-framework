@@ -70,6 +70,11 @@ Edit `workspace/workshop/<target>/HANDOFF.md` and add:
 ### Pending decisions (confirm in takeover session)
 - ...
 
+### Artifact Handles
+> Large tool outputs (scan results, logs, source dumps, HTTP transcripts) live ON DISK — context keeps only 1-line handles. This is what survives compaction; the takeover session re-reads from disk, not from the (compacted) conversation.
+- `workspace/workshop/<target>/poc/scan-<n>.json` — <size> — <one-line content fingerprint, e.g. "nuclei run @ 2026-10-17T03:20Z, 14 hits, 3 critical">
+- ...
+
 ### File locations
 - workspace/workshop/<target>/recon/...
 - Vault 01 - Targets/<t>/Findings/Finding - <t> - <ID>.md
@@ -78,6 +83,17 @@ Edit `workspace/workshop/<target>/HANDOFF.md` and add:
 - ...
 <!-- END_INPROGRESS -->
 ```
+
+### Artifact Handle Discipline (write big outputs to disk BEFORE the handoff)
+
+> Borrowed from DeerFlow 2.0's "tool-artifact handles survive compaction" pattern. The conversation context is lossy (compaction truncates mid-session); the filesystem is not. A handle is a pointer that stays valid across compaction.
+
+Rules for the whole session, not just handoff time:
+
+1. **Persist-then-summarize.** Any tool output you may need later (scan JSON, source-map dump, crawl results, fuzz logs) gets written to `workspace/workshop/<target>/` (e.g. `poc/`, `recon/`) as a file the moment you have it. The conversation keeps only a 1-line handle: `path — size — content fingerprint`.
+2. **Fingerprint, don't trust.** The handle must carry a verifiable fingerprint (line/hit count, timestamp, first bytes). On takeover, verify the fingerprint before relying on the file — a half-written file from a crashed session must be detected, not silently trusted. If mismatched: treat as degraded input (see Takeover Step 3) and regenerate rather than guess.
+3. **Handles replace re-runs.** The In-Progress block lists handles, not raw data. Re-running a 20-minute scan because the summary got compacted away is the failure this prevents.
+4. **Never inline big outputs into HANDOFF.md.** It is read at every session start; a 200-line paste defeats the token-light brief.
 
 ### Step 4: Commit and close
 
