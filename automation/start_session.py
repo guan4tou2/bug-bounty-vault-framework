@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import sys
 import time
 import uuid
@@ -120,7 +121,7 @@ def claim(scope: str, owner: str, eta_minutes: int) -> bool:
             "claimed_at": now.isoformat(),
             "last_heartbeat": now.isoformat(),
             "expected_release": (now + timedelta(minutes=eta_minutes)).isoformat(),
-            "host": os.uname().nodename,
+            "host": platform.node() or os.environ.get("COMPUTERNAME", "unknown"),
         }
         try:
             # O_EXCL: atomic create-or-fail, so an existing lock is never clobbered.
