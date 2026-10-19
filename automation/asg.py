@@ -38,21 +38,12 @@ if str(sys_path_hint) not in sys.path:
 
 from hunt_loop import HuntLoop
 from hunt_lock import acquire, release, guarded_save
+from ledger_reader import read_ledger_events
 
 
 def _read_events(ledger: Path) -> list[dict]:
-    """Read all events from a JSONL ledger file."""
-    if not ledger.exists():
-        return []
-    events: list[dict] = []
-    for line in ledger.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        try:
-            events.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return events
+    """Missing is empty; corrupt state must never become a partial frontier."""
+    return read_ledger_events(ledger)
 
 TARGETS_DIRNAME = "01 - Targets"
 GEN_START = "<!-- ASG:GENERATED:START -->"
@@ -92,7 +83,7 @@ MANDATORY_WORKERS = ("verb-matrix", "chain", "expand")
 
 # ── RESOLVER (the single source of ASG paths) ───────────────────────────────
 def vault_root() -> Path:
-    return Path(__file__).resolve().parents[1]
+    return Path(os.environ.get("VAULT_ROOT", Path(__file__).resolve().parents[1]))
 
 
 def target_dir(target: str | Path) -> Path:
@@ -358,7 +349,15 @@ def append_events(target: str | Path, events: list[tuple[str, dict]], *,
     try:
         loop = HuntLoop.load(led)
         for kind, data in events:
+            from asg_research import normalize_event
+            from evidence_refs import normalize_evidence
+            data = dict(data)
+            # Research artifacts pin their bytes. Existing verdict string
+            # semantics remain the public framework's compatibility contract.
+            if kind == "research_node" and "evidence" in data:
+                data["evidence"] = normalize_evidence(data["evidence"], loop.base_path, events=loop.events)
             data.setdefault("at", now)
+            data = normalize_event(kind, data, loop)
             loop.append(kind, **data)
         guarded_save(loop, led, token)
     finally:
@@ -451,6 +450,25 @@ def _summary(target: str | Path) -> dict:
     cap = loop.capsule()
     brief = resume_brief(loop)
     return {"loop": loop, "cap": cap, "brief": brief, "dead_paths": dead_paths(loop)}
+
+
+def read_state(target: str | Path) -> dict:
+    """Read-only ledger state, with research lineage separate from surfaces.
+
+    A legacy Markdown graph stays legacy until the operator explicitly migrates;
+    reading or adding research never invents historical ledger records.
+    """
+    from asg_research import project
+    from evidence_refs import finding_records
+    from hunt_session import resume_brief
+    loop = HuntLoop.load(ledger_path(target))
+    cap = loop.capsule()
+    research = project(loop.events, loop.base_path, cap=cap)
+    surfaces = surface_state(target) if loop.events else {}
+    return {"source": "ledger" if loop.events else "legacy", "loop": loop,
+            "capsule": cap, "research": research, "brief": resume_brief(loop),
+            "nodes": [{"identifier": name, "disposition": state} for name, state in sorted(surfaces.items())],
+            "findings": list(finding_records(loop.events).values())}
 
 
 # ── VERDICT CONFIDENCE + CHAIN PROJECTION ─────────────────────────────────
@@ -707,6 +725,8 @@ def write_snapshot(target: str | Path) -> Path:
         "chain_entry_points": len(chains["entry_points"]),
         "chain_capabilities": len(chains["capabilities"]),
     }
+    if cap.get("research"):
+        snap["research"] = cap["research"]
     p = snapshot_path(target)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -732,7 +752,7 @@ def _render_generated(target: str | Path) -> str:
         )
         for cap_name, cnt in cap_counts.most_common(5):
             chain_items.append(f"  {cap_name}: {cnt}")
-    return "\n\n".join([
+    blocks = [
         "_generated from `.state/asg-events.jsonl` — do not edit inside this block; "
         "write below in Operator Notes_",
         f"### Current Frontier\n- run_state: **{brief['run_state']}**  (events: {cap['event_cursor']})\n"
@@ -743,7 +763,14 @@ def _render_generated(target: str | Path) -> str:
         block("Blocked", cap["blocked_hypotheses"]),
         block("Disputed", cap["disputed"]),
         block("Dead Paths (don't re-tread; see reopen)", dead),
-    ])
+    ]
+    from asg_research import project
+    research = project(s["loop"].events, s["loop"].base_path, cap=cap)
+    if research["enabled"]:
+        blocks.append(block("Research Goals and Lineage", [
+            f"{n['ref']} [{n.get('effective_state', n.get('state', ''))}]: {n['text']}"
+            for n in research["nodes"] if n["kind"] in {"goal", "intent"}]))
+    return "\n\n".join(blocks)
 
 
 def project_markdown(target: str | Path) -> Path:
@@ -941,9 +968,13 @@ def project_dispositions(target: str | Path) -> dict:
 
 def project_all(target: str | Path) -> dict:
     """Refresh every projection from the ledger."""
-    return {"markdown": str(project_markdown(target)),
+    result = {"markdown": str(project_markdown(target)),
             "dispositions": project_dispositions(target),
             "snapshot": str(write_snapshot(target))}
+    if read_state(target)["research"]["enabled"]:
+        from render_surface_graph_canvas import write_research_canvas
+        result["research_canvas"] = str(write_research_canvas(target))
+    return result
 
 
 def status(target: str | Path) -> dict:
@@ -972,7 +1003,7 @@ def status(target: str | Path) -> dict:
     surfaces = surface_state(target)
     untested = sum(1 for s in surfaces.values() if s == "untested")
     chains = auto_chain(target)
-    return {
+    result = {
         "target": _basename(target),
         "profile": genesis.get("profile", "web"),
         "phase": phase,
@@ -989,9 +1020,16 @@ def status(target: str | Path) -> dict:
         "chain_edges": len(chains.get("chain_edges", [])),
         "chain_entry_points": len(chains.get("entry_points", [])),
     }
+    research = read_state(target)["research"]
+    if research["enabled"]:
+        result["research"] = research["summary"]
+    return result
 
 
 def _main(argv: list[str]) -> int:
+    if argv and argv[0] == "research":
+        from asg_research import cli
+        return cli(argv[1:])
     import argparse
     ap = argparse.ArgumentParser(description="ASG single-authority resolver + projections.")
     ap.add_argument("action", choices=["paths", "project", "snapshot", "migrate", "chains",
@@ -1000,6 +1038,7 @@ def _main(argv: list[str]) -> int:
                                        "status", "pending-workers", "complete-worker"])
     ap.add_argument("target")
     ap.add_argument("extra", nargs="*", default=[])
+    ap.add_argument("--intent", help="Research provenance for record-finding")
     a = ap.parse_args(argv)
     if a.action == "paths":
         print(json.dumps({"target_dir": str(target_dir(a.target)),
@@ -1053,7 +1092,10 @@ def _main(argv: list[str]) -> int:
             print("usage: asg.py record-finding <target> <finding-id>", file=sys.stderr)
             return 1
         fid = a.extra[0]
-        print(json.dumps(record_finding(a.target, fid), ensure_ascii=False, indent=2))
+        fields = {}
+        if a.intent:
+            fields["intent_id"] = a.intent
+        print(json.dumps(record_finding(a.target, fid, **fields), ensure_ascii=False, indent=2))
     elif a.action == "advance-finding":
         if len(a.extra) < 2:
             print("usage: asg.py advance-finding <target> <finding-id> <to-state> [reason]",

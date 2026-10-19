@@ -74,12 +74,21 @@ def next_action(cap: dict, inflight: list[str], run_state: RunState) -> str:
                 f"if it completed) before running anything else")
     if cap["disputed"]:
         return f"RESOLVE dispute on '{cap['disputed'][0]}' with a discriminating control experiment"
+    research = cap.get("research", {})
+    if research.get("running_intents"):
+        return f"RESUME research intent '{research['running_intents'][0]}' before starting duplicate work"
+    if research.get("ready_intents"):
+        return f"RUN research intent '{research['ready_intents'][0]}' and record its outputs"
     if cap["ready_hypotheses"]:
         return f"RUN hypothesis '{cap['ready_hypotheses'][0]}' (test action vs control)"
     if cap["untested_surface"]:
         return f"MAP/HYPOTHESISE on untested surface '{cap['untested_surface'][0]}' (replanning; not done)"
     if cap["blocked_hypotheses"]:
         return f"UNBLOCK '{cap['blocked_hypotheses'][0]}' (acquire the missing capability/env)"
+    if research.get("open_goals"):
+        return f"REVIEW acceptance criteria for '{research['open_goals'][0]}' and plan missing work"
+    if research.get("unsettled_intents"):
+        return f"RESOLVE paused/blocked research work '{research['unsettled_intents'][0]}'"
     return "COMPLETED — no ready work, no untested surface, nothing disputed/blocked"
 
 
@@ -95,7 +104,10 @@ def resume_brief(loop: HuntLoop) -> dict:
     # friction #1. These are already excluded from untested_surface.
     swept = sorted({s for e in loop.events if e.get("type") == "surface_swept"
                     for s in e.get("surfaces", [])})
+    from asg_research import project, brief as research_brief
+    research = project(loop.events, loop.base_path, cap=cap)
     return {
+        "research": research_brief(research),
         "objective": _objective(loop),
         "run_state": run_state.value,
         "event_cursor": cap["event_cursor"],
@@ -118,6 +130,10 @@ def _render(brief: dict) -> str:
     lines = ["── hunt resume brief ──"]
     if brief["objective"]:
         lines.append(f"objective : {brief['objective']}")
+    for goal in brief.get("research", {}).get("goals", []):
+        lines.append(f"goal      : {goal['ref']} [{goal['effective_state']}] {goal['text']}")
+    for hint in brief.get("research", {}).get("hints", []):
+        lines.append(f"hint      : {hint['ref']} {hint['text']}")
     lines += [
         f"run_state : {brief['run_state']}   (events: {brief['event_cursor']})",
         f"caps      : {brief['capabilities'] or '—'}",

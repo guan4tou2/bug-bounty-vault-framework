@@ -37,6 +37,10 @@ This prints a summary of HANDOFF.md, FINDINGS_QUICK_REF.md, and RECON_DB.md high
 
 First time on a machine: establish the tool layer once with `bb-tool-setup` ([bbflow/setup.md](bbflow/setup.md)). The first hunting action on any target is always `bb-surface-mapping` — never a scanner first.
 
+## Research Goals and Provenance
+
+For multi-step research or validation, read `python3 automation/asg.py research <target> brief` and `python3 automation/next_work.py <target>`. Record goal criteria, intents, and sourced facts or existing Findings in the same ledger. Before custom tooling, read original sources and record why an existing implementation is reused, adapted, or insufficient. Hints and summaries do not count as proof. Native research continuation belongs to the current runner. See [docs/asg-research-provenance.md](docs/asg-research-provenance.md) for the CLI, acceptance rules, and Canvas.
+
 ## Pre-flight (Mandatory)
 
 Before analyzing any software, firmware, or SaaS target:

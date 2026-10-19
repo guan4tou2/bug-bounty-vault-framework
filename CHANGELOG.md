@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### ASG research provenance
+
+- Goals with acceptance criteria, work intents, sourced facts, hints, and expandable digests share the existing ASG ledger and canonical Finding identities.
+- Typed lineage links record decomposition, derivation, outputs, prerequisites, and criterion proofs. Changed evidence or acceptance definitions invalidates affected proofs; summaries retain their original records.
+- Research work appears in session continuation, next-work selection, bounded test workers, Markdown, snapshots, and a deterministic research Canvas. Plain-language research returns to the native runner without executing its text as a command.
+- Existing targets remain opt-in. Legacy event metadata, confidence behavior, Finding phases, and the public workflow are retained; no private targets, runtime state, or evidence are included.
+
 ### Generic checks and generators back-ported from a private working vault
 
 - `automation/check_workspace_boundary.sh` — structural guard: only scaffolding tracked under `workspace/`, no

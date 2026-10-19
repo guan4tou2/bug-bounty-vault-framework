@@ -301,6 +301,9 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
     block = env_gate(hyp, current_env)
     if block:
         loop.record_verdict(hyp.hyp_id, Verdict.BLOCKED, evidence=None)
+        loop.append("logic_verdict", hyp_id=hyp.hyp_id, verdict=Verdict.BLOCKED.value,
+                    reason=block, test_outcome=None, control_outcome=None,
+                    execution="blocked", execution_error=block)
         return {"verdict": Verdict.BLOCKED, "reason": block, "next": ["acquire matching environment"]}
 
     # interrupted-action reconciliation for the test action
@@ -321,8 +324,9 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
             f"record the invariant first, then re-test. ({reason})")
     else:
         verdict, reason = guard_invariant_provenance(inv, verdict, reason)
-    # I1: only a CONFIRMED verdict carries evidence + grants the hypothesis's
-    # declared capabilities to the ledger's capability layer.
+    # Capability grants still come only from a CONFIRMED verdict. The comparison
+    # record below keeps BOTH observations' evidence for every outcome, including
+    # refuted and inconclusive results; retaining evidence is not a capability.
     loop.record_verdict(hyp.hyp_id, verdict,
                         evidence=(test_obs.evidence_ref if verdict == Verdict.CONFIRMED else None),
                         provides=(hyp.provides if verdict == Verdict.CONFIRMED else []))
@@ -330,8 +334,17 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
     # surface tested, so resume advances instead of looping on replanning.
     if hyp.surface_id and verdict in (Verdict.CONFIRMED, Verdict.REFUTED):
         loop.add_surface(hyp.surface_id, untested=False)
+    from evidence_refs import normalize_evidence
+    comparison_evidence = {
+        "kind": "comparison",
+        "test": normalize_evidence(test_obs.evidence_ref, loop.base_path, events=loop.events),
+        "control": normalize_evidence(control_obs.evidence_ref, loop.base_path, events=loop.events),
+    }
     loop.append("logic_verdict", hyp_id=hyp.hyp_id, verdict=verdict.value, reason=reason,
-                test_outcome=test_obs.outcome, control_outcome=control_obs.outcome)
+                test_outcome=test_obs.outcome, control_outcome=control_obs.outcome,
+                evidence=comparison_evidence,
+                execution="ok" if test_obs.ok and control_obs.ok and not test_obs.error and not control_obs.error else "error",
+                execution_error=test_obs.error or control_obs.error)
     return {"verdict": verdict, "reason": reason, "next": next_hypotheses(hyp, verdict),
             "reused_prior_execution": bool(prior)}
 
