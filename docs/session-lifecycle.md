@@ -94,6 +94,8 @@ During the session, maintain three living documents:
 | **FINDINGS_QUICK_REF.md** | One-line per Finding (ID, title, severity, status) | Auto-regenerated; manual only if script unavailable |
 | **HANDOFF.md** | Session narrative: what you tried, what you learned, next steps | End of session (or mid-session at natural breakpoints) |
 
+For work that uses research goals and provenance, the ASG ledger holds goal criteria, intents, sourced facts, and Finding links. The resume brief and `python3 automation/next_work.py <target>` expose that work after a restart. HANDOFF may summarize it by stable IDs. See [Research Provenance in the ASG](asg-research-provenance.md); summaries do not replace evidence or verification.
+
 ### 2.2 Operation log
 
 **Before** executing any manual HTTP request (POST/PUT/PATCH/DELETE, or exploratory GET):

@@ -148,6 +148,8 @@ python3 automation/end_session.py my-target
 
 See [docs/session-lifecycle.md](docs/session-lifecycle.md) for the full protocol.
 
+For multi-step research, the ASG can also track goals, intents, sourced facts, Finding lineage, hints, and expandable summaries in the same ledger. Acceptance criteria stay linked to current evidence, and pending work appears in the resume brief and research Canvas. See [Research Provenance in the ASG](docs/asg-research-provenance.md) for setup and examples.
+
 ## Finding Pipeline
 
 Every confirmed vulnerability follows:

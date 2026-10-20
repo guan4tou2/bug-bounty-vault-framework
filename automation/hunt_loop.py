@@ -95,9 +95,11 @@ def _event(kind: str, *, session_id: str = "", **data) -> dict:
 # ── the loop core ───────────────────────────────────────────────────────────
 class HuntLoop:
     def __init__(self, events: Optional[list[dict]] = None,
-                 session_id: Optional[str] = None):
+                 session_id: Optional[str] = None,
+                 base_path: Optional[str | Path] = None):
         self.events: list[dict] = list(events or [])
         self.session_id: str = session_id or uuid.uuid4().hex[:12]
+        self.base_path = Path(base_path) if base_path is not None else None
 
     # --- persistence (I4: atomic event-log snapshot, deterministic reload) ---
     def save(self, path: str | Path) -> None:
@@ -117,13 +119,10 @@ class HuntLoop:
 
     @classmethod
     def load(cls, path: str | Path) -> "HuntLoop":
-        evs: list[dict] = []
+        from ledger_reader import read_ledger_events
         p = Path(path)
-        if p.exists():
-            for line in p.read_text(encoding="utf-8").splitlines():
-                if line.strip():
-                    evs.append(json.loads(line))
-        return cls(evs)
+        base = p.parent.parent if p.parent.name == ".state" else p.parent
+        return cls(read_ledger_events(p), base_path=base)
 
     def append(self, kind: str, **data) -> None:
         self.events.append(_event(kind, session_id=self.session_id, **data))
@@ -164,6 +163,8 @@ class HuntLoop:
                 "ready_hypotheses", "blocked_hypotheses", "untested_surface",
                 "disputed", "invalidated_hypotheses")):
             raise ValueError("completion requires a reason and no unresolved work")
+        if any(cap.get("research", {}).get(k) for k in ("open_goals", "unsettled_intents")):
+            raise ValueError("completion requires accepted goals and settled research work")
         self.append("completion", reason=reason)
 
     # --- materialization (I3/I4/I5: pure projection over the event log) ---
@@ -242,7 +243,7 @@ class HuntLoop:
         static_only = sorted(
             h for h, c in conf_for_confirmed.items()
             if not confidence_is_dynamic(c))
-        return {
+        result = {
             "event_cursor": len(self.events),
             "invalidated_hypotheses": invalidated,
             "capabilities": sorted(capabilities),
@@ -255,6 +256,15 @@ class HuntLoop:
             "blocked_hypotheses": sorted(blocked), # I5
             "untested_surface": sorted(untested_surface),
         }
+        from asg_research import project
+        research = project(self.events, self.base_path, cap=result)
+        if research["enabled"]:
+            result["research"] = research["summary"]
+            gated = set(research["summary"]["gated_hypotheses"])
+            result["ready_hypotheses"] = [h for h in result["ready_hypotheses"] if h not in gated]
+            result["blocked_hypotheses"] = sorted(set(result["blocked_hypotheses"]) |
+                                                  (gated - set(confirmed) - refuted))
+        return result
 
     # --- stop state machine (I2) ---
     def run_state(self, needs_input: bool = False,
@@ -264,6 +274,9 @@ class HuntLoop:
             return RunState.NEEDS_INPUT
         if waiting_external:
             return RunState.WAITING_EXTERNAL
+        research = cap.get("research", {})
+        if research.get("ready_intents") or research.get("running_intents"):
+            return RunState.RUNNING
         if cap["ready_hypotheses"]:
             return RunState.RUNNING
         # I2: no ready work, but untested surface / disputed / blocked-with-hope
@@ -272,6 +285,8 @@ class HuntLoop:
             return RunState.REPLANNING
         if cap["blocked_hypotheses"]:
             return RunState.BLOCKED
+        if research.get("open_goals") or research.get("unsettled_intents"):
+            return RunState.REPLANNING
         if self.events and self.events[-1]["type"] == "completion":
             return RunState.COMPLETED
         return RunState.REPLANNING

@@ -56,6 +56,12 @@ bash automation/dag_gaps.sh <target> --kind decision
 
 Pick the highest-ROI or uncertainty-reducing `⏳` edges first. The legacy `chain_gaps.sh` command is a compatibility wrapper for exploit-chain DAGs.
 
+### §0f Research Goals and Provenance
+
+For work with multiple research or validation steps, use the existing ASG ledger to record goals with named acceptance criteria, intents with prerequisites, and sourced facts or canonical Findings. Start with `python3 automation/asg.py research <target> brief` and `python3 automation/next_work.py <target>`. Record source reading and the reuse/adapt/build decision before custom tooling. Hints guide work; they do not grant authorization or prove a result. Digests retain expandable originals, and changed evidence reopens affected criteria. Full contract and examples: [docs/asg-research-provenance.md](docs/asg-research-provenance.md).
+
+Keep the Target Work DAG as a route overview when useful; research state is written to the ledger and its generated views. Native research continuation is work for the current runner, not a request for new human approval. Existing scope, Finding verification, and capability rules still apply. Targets without research events retain their current workflow; legacy history is migrated only by an explicit command.
+
 ### §0g Version + CVE Pre-flight
 
 **Before any software/firmware/SaaS analysis:**

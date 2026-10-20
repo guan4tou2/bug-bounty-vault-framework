@@ -51,6 +51,7 @@ class WorkerTask:
     model_tier: str = "strong"      # "cheap" for format/fixed-checks, "strong" for
     #                                 logic-vuln hypotheses / contradictory evidence
     knowledge: list[str] = field(default_factory=list)      # LL/KB actually fed in
+    research_context: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -206,6 +207,21 @@ def autodrive(
             rep.handoff_reason = f"action budget exhausted ({budget.max_actions})"
             break
 
+        # Plain-language research uses the native runner's web/file tools. It is
+        # neither a shell action nor an additional request for operator approval.
+        from asg_research import project as research_graph, worker_context, append_to_loop, settle_test_intent
+        research = research_graph(loop.events, loop.base_path, cap=cap)
+        rnodes = {n["ref"]: n for n in research["nodes"]}
+        rsummary = research["summary"]
+        native = [r for r in rsummary["ready_intents"] if not rnodes[r].get("hypothesis")]
+        if rsummary["running_intents"] or native:
+            refs = rsummary["running_intents"] or native
+            rep.handoff_reason = "native research work pending: " + ", ".join(refs)
+            break
+        if rsummary["open_goals"] and not cap["ready_hypotheses"] and not rsummary["ready_intents"]:
+            rep.handoff_reason = "goal acceptance or research prerequisites pending: " + ", ".join(rsummary["open_goals"])
+            break
+
         # 2) select executable work: a ready hyp not dead-ended / not over retry budget.
         # `rank` (decision ①) orders ready work by value; default = capsule order.
         dead = _dead_ended(loop)
@@ -285,6 +301,24 @@ def autodrive(
                 loop.append("knowledge_retrieval", hyp_id=hyp.hyp_id, status="failed",
                             query=sorted(set(kb_tags)), selected_ids=[], reason=type(exc).__name__)
 
+        # Selection callbacks and replanners can return an already-registered
+        # hypothesis (or change its prerequisites). Recheck the actual selected
+        # ID at the dispatch boundary; an old capsule or a proposal is not a
+        # permission to bypass a bound intent's lifecycle or capability gate.
+        cap = loop.capsule()
+        research = research_graph(loop.events, loop.base_path, cap=cap)
+        rnodes = {n["ref"]: n for n in research["nodes"]}
+        rsummary = research["summary"]
+        bound_intents = [node for node in research["nodes"] if node["kind"] == "intent"
+                         and node.get("hypothesis") == f"hypothesis:{hyp.hyp_id}"]
+        gated_intents = [node for node in bound_intents
+                         if node["effective_state"] != "open" or node.get("missing")]
+        if gated_intents:
+            rep.handoff_reason = "research intent prerequisites pending: " + "; ".join(
+                f"{node['ref']} [{node['effective_state']}] missing={node.get('missing', [])}"
+                for node in gated_intents)
+            break
+
         # 5) build the bounded worker task (memory stays in the ASG, not the worker),
         # NOW carrying the retrieved knowledge so it actually shapes the worker.
         task = WorkerTask(
@@ -297,6 +331,12 @@ def autodrive(
             model_tier=_tier_for(hyp, cap),   # tiered by difficulty (corr. #2)
             knowledge=knowledge,
         )
+        bound_intent = next((rnodes[r] for r in rsummary["ready_intents"]
+                             if rnodes[r].get("hypothesis") == f"hypothesis:{hyp.hyp_id}"), None)
+        if bound_intent:
+            task.research_context = worker_context(research, bound_intent)
+            append_to_loop(loop, "research_state", ref=bound_intent["ref"], state="running",
+                           reason="Bounded ASG test runner dispatch")
 
         # 6) execute + judge. research_step reconciles the test action, so a reload /
         #    worker-switch mid-flight does NOT blindly re-run (dead_end_reruns stays 0).
@@ -317,6 +357,8 @@ def autodrive(
         if prior:
             rep.dead_end_reruns += 0        # reconcile prevented a blind re-run
         v = res["verdict"]
+        if bound_intent:
+            settle_test_intent(loop, bound_intent, hyp.hyp_id, v)
 
         # 7) update failure-path memory, distinguished by cause
         if v == Verdict.CONFIRMED and hyp.surface_id:
