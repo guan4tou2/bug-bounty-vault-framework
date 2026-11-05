@@ -33,7 +33,7 @@ def test_autodrive_self_drives_through_spawn(tmp_path):
         # ...and dispatches a worker to run the GET test+control
         if "isolated hunt worker" in prompt:
             calls["worker"] += 1
-            return ('```json\n{"test":{"ok":true,"outcome":"leaked","evidence_ref":"poc/a"},'
+            return ('```json\n{"test":{"ok":true,"outcome":"leaked","evidence_ref":{"kind":"observation","text":"leaked in test"}},'
                     '"control":{"ok":true,"outcome":"403"}}\n```')
         return "{}"
 
@@ -93,8 +93,8 @@ def test_cg_chaining_unauth_no_account(tmp_path):
                     '"provides":["P:cred=api"],"requires":[]}')
         if "isolated hunt worker" in prompt:
             if "admin" in prompt:
-                return '```json\n{"test":{"ok":true,"outcome":"admin_data","evidence_ref":"poc/b"},"control":{"ok":true,"outcome":"403"}}\n```'
-            return '```json\n{"test":{"ok":true,"outcome":"cred_leaked","evidence_ref":"poc/a"},"control":{"ok":true,"outcome":"404"}}\n```'
+                return '```json\n{"test":{"ok":true,"outcome":"admin_data","evidence_ref":{"kind":"observation","text":"admin data in test"}},"control":{"ok":true,"outcome":"403"}}\n```'
+            return '```json\n{"test":{"ok":true,"outcome":"cred_leaked","evidence_ref":{"kind":"observation","text":"creds leaked in test"}},"control":{"ok":true,"outcome":"404"}}\n```'
         return "{}"
 
     rep, loop = run_live(

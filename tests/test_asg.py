@@ -59,7 +59,8 @@ def test_projection_preserves_operator_content(tmp_path, monkeypatch):
     from hunt_loop import Verdict
     # confirm via a direct event so the projection has a capability to show
     asg.append_event("T2", "verdict", hypothesis="h1", status=Verdict.CONFIRMED.value,
-                     evidence="poc/x", provides=["P:read=config"])
+                     evidence={"kind": "observation", "text": "recovered config in test"},
+                     provides=["P:read=config"])
 
     md = asg.markdown_path("T2")
     md.parent.mkdir(parents=True, exist_ok=True)
@@ -246,7 +247,9 @@ def _confirm_finding(target, fid):
     """Helper: drive a finding hypothesis -> confirmed (auto-queues mandatory workers)."""
     asg.append_event(target, "genesis", profile="web", phase="engage")
     asg.record_finding(target, fid)
-    asg.advance_finding(target, fid, "tested")
+    # Evidenced states require an observation_kind (what the evidence actually
+    # touched); it persists on the ledger and carries to the later transitions.
+    asg.advance_finding(target, fid, "tested", observation_kind="data_access")
     asg.advance_finding(target, fid, "adversary-verified")
     return asg.advance_finding(target, fid, "confirmed")
 

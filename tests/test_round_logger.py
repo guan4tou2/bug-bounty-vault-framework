@@ -137,7 +137,8 @@ def test_context_brief_with_capsule(tmp_path):
     loop = HuntLoop(session_id="brief_test")
     loop.add_surface("endpoint_a")
     loop.add_hypothesis("h1")
-    loop.record_verdict("h1", Verdict.CONFIRMED, evidence="poc.png",
+    loop.record_verdict("h1", Verdict.CONFIRMED,
+                        evidence={"kind": "observation", "text": "reproduced in test"},
                         provides=["cap_read"])
     loop.save(ledger)
 
@@ -242,7 +243,7 @@ def test_default_paths_colocate_with_ledger():
     .state/round_log.jsonl)."""
     import asg
     import round_logger as rlmod
-    target = "digiwin-bbp"  # any real target dir under 01 - Targets/
+    target = "example"  # any real target dir under 01 - Targets/
     try:
         led = asg.ledger_path(target)
     except Exception:

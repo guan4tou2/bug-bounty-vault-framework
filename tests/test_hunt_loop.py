@@ -11,6 +11,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "automation"))
 from hunt_loop import HuntLoop, ExecutionResult, Verdict, RunState, step_execute_and_judge  # noqa: E402
 
+# Resolving proof: a capability is granted only from a CONFIRMED verdict whose
+# evidence resolves. A structured observation is the minimal resolving form.
+PROOF = {"kind": "observation", "text": "reproduced in controlled test"}
+
 
 # I1 / gap 1: a clean execution does NOT confirm a vuln or grant a capability.
 def test_execution_success_does_not_confirm_or_grant():
@@ -27,7 +31,7 @@ def test_execution_success_does_not_confirm_or_grant():
 def test_confirmed_with_evidence_grants_capability():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/proof.txt",
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence=PROOF,
                       provides=["P:read=config"])
     cap = lp.capsule()
     assert cap["capabilities"] == ["P:read=config"]
@@ -64,7 +68,7 @@ def test_failed_execution_is_inconclusive_not_confirmed():
 def test_contradiction_marks_disputed():
     lp = HuntLoop()
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/a", provides=["P:x"])
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence=PROOF, provides=["P:x"])
     lp.record_verdict("h1", Verdict.REFUTED, evidence="poc/b")
     cap = lp.capsule()
     assert cap["disputed"] == ["h1"]
@@ -78,7 +82,7 @@ def test_reload_recovers_identical_capsule(tmp_path):
     lp = HuntLoop()
     lp.add_surface("ep1", untested=True)
     lp.add_hypothesis("h1")
-    lp.record_verdict("h1", Verdict.CONFIRMED, evidence="poc/a", provides=["P:x"])
+    lp.record_verdict("h1", Verdict.CONFIRMED, evidence=PROOF, provides=["P:x"])
     before = lp.capsule()
     f = tmp_path / "loop.jsonl"
     lp.save(f)
@@ -90,7 +94,7 @@ def test_reload_recovers_identical_capsule(tmp_path):
 def test_revoke_blocks_dependent():
     lp = HuntLoop()
     lp.add_hypothesis("gain", )
-    lp.record_verdict("gain", Verdict.CONFIRMED, evidence="poc/a", provides=["P:admin"])
+    lp.record_verdict("gain", Verdict.CONFIRMED, evidence=PROOF, provides=["P:admin"])
     lp.add_hypothesis("use", requires=["P:admin"])
     assert "use" in lp.capsule()["ready_hypotheses"]
     lp.revoke_capability("P:admin", reason="token rotated")
@@ -141,9 +145,9 @@ def test_needs_input_and_waiting_override():
 def test_revocation_invalidates_confirmed_descendants():
     lp = HuntLoop()
     lp.add_hypothesis('root')
-    lp.record_verdict('root', Verdict.CONFIRMED, 'a', ['admin'])
+    lp.record_verdict('root', Verdict.CONFIRMED, PROOF, ['admin'])
     lp.add_hypothesis('child', ['admin'])
-    lp.record_verdict('child', Verdict.CONFIRMED, 'b', ['write'])
+    lp.record_verdict('child', Verdict.CONFIRMED, PROOF, ['write'])
     lp.add_hypothesis('leaf', ['write'])
     lp.revoke_capability('admin', 'expired')
     assert lp.capsule()['capabilities'] == []
@@ -155,7 +159,7 @@ def test_independent_support_survives_dispute():
     lp = HuntLoop()
     for h in ('a', 'b'):
         lp.add_hypothesis(h)
-        lp.record_verdict(h, Verdict.CONFIRMED, h, ['read'])
+        lp.record_verdict(h, Verdict.CONFIRMED, PROOF, ['read'])
     lp.record_verdict('a', Verdict.REFUTED, 'control')
     assert lp.capsule()['capabilities'] == ['read']
 

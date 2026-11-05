@@ -370,7 +370,12 @@ def test_legacy_capability_strings_do_not_prove_a_finding_goal(target):
         ("verdict", {"hypothesis": "ACME-001", "status": "confirmed", "provides": [],
                      "evidence": "missing-evidence-reference", "confidence": "reproduced"}),
     ])
-    assert "ACME-001" in HuntLoop.load(asg.ledger_path(target)).capsule()["confirmed"]
+    # Strict evidence gate: an unresolvable legacy string grants no capability, so
+    # the verdict is surfaced as evidence_rejected rather than silently confirmed —
+    # and still cannot prove a goal.
+    cap = HuntLoop.load(asg.ledger_path(target)).capsule()
+    assert "ACME-001" not in cap["confirmed"]
+    assert "ACME-001" in cap["evidence_rejected"]
     with pytest.raises(ValueError, match="eligible"):
         proof(target, "finding:ACME-001")
 

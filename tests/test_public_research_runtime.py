@@ -21,6 +21,9 @@ from logic_vuln_loop import Env, LogicHypothesis, Observation
 
 def research_loop(tmp_path):
     loop = HuntLoop(session_id="public-research-session", base_path=tmp_path)
+    # A research target declares its profile; source-audit has no recon floor, so
+    # research work (intents / goal-review) is what next_work surfaces.
+    loop.append("genesis", profile="source-audit")
     loop.append("objective", text="Evaluate the controlled example")
     append_to_loop(loop, "research_node", node_kind="goal", id="G1", text="Check the rule",
                    criteria=[{"id": "C1", "text": "Record direct evidence of the result"}],
@@ -46,9 +49,9 @@ def test_public_session_identity_and_confidence_contract_survive_research(tmp_pa
     loop = research_loop(tmp_path)
     intent(loop)
     loop.add_hypothesis("static")
-    loop.record_verdict("static", Verdict.CONFIRMED, "legacy-proof", ["read:legacy"], confidence="static")
+    loop.record_verdict("static", Verdict.CONFIRMED, {"kind": "observation", "text": "legacy proof reproduced in test"}, ["read:legacy"], confidence="static")
     loop.add_hypothesis("dynamic")
-    loop.record_verdict("dynamic", Verdict.CONFIRMED, "legacy-proof", [], confidence="reproduced")
+    loop.record_verdict("dynamic", Verdict.CONFIRMED, {"kind": "observation", "text": "legacy proof reproduced in test"}, [], confidence="reproduced")
     cap = loop.capsule()
     assert cap["static_only"] == ["static"]
     assert cap["capabilities"] == ["read:legacy"]
@@ -86,7 +89,7 @@ def test_bound_hypothesis_respects_intent_capability_prerequisites(tmp_path):
     assert loop.capsule()["ready_hypotheses"] == []
     assert loop.capsule()["blocked_hypotheses"] == ["H1"]
     loop.add_hypothesis("account")
-    loop.record_verdict("account", Verdict.CONFIRMED, "legacy-proof", ["account:example"])
+    loop.record_verdict("account", Verdict.CONFIRMED, {"kind": "observation", "text": "legacy proof reproduced in test"}, ["account:example"])
     assert loop.capsule()["ready_hypotheses"] == ["H1"]
     loop.revoke_capability("account:example", "Account revoked")
     assert loop.capsule()["ready_hypotheses"] == []
@@ -147,7 +150,7 @@ def test_dispatch_rechecks_capability_revoked_by_selection_callback(tmp_path):
     hyp = hypothesis()
     loop.add_hypothesis(hyp.hyp_id)
     loop.add_hypothesis("account")
-    loop.record_verdict("account", Verdict.CONFIRMED, "legacy-proof", ["account:example"])
+    loop.record_verdict("account", Verdict.CONFIRMED, {"kind": "observation", "text": "legacy proof reproduced in test"}, ["account:example"])
     intent(loop, hypothesis="hypothesis:H1", requires=["account:example"])
     dispatched = []
 
