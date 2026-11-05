@@ -33,7 +33,7 @@ Finding ID | Original PoC Command | Time (UTC) | Status | Size | Key Response | 
 ```
 
 Rules:
-- **Exact same command** — no "close enough"
+- **Exact same command** — no "close enough" — **except for credential values that expire or rotate** (cookie / CSRF token / JWT / session ID): before replaying, obtain **fresh values through the same login flow** and substitute them in. Do not assume old values still work. A replay that fails with a stale credential (401/403/CSRF mismatch) is routinely misjudged as "fixed" when the credential merely expired — the root cause was never retested.
 - GET-first: POST/PUT/DELETE requires understanding consequences first
 - Log each test in the operation log
 - Unreachable endpoints -> immediately differentiate using CT telemetry + DNS: HOST GONE vs BLOCKED AT EDGE
@@ -78,6 +78,18 @@ For each FIXED Finding and its patch impact radius:
 - [ ] Patch has not introduced new error paths (new 500s / debug output / stack traces)
 - [ ] Patch has not accidentally exposed new attack surface (new endpoints / redirects / CORS changes)
 - [ ] Previously FIXED findings have not reappeared after new deployment (code revert detection)
+
+**`verified-not-exploitable` findings must be included in the retest scope.**
+
+The protection on this class of finding comes from **this deployment's mitigations**, not from the weakness being absent — once a mitigation is removed, bypassed, or drifts out of config, it becomes exploitable immediately.
+
+| status | Retest disposition |
+|---|---|
+| `verified-not-exploitable` | ⚠️ **Must test.** Re-confirm each mitigation layer that originally blocked it is still in place (a finding may rely on several stacked mitigations). |
+| `not-vulnerable` | No retest needed — unless the version / component changed (the weakness never existed). |
+| `killed` | Revisit as budget allows — it was dropped on cost grounds, so the weakness may still be present. |
+
+> The distinction is the **source of protection**: `verified-not-exploitable`'s protection can be removed; the other two cannot. Before retesting, grep for `status: "verified-not-exploitable"` to pull the list — don't retest only the FIXED ones.
 
 **Sanitization Side Effect Check (post-injection-fix — mandatory)**:
 After SQLi/XSS/CMDi fixes, replay with sanitized input and check:
@@ -174,3 +186,9 @@ Minimum standard before the report can be sent externally:
 - [ ] No severity inflation (CVSS changes require new supporting evidence)
 - [ ] Residual cleanup checklist is complete
 - [ ] Independent audit completed (adversarial agent review)
+
+## Technique handoff
+
+A retest attacks the **original finding's vulnerability class** — Phase 2 variant/bypass testing especially needs that class's technique library. Go back to the matching technique skill for payloads and variants by original class: `sqli-sql-injection` · `xss-cross-site-scripting` · `ssrf-server-side-request-forgery` · `path-traversal-lfi` · `upload-insecure-files` · `cors-cross-origin-misconfiguration` · `jwt-oauth-token-attacks` · `401-403-bypass-techniques` · `waf-bypass-techniques` (vendors often substitute a WAF rule for a real patch → this one is especially critical at retest). IDOR coverage goes through `bb-idor-coverage` (re-run the full verb matrix before a FIXED verdict — don't retest only the original verb).
+
+> The most common "fixed" is a patch that covers **only the one variant in your PoC**. If Phase 2 does not go back to the technique skill for variants, it is just replaying your own old payload — a model executing inside a procedural skill does not re-scan the skill catalog, it follows the path written here.

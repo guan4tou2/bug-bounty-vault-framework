@@ -112,6 +112,58 @@ bash automation/dag_gaps.sh <target>
 # Pick top 1-3 candidates per session cycle
 ```
 
+### Stage 4b: Dimension stall check (the escape hatch)
+
+**Problem:** a loop can spend many rounds inside one dimension (e.g. unauthenticated HTTP probing) and miss entire categories of information (OSINT, infra layer, employee leaks) that a single-round jump to a different *reconnaissance* dimension would surface. Shuffling hypotheses within the *testing* dimensions does not fix this.
+
+**Mechanism:** after each round (or after 3 consecutive attempts with no new finding), read `ASG.recon_dimensions` and check:
+1. Any `pending` dimension? → propose switching to it before going deeper in the current one.
+2. Version→CVE stale? → any component discovered >1 round ago but not yet CVE-searched → fire now.
+3. `passive_osint` still `pending`? → hard block: do not proceed to Stage 5 testing until OSINT is at least `partial`.
+
+**Dimension-jump priority** (when several are pending) — a floor, not a ceiling:
+1. `passive_osint` (highest — zero risk, seeds everything)
+2. `infra_layer` (DNS / IP / TLS — finds hidden hosts)
+3. `employee_osint` (public code leaks — credentials, internal structure)
+4. `tech_stack_deep` (sourcemap / config mining — hidden endpoints)
+5. version→CVE is auto-fired, not manually scheduled
+
+Targets may add their own dimensions (the ASG schema accepts arbitrary dimension keys); they are checked after the floor dimensions.
+
+**Key insight:** a dimension jump is not "give up on the current dimension" — it is "interleave one round of a different category, bring back new seeds, then continue". A single round that jumps from HTTP probing to DNS/infra mapping can surface a high-severity host that many rounds of HTTP probing never would.
+
+### Stage 5: Test — dynamic verification flow
+
+A candidate must pass a structured verification flow before its `status` is promoted:
+
+```
+candidate → assess actual effects + existing authorization
+  allowed → execute bounded test → evidence review
+    reproduced boundary violation + claimed impact achieved → validated
+    insufficient / cannot test / not reproduced → suspected + verification plan
+    disproven by adequate controls → refuted
+  authorization/effects unclear → park + a concrete question → recheck after approval
+  prohibited → block (ordinary approval does not override a prohibition)
+```
+
+Per-finding ASG record (fields → [[Reference Card - Attack Surface Graph Schema]]):
+- `suspected` → fill `verification_plan` (what verification is next) + `verification_risk`
+- `validated` → fill `verification_method` (what was done, what was observed) + `evidence_ref`
+- not every finding reaches `dynamic_verified` — some need an account / environment / authorization → mark `blocked` + `verification_plan` for the next session
+
+Principles:
+1. **suspected ≠ validated** — a version match or a static-only confirmation is `suspected`; only dynamic verification can be `validated`.
+2. **dynamic verification requires a full PoC** — not "there was some dynamic interaction", but a complete, re-runnable PoC (a script or precise manual steps) achieving the `expected_impact` against the authorized target or a proven-equivalent controlled environment. A sanitizer/harness trigger is static-confirmed; a short-term measurement wobble is not confirmed; "the packet was sent" is not impact.
+3. **the PoC must be re-runnable and reach the expected effect** — a screenshot with no reproducible procedure is not a PoC; a partial effect is not achievement; a one-off is not reproducible. `poc_ref` points at the script/procedure; `verification_method` records the observed effect.
+4. **only `validated` enters a report** — a `suspected` finding is an honest intermediate state handed to the next session, not a downgraded report.
+5. **not every dynamic check needs to ask** — check authorization and real side effects first; proceed when in-scope and the consequences are known, ask when unknown, block what is prohibited.
+6. **record failed verification too** — tried but not reproduced → `false_positive` + `verification_method` noting what was attempted.
+
+**Discovery feedback (5 → 0/1 loop):** when testing surfaces a new attack surface (a new subdomain, internal IP, API endpoint, or credential in a response):
+1. add the new node to the ASG (`origin: discovered`, `recon_source: test-feedback`)
+2. re-run the passive-OSINT floor on the new scope (CT logs, Wayback, …)
+3. the new node enters Stage 4 prioritization
+
 ### Stage 6: Chain (the multiplier)
 
 Q8 of `bb-exploit-chain` feeds back into the loop:
@@ -121,6 +173,47 @@ Q8 of `bb-exploit-chain` feeds back into the loop:
 4. Q7 clue-correlation re-scans blocked attempts for retest triggers
 
 This creates a positive feedback loop: each finding potentially unlocks the next.
+
+---
+
+## Cross-Cutting: Search-First Principle (applies at every stage)
+
+**No factual claim about the external world may rest on training data or memory alone. Search to confirm it.** This is not a single stage's rule — it is a discipline for every step of the loop, and it is not limited to version numbers and CVEs: it applies to anything that can change over time.
+
+### Fact classes that must be searched
+
+| Class | Example | Why memory is not enough |
+|---|---|---|
+| **Version / CVE / PoC** | "<product> <version> has a CVE"; "this CVE has a public PoC" | Advisories update; PoCs appear or get pulled |
+| **Tech-stack behavior** | "Spring Boot exposes actuator by default"; "Django DEBUG is off by default" | Defaults change between versions |
+| **WAF / defenses** | "Cloudflare blocks this payload"; "this bypass works" | WAF rules update continuously |
+| **Default credentials** | "<product>'s default login is admin/admin" | Vendors change defaults |
+| **Program state** | "this BBP is live"; "scope includes `*.example.com`" | Programs adjust scope / pause / close |
+| **Exploit techniques** | "this SSTI payload works on Jinja2"; "this bypass still works" | Frameworks patch; syntax changes |
+| **API / docs** | "this API accepts a JSON body"; "this endpoint returns user data" | APIs version |
+| **Vendor patch status** | "this is fixed"; "no patch yet" | New patches ship at any time |
+| **Prior research** | "has anyone written this attack up?"; "best practice for this technique" | New writeups publish continuously |
+
+### How
+
+You need no special trigger — whenever you are about to make a factual judgment (not a deduction, but a claim about the *state of the external world*) at any stage, search first. Source priority:
+1. **Injected context** (environment block / vault state) — most authoritative right now.
+2. **WebSearch / a multi-source search** — external facts after the training cutoff.
+3. **Training data** — only for stable invariants (HTTP protocol semantics, crypto algorithm properties, language syntax).
+
+**Test:** if "it was A a year ago, it might not be A now" → search. If "it has not changed since the RFC defined it" → answer directly.
+
+### Application by stage
+
+| Stage | Typical judgment to search |
+|---|---|
+| OSINT | the target's tech stack, subdomains, employee info, historical vulns |
+| Version→CVE | version↔CVE mapping, PoC availability, patch status |
+| Surface Map | framework default behavior, known component weaknesses |
+| Prioritize | current exploitability of a vuln class |
+| Test | payload validity, WAF-bypass techniques, default credentials |
+| Chain | feasibility of a chaining technique, prior writeups |
+| Submit | the program's current scope / status, vendor response policy |
 
 ---
 

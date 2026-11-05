@@ -32,6 +32,7 @@ For each resource ID, test the complete verb matrix before marking as done:
 | **DELETE** | Delete another user's object | Destructive; commonly missed in testing |
 | **POST** | Create / bind as another user | Create-path privilege escalation |
 | **Variants** | Object-ID guessing (sequential/UUID leak), cross-tenant, batch endpoints, GraphQL `node` queries | Backend authz often only blocks frontend routes |
+| **Identity-claim parameters** | A request parameter that reports identity/scope (e.g. a `userID` field or a self-asserted `scope`/group ID) swapped to another's value — **completion condition: the test MUST include a null value and a non-existent value as controls** | A parameter that *looks* like an authz input is not necessarily one. Swapping it to another account and getting the same data back cannot distinguish "the parameter was ignored" from "it was rejected and the backend fell back to your own session". The null / non-existent controls disambiguate this ([[LL-319]]). |
 
 **Stop-loss criteria**: All verbs tested (confirmed / disproven / N/A with documented reason) before marking complete. **Testing only GET and closing = incomplete** (this gate exists specifically to block that).
 

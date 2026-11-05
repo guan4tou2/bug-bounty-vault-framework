@@ -18,6 +18,19 @@ description: Use when session context is low, work needs checkpointing, takeover
 | Structural check | Same session has run >= 30 turns or >= 1.5 hours — check whether a handoff is appropriate |
 | System signal | Claude Code displays a context warning |
 
+## ⚠️ Codename discipline (read every time — applies to every handoff)
+
+> HANDOFF.md is text that is visible across sessions. **A raw secret never goes into it.**
+
+| Type | Correct form | Forbidden |
+|---|---|---|
+| Finding | `<FINDING-ID>` (the ASG finding ID) | Full title containing the raw endpoint / CVE |
+| Credential / token / JWT | `see the evidence field of <FINDING-ID>` | The raw token value (`eyJ...`, `Bearer ...`) |
+| Attack surface | `<surface-label>` (the ASG surface label) | Full URL with path / params |
+| Next-step command | A shell command containing no secret | Any command with a secret inline |
+
+**A handoff produced by invoking this skill always uses the codename form above** — even if a HANDOFF.md was hand-written in an earlier turn, invoking this skill **regenerates** a codename-compliant version (it is not "already done, skip").
+
 ## Handoff Process (current session — context nearly full)
 
 ### Step 1: Verify lock is alive
@@ -54,6 +67,24 @@ Edit `workspace/workshop/<target>/HANDOFF.md` and add:
 > Scope: <lock scope>
 > resume_state: <continue = mid-task, resume straight from "In progress → next" below | blocked = stuck on a blocker, clear the live-state/unfinished-checklist first | milestone-complete = milestone done, pick a new direction>
 > ↳ The takeover session's FIRST decision (resume / unblock / pick-new) is a one-line lookup here — don't re-read the whole file to infer it; pair it with "next" = a precise, copy-pasteable command. If the last action was "wait for the user to answer" and it was answered, mark milestone-complete so the takeover session doesn't re-ask.
+
+### 🔴 PINNED: procedural obligations (must survive compaction)
+> The AGENTS.md rules currently in force for this session — the next session must keep following them.
+- Discovery / round log: one entry per operation (the session's logging rule)
+- <other rules in force this session, e.g. GET-first, operation logging, dedup gate>
+
+### 🔴 PINNED: live connections / environment state (must survive compaction)
+> Connection params, page IDs, VM state the takeover session needs — compaction loses these.
+- SSH tunnel: `ssh -4 -L <port>:127.0.0.1:<port> <user>@<host>`
+- CDP page ID (if a browser bridge is up): `<page_id>`
+- VM IP / state: `<ip>` / running|suspended
+- Egress route in use: `<route>` / none
+- <other live state>
+
+### 🔴 PINNED: unfinished checklist (must survive compaction)
+> A checklist/gate running half-way — list done and not-done steps so the takeover doesn't restart it.
+- [ ] <specific step + where it stopped>
+- [x] <already-done step>
 
 ### Completed (do not redo)
 - [x] ...
@@ -112,11 +143,21 @@ bash automation/claim.sh <scope> --takeover --owner=<new model>
 2. Proceed with a normal (non-takeover) `claim.sh <scope>` — there is no In-Progress block to take over.
 3. Say so explicitly in your first message to the user (Step 3 below), e.g. "No clean handoff found for `<target>` — reconstructed context from RECON_DB.md + git log instead," so the user knows a continuity gap exists rather than assuming a clean handoff happened.
 
+### Step 2b: Process the 🔴 PINNED blocks
+
+The three `🔴 PINNED` blocks are context the previous session explicitly marked as **lost on compaction** — act on them before anything else:
+
+1. **Procedural obligations** — internalize them as this session's working habits immediately (e.g. the round log); don't wait until you've forgotten to backfill.
+2. **Live connections** — verify each is still valid (a tunnel may have dropped, a VM may be suspended); rebuild any that are dead before relying on them.
+3. **Unfinished checklist** — resume from the stopping point; do not re-run the already-done steps.
+
 ### Step 3: First message to the user
 
 ```
 Takeover from session `<previous-id>`. Immediate next step: `<first item from In-Progress>`
 ```
+
+Describe the next task by its **ASG ID / surface label** (`<FINDING-ID>`, `<surface-label>`), not by a raw endpoint or vuln-class name — the same codename discipline as the handoff file itself.
 
 ### Step 4: Update In-Progress as work proceeds
 

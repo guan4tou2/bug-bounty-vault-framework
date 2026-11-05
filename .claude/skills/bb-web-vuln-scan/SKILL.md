@@ -9,6 +9,10 @@ This skill enforces systematic testing **after** surface mapping (`bb-surface-ma
 
 Payloads below are canonical, publicly-documented OWASP WSTG test strings — they are a **starting point, not the full set**. Keep target-specific payloads, evasion, and real scanner output in your private vault / tool repo, never here. When a technique needs more than the starting point (full payload sets, bypass matrices, PoC walkthroughs), go to `09 - Knowledge Base/wiki/README.md` — its FAQ table routes each vuln class in this checklist to a matching `wiki/NN-*.md` deep-dive.
 
+## Context discipline (delegate execution)
+
+The main line (commander) should hold only **decisions and conclusions**. Executing this matrix is the heavy work — many hosts, many parameters, batched payloads, spidering. **When the surface is non-trivial (>1 host or batch testing is needed), delegate execution to the `web-hunter` agent and keep only the matrix conclusions on the main line: which OWASP items were covered, what hit, and `file:line` evidence pointers.** Do not flush raw HTTP responses, full spider lists, or per-payload output into the main line's context. Only a single-endpoint quick check runs inline.
+
 ## Trigger
 
 Run when actively testing a web target's endpoints/parameters:
@@ -19,11 +23,13 @@ Run when actively testing a web target's endpoints/parameters:
 
 ## Hard Rules
 
-1. **Every version number → look up CVE immediately.** When you find a version, stop and search `"<product> <version> CVE exploit"` before continuing. Delegate the SOP to `bb-version-cve-precheck`.
-2. **Hit a WAF → attempt bypass, do not give up.** Identify the WAF, find a documented bypass, test its coverage (different paths/params may have different rules).
-3. **Cover every OWASP Top 10 category** — not just A03 + A05.
-4. **Do not hardcode lists.** The paths / parameter names / payloads here are a starting point. For each target, expand dynamically from the tech stack and a real wordlist.
-5. **Any finding → trigger `bb-exploit-chain`** (the 6-question chain) before moving to the next system.
+1. **Search-First (applies throughout).** Before making any factual judgment — version→CVE, tech-stack defaults, WAF behavior, payload validity, default credentials, technique feasibility — search to confirm. Do not answer from training data on anything that "can change over time".
+2. **Every version number → look up CVE immediately.** When you find a version, stop and search `"<product> <version> CVE exploit"` before continuing. Delegate the SOP to `bb-version-cve-precheck`.
+3. **Hit a WAF → attempt bypass, do not give up.** Identify the WAF, find a documented bypass, test its coverage (different paths/params may have different rules).
+4. **Cover every OWASP Top 10 category** — not just A03 + A05.
+5. **Do not hardcode lists.** The paths / parameter names / payloads here are a starting point. For each target, expand dynamically from the tech stack and a real wordlist.
+6. **Any finding → trigger `bb-exploit-chain`** (the 6-question chain) before moving to the next system.
+7. **Finding lifecycle: suspected → validated.** An anomaly opens a `suspected` finding (with `expected_impact` + `verification_plan`) → you then write a full PoC → the PoC achieves the `expected_impact` against the authorized target or a proven-equivalent controlled environment → only then is it `validated`. **An ASAN-harness trigger, a short-term timing wobble, or "the request was sent" is only `suspected`, never `validated`.** Only a `validated` finding with a `poc_ref` may go into a report.
 
 ## Anti-patterns (forbidden)
 
@@ -32,6 +38,16 @@ Run when actively testing a web target's endpoints/parameters:
 - ❌ "Did A03, injection is done" → every parameter × every injection type is the bar.
 - ❌ Ticking the OWASP list and leaving → any anomaly must run the chain review.
 - ❌ Marking an item ✅ that was not actually tested.
+
+## Phase 0 — KB query gate (before you test)
+
+Before testing a target's tech stack / vuln class, **query the KB first** to see whether an existing pattern can accelerate the work:
+
+```bash
+bash automation/surface_kb.sh "<tech-stack>"   # e.g. "laravel" / "spring boot" / "wordpress"
+```
+
+KB hit → load the pattern's checklist / known chain path, don't re-explore. KB miss → run full coverage as normal, then backfill the new pattern with `bb-knowledge-capture` afterward.
 
 ## Phase 1 — Version → CVE
 
@@ -119,8 +135,11 @@ All of these must hold before claiming exhaustion:
 4. Any WAF encountered had a bypass attempt.
 5. Every finding ran `bb-exploit-chain` (the 6-question chain).
 6. Every ⏳ is genuinely auth-blocked, not skipped.
+7. **Every finding has an `expected_impact`** — a finding with no defined "what success looks like" is not done.
+8. **Every `validated` finding has a `poc_ref`** — without a re-runnable PoC the finding is not verified.
+9. **No finding is `validated` while missing a `verification_method`** — a transient trigger or "the request was sent" is `suspected`, not `validated`.
 
-You **cannot** claim exhaustion while any non-auth ⏳ remains, any endpoint is still untested, any finding skipped the chain review, or any WAF was left untried.
+You **cannot** claim exhaustion while any non-auth ⏳ remains, any endpoint is still untested, any finding skipped the chain review, any WAF was left untried, any finding lacks an `expected_impact`, or any `validated` finding lacks a `poc_ref` / `verification_method`.
 
 ## Phase 4 — Output
 
@@ -135,6 +154,47 @@ Use whatever browser-automation and request-interception tools your setup provid
 - Use full navigations (not cross-origin fetch) for IDOR/SQLi so CORS does not block reads.
 - Be able to intercept and rewrite request body / cookies / headers, and reuse session tokens across requests.
 - Use direct HTTP (curl/httpie) for fast API checks where JS rendering is not needed.
+
+## Technique handoff (once the matrix hits, hand off — don't hand-roll payloads here)
+
+This skill owns **coverage and ordering**; when a class is actually worth attacking, hand off to the matching technique skill for its payloads and bypasses:
+
+| Hit | Hand off to |
+|---|---|
+| Parameter reaches SQL | `sqli-sql-injection` |
+| Reflected / stored sink | `xss-cross-site-scripting` (CSP blocks → `csp-bypass-advanced`; no JS execution → `dangling-markup-injection`) |
+| Server fetches a URL | `ssrf-server-side-request-forgery` (cloud metadata → `offensive-cloud`; k8s → `offensive-k8s-attacks`) |
+| File path controllable | `path-traversal-lfi` |
+| Blocked by a WAF | `waf-bypass-techniques` |
+| Object ID swappable | `bb-idor-coverage` (coverage gate) + `idor-broken-object-authorization` (technique) |
+| 401 / 403 | `401-403-bypass-techniques` |
+| GraphQL | `graphql-and-hidden-parameters` |
+| Upload point | `upload-insecure-files` |
+| Template / expression echo | `ssti-server-side-template-injection` · `expression-language-injection` |
+| XML parsing / SOAP / SVG upload | `xxe-xml-external-entity` (XSLT engine → `xslt-injection`) |
+| JSON / document-DB query | `nosql-injection` |
+| State change with no token / loose SameSite | `csrf-cross-site-request-forgery` (framable → `clickjacking`) |
+| One-shot operation / quota / concurrency | `race-condition` |
+| Host header reaches URL generation / routing | `http-host-header-attacks` (cache layer → `web-cache-deception`) |
+| Same-name params parsed differently front vs back | `http-parameter-pollution` |
+| Front/back proxy framing mismatch | `request-smuggling` (HTTP/2 → `http2-specific-attacks`) |
+| Input reaches a response header / Location / Set-Cookie | `crlf-injection` |
+| JS deep-merge / query parser | `prototype-pollution` → `prototype-pollution-advanced` |
+| Serialized object reaches a deserializer | `deserialization-insecure` (Java JNDI lookup → `jndi-injection`) |
+| Login / signup / reset / 2FA flow | `authbypass-authentication-flaws` |
+| Price / flow / state machine / coupon | `business-logic-vulnerabilities` |
+| REST / GraphQL API surface | `api-recon-and-docs` → `api-authorization-and-bola` → `api-auth-and-jwt-abuse` |
+| SSO / SAML assertion | `saml-sso-assertion-attacks` |
+| `.git` / `.env` / backup / source map | `insecure-source-code-management` |
+| Redirect target controllable (`?next=` `?url=`) | `open-redirect` (chains into OAuth callback → `oauth-oidc-misconfiguration`) |
+
+> Why spell this out: while a model executes **inside a procedural skill**, it does not re-scan the skill catalog — it follows the path you wrote. Leaving a technique off this table means those technique skills effectively do not exist at that step.
+
+### If this is a red-team / pentest engagement (not bug bounty)
+
+**The coverage this skill pursues is not the goal in a red-team context.** The client's question is "can you get in?", and a stack of low-severity findings answers it poorly — a pile of step-1 findings still sums to step-1 on the privilege ladder.
+
+→ Run each finding through `bb-web-foothold` to place it on the privilege ladder, and throttle scanning to its noise budget. The engagement-level flow is `bb-redteam-engagement`.
 
 ## Cross-References
 
