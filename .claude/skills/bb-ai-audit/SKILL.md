@@ -63,8 +63,8 @@ Deep references:
 
 Hand-offs:
 - **Memory / history IDOR → `bb-idor-coverage`** for the full read/write verb matrix (GET + POST/PUT/PATCH/DELETE, cross-tenant). AI memory endpoints are especially easy to stop at GET, but write (poisoning, I:H) is usually the highest-impact dimension.
-- **OAuth-core flaws under MCP** (redirect_uri validation, state/nonce, PKCE, token audience, callback binding): MCP is a layer over standard OAuth — test the OAuth itself too, not just MCP-specific behaviour (external skill `jwt-oauth-token-attacks`, see `09 - Knowledge Base/Reference Card - External Skills Catalog.md`).
-- `/skills` `/history` `/registry` are object-ID APIs → test object-level and function-level authorization in depth (nested resources, hidden writable fields).
+- **OAuth-core flaws under MCP** (redirect_uri validation, state/nonce, PKCE, token audience, callback binding): MCP is a layer over standard OAuth — test the OAuth itself too, not just MCP-specific behaviour (external skills `oauth-oidc-misconfiguration` / `jwt-oauth-token-attacks`, see `09 - Knowledge Base/Reference Card - External Skills Catalog.md`).
+- `/skills` `/history` `/registry` are object-ID APIs → hand off to `api-authorization-and-bola` for object-level and function-level authorization in depth (nested resources, hidden writable fields).
 
 **Writes and deletes: know the consequence first.** `POST /memory` (poisoning) and `DELETE /memory` (availability) are write semantics → pass `bb-scope-safety-check` first. Finish all reads before writes (`AGENTS.md` §6).
 
@@ -132,7 +132,7 @@ Any of these → record a negative and move to the next surface:
 - Upstream: `bb-version-cve-precheck` · `bb-surface-mapping`
 - Safety gate: `bb-scope-safety-check` (memory writes / deletes)
 - Platform-layer hand-off: `bb-idor-coverage`
-- Model-layer hand-off (insecure output handling): output rendered to other users is XSS → external `xss-cross-site-scripting`; markdown-image exfiltration blocked by CSP → external `csp-bypass-advanced`; output flowing into SQL / shell → treat as classic injection (see `09 - Knowledge Base/Reference Card - External Skills Catalog.md`)
+- Model-layer hand-off (insecure output handling): output rendered to other users is XSS → external `xss-cross-site-scripting`; markdown-image exfiltration blocked by CSP → external `csp-bypass-advanced`; output flowing into SQL → `sqli-sql-injection`; output flowing into a shell command → `cmdi-command-injection` (see `09 - Knowledge Base/Reference Card - External Skills Catalog.md`)
 - Downstream: `bb-evidence-readiness` → `bb-attack-chain-review` → `bb-submission-readiness`
 - Scoring: `bb-cvss-score` + `cvss-adversary` agent
 - KB: [[Pattern - AI LLM MCP Security]] · [[Pattern - Indirect Prompt Injection via External Data Sources]] · [[Pattern - AI Memory API Unauth IDOR]] · [[Pattern - MCP OAuth Scope Mismatch]] · [[Checklist - AI LLM SaaS Unauthenticated Endpoints]] · [[Playbook - Nuclei + LLM Agents]]
