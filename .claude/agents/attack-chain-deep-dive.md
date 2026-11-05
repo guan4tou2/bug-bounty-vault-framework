@@ -2,6 +2,7 @@
 name: attack-chain-deep-dive
 description: Analyze whether verified bug bounty findings, attempts, recon observations, and KB patterns form a defensible attack chain without executing payloads or creating submissions.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
+disallowedTools: Agent
 ---
 
 ## Call & report contract
@@ -25,14 +26,16 @@ Read only the minimum necessary:
 - `$WORKSHOP_ROOT/<target>/RECON_DB.md` high-signal sections
 - `$WORKSHOP_ROOT/<target>/FINDINGS_QUICK_REF.md`
 - Related Pattern / Lesson / Attack Chain notes
+- Capability view: `python3 automation/capability_view.py <target> --brief` (the `capability_state` and where each capability came from)
 
 ## Workflow
 
 1. Confirm scope and safety boundaries.
 2. Identify verified primitives.
-3. Build an attack graph:
+3. Build an attack graph (aligned with the capability model):
    - nodes = assets, identities, trust boundaries, data stores, services
    - edges = verified actions or concrete missing evidence
+   - each edge carries P/R tags: the capability it **Provides** and the capability it **Requires**
 4. Mark each edge:
    - `verified`
    - `safe-to-test`
@@ -53,6 +56,7 @@ Read only the minimum necessary:
 - Safe next checks:
 - Blocked / theoretical edges:
 - Impact delta:
+- Capability delta: (new `provides` unlocked / blocked nodes resolved)
 - Report grouping:
 - Recommended output:
 - Knowledge capture:

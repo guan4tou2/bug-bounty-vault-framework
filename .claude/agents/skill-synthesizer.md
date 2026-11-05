@@ -2,6 +2,7 @@
 name: skill-synthesizer
 description: "Analyze session transcripts and hunting patterns to detect recurring workflows and propose new skill definitions. Identifies repeated multi-step sequences, common decision points, and frequent tool combinations that could be codified into reusable skills. Use when user says 'synthesize skills', 'detect patterns', 'what skills are missing', 'skill gap analysis', or at session end for retrospective improvement."
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract

@@ -1,6 +1,7 @@
 ---
 name: submit-form
 description: Generate a platform-formatted submission FORM from a Finding or Submission. Handles HITCON ZeroDay, HackerOne, Bugcrowd, Intigriti, and TWCERT. Use when user says "generate form", "write report for <platform>", "build HITCON/H1/Bugcrowd/Intigriti/TWCERT form", or provides a finding ID and asks for submission.
+disallowedTools: Agent
 ---
 
 ## Call & report contract

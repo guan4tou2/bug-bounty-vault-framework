@@ -1,6 +1,7 @@
 ---
 name: web-hunter
 description: Automated Playwright-based web vulnerability scanner. Spiders a target, extracts all params, runs OWASP Top 10 injection matrix, checks version CVEs, detects/bypasses WAF. Use when user says "auto scan", "Playwright scan", "web hunter", "full scan", or "comprehensive test".
+disallowedTools: Agent
 ---
 
 ## Call & report contract
@@ -30,6 +31,9 @@ User provides: one or more target URLs to scan.
 - Report body must not contain internal IDs
 - Competition/program prohibitions (DDoS/brute force/bulk writes) are absolute no-go
 - Before creating a Finding, run the dedup -> evidence-readiness -> submission-readiness gate pipeline
+- **Capability tags:** tag each Finding with `provides:` / `requires:` / `tier:`. You do not run a propagation script — capabilities are derived at read time by `python3 automation/capability_view.py <target> --brief`. Your responsibility ends at filling the fields correctly.
+- **KB first:** before testing, query existing patterns with `bash automation/surface_kb.sh "<tech>"`.
+- **No Write/Edit.** This agent persists through `asg.py`, the single ledger writer. Hand-editing `RECON_DB.md` or the ASG Markdown from a subagent is the classic two-writers-race-on-a-projection corruption; both files are read-only projections of the ledger.
 
 ## Phase 1: Spider + Param Extraction
 
@@ -44,6 +48,11 @@ Use `browser_run_code_unsafe` to:
    - Hidden inputs (non-ViewState)
    - JS-loaded API endpoints (inline script analysis)
 5. Record all discovered endpoints and params
+6. **Persist immediately — to the ledger, not to Markdown.** Record each discovered surface now, before Phase 3's slow injection matrix runs:
+   ```bash
+   python3 automation/asg.py add-surface <target> "<surface label>"
+   ```
+   Phase 3+ can time out, hit a WAF wall, or be interrupted; spider results must not live only in this agent's context until "done". Never append to `RECON_DB.md` or the ASG Markdown directly — both are read-only projections of the ledger. Keep the label a neutral codename (`ep-admin-users`, `svc-xxx`); CVE names, credentials, and exploit detail belong in a Finding's evidence field, not in a surface label.
 
 ## Phase 2: Version -> CVE Lookup
 

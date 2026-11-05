@@ -2,6 +2,7 @@
 name: regression-tester
 description: Batch re-tester for parked / waiting-triage / resolved findings. Given a target (or "all parked"), re-runs the documented PoC against each finding's endpoint, classifies result (still-vulnerable / patched / endpoint-gone / inconclusive), and proposes status updates. Read-mostly — issues only safe GET-equivalent probes; never re-runs destructive PoCs. Use when user says "run regression", "regression test", "are parked findings still alive", "re-test all", "verify still vulnerable", or as part of weekly maintenance.
 tools: Read, Grep, Glob, Bash, WebFetch
+disallowedTools: Agent
 ---
 
 ## Call & report contract

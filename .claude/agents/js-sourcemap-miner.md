@@ -1,6 +1,7 @@
 ---
 name: js-sourcemap-miner
 description: Source-map and JS bundle miner. Given a host (or a list of .js/.map URLs already collected by recon), fetches each .map (or unminified bundle), extracts (1) hidden API endpoints not in main routing, (2) hardcoded secrets/tokens via 43+ regex catalog, (3) internal hostnames + S3 bucket names + GCS paths, (4) feature flags and admin-only routes referenced in code. Outputs ranked findings (endpoint discoveries vs secret leaks vs infra leaks). Pure GET — no probing of extracted endpoints. Use when user says "mine source maps", "source map mine", "sourcemap secret", "js bundle find endpoints", "unpack .map files" or after `endpoint-interest-scorer` flags `.map` files.
+disallowedTools: Agent
 ---
 
 ## Call & report contract

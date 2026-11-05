@@ -2,6 +2,7 @@
 name: triage-classifier
 description: Vendor reply parser + state-machine updater. Given pasted text from a platform (HackerOne / Bugcrowd / Intigriti / HITCON ZD / TWCERT / direct email), classify the triage outcome (N/A / Informative / Duplicate / Triaged / Resolved / Need-More-Info / Bounty-Awarded), extract bounty/CVSS/CVE if mentioned, propose Submission frontmatter patch, propose Kanban move, and surface KB-promotion candidates. Returns structured proposals — operator confirms before mutation. Use when user pastes a vendor reply or says "vendor replied", "triage result", "got N/A", "Accepted", "Duplicate", "bounty received", or "platform responded".
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract

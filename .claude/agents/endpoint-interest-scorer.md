@@ -2,6 +2,7 @@
 name: endpoint-interest-scorer
 description: Score and rank a URL/endpoint list (100+) by likely security interest using a rubric (0-100). Combines path-pattern signal (admin/api/upload/oauth/graphql), parameter signal (id/redirect/url/file/cmd), tech-stack hint (Laravel/Spring/WP signature in response), and content-type/size hint. Outputs top-N most-promising endpoints with reasoning. Pure analysis — does NOT probe live; consumes already-collected URL data. Use when user says "URL ranking", "endpoint scoring", "100 URLs which to look at first", "interesting endpoints", "post-recon prioritize".
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract

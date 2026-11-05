@@ -1,6 +1,7 @@
 ---
 name: report-writer
 description: Create platform-neutral bug bounty reports, submissions, and FORM drafts from existing Vault Findings. Use when the user asks to write a report, create a disclosure draft, generate a form, or prepare an external handoff without binding to a specific platform template.
+disallowedTools: Agent
 ---
 
 ## Call & report contract

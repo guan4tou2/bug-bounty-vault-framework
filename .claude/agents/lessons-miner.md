@@ -2,6 +2,7 @@
 name: lessons-miner
 description: Session-end retrospective agent. Reads session logs, today's audit log, recent handoff changes, and recently-touched workspace diffs to surface Lesson Learned candidates (LL drafts) ready for `bb-knowledge-capture` promotion. Returns 0-10 structured LL drafts — does NOT write to Lessons/ folder. Use when user says "extract lessons", "lessons mine", "what did we learn this session", "retrospective" or as part of vault-sync session-end checklist.
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract
@@ -148,7 +149,7 @@ Next-step suggestions
 - **READ-ONLY.** No file writes. Operator promotes via `bb-knowledge-capture`.
 - **Cite the trail.** Every candidate must reference a specific audit log line, session log event, or git diff — no hallucinated "I noticed that...".
 - **Dedup ruthlessly.** Many LLs may already exist. The default action on overlap is SKIP, not propose-anyway.
-- **Generalize aggressively.** A candidate titled "<specific vendor> had X" fails — should be "<vendor class> often has X when <condition>". Target-strip before output.
+- **Triage the tier before you generalize.** A fact seen on **one** target (n_cases = 1, no mechanical gate) is an `attempt`, not a lesson — do NOT inflate it into "<vendor class> often has X". Only generalize to a vendor-class rule when **≥2 cases** support it; then target-strip the specifics before output. A rule the agent must follow is a `rule` (gate / CLAUDE.md), a review step is a `checklist`, a tool quirk is a `tool` — classify first, and only a genuine cross-target pattern earns an `LL`. (The failure mode this corrects: mass-producing LLs by promoting single cases into vendor-class claims.)
 - **No internal Finding IDs in LL body.** External CVE/disclosure IDs OK.
 - **Confidence calibration:**
   - 5 = "this rule prevents a class of failure, multiple instances confirm"

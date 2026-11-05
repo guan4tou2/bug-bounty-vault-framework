@@ -1,6 +1,7 @@
 ---
 name: debug-leak-scanner
 description: Batch scanner for debug/diagnostic endpoint exposures across a host list (Laravel Ignition, Clockwork, Horizon, Telescope, Whoops, Symfony profiler, Rails web-console, Django debug, Spring Actuator, Next.js __next, Express debug, Flask debug, .git, .env, /server-status, /server-info, /trace.axd, phpinfo). Issues only safe GETs; classifies hits by leak severity; outputs sorted-by-impact findings list. Use when user says "batch debug scan", "Ignition scan all", "actuator all targets", "debug leak scan", "scan .env / .git all" or after `bb-surface-mapping` discovers a multi-host scope.
+disallowedTools: Agent
 ---
 
 ## Call & report contract

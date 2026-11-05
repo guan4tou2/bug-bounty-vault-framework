@@ -2,6 +2,7 @@
 name: detection-rule-writer
 description: Turn a verified Finding or attack narrative into detection rules for the defender's blue team (Sigma plus platform query syntax, with false-positive and evasion assessment) — a purple-team handback deliverable. Distinct from nuclei-template-gen, which produces ACTIVE scan templates that probe the target to see whether the bug still exists; this agent produces PASSIVE detection rules that read logs to see whether someone is attacking. Use when asked to "write detection rules", "sigma rule", "purple team", "rules for the blue team", "how would they detect this attack", or "SIEM rule".
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract

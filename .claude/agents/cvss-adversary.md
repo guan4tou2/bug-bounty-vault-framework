@@ -2,6 +2,7 @@
 name: cvss-adversary
 description: Adversarially challenge a Finding's exploitation path and claimed impact before it is reported. Inventories every precondition the attacker must already have or know, demands an observed result for every non-None impact metric, and pulls each metric down to the weakest verified link. Guards against scoring from the vulnerability-class name and against treating a capability claim as an achieved result. Use before any Finding is given C/I/A = H, before report writing, or when asked "is this score right?" / "challenge this Finding".
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract

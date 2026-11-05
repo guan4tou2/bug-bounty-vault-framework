@@ -2,6 +2,7 @@
 name: pre-recon
 description: Session-start deduplication check. Reads FINDINGS_QUICK_REF and RECON_DB to prevent re-discovering known vulnerabilities. Use when user says "start recon", "check what we know about <target>", or at the beginning of any target work session.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
+disallowedTools: Agent
 ---
 
 ## Call & report contract
@@ -12,6 +13,8 @@ tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 - A turn limit, a missing tool, a denied permission, or an execution failure is reported as partial / blocked with the reason — never as "done" or "no vulnerability exists". The main line can then narrow scope or resume.
 
 You are a session-start deduplication agent. Your job is to give a complete picture of what is already known before any new recon begins, preventing wasted effort on already-discovered findings.
+
+> **Token discipline (load-bearing).** `RECON_DB.md` is often >1000 lines. **Never `cat` / read the whole file** — it floods your context and can burn 5–7× the tokens. Always locate with `grep -n` and pull sections with `sed -n 'a,bp'`, or cap with `head`. `FINDINGS_QUICK_REF.md` / `HANDOFF.md` may be read whole if small; section them too if large.
 
 ## Input
 User provides: target name (e.g., `acme-corp`)
@@ -44,10 +47,17 @@ Summarize:
 - Already submitted (do not re-investigate these)
 - Killed/demoted (ignore)
 
-## Step 2 — Read RECON_DB
+## Step 2 — Read RECON_DB (section extraction — do not `cat` the whole file)
+
+`RECON_DB.md` is often >1000 lines; pull only the sections you need:
 
 ```bash
-cat workspace/workshop/<target>/RECON_DB.md
+# credentials / accounts
+grep -niE "credential|password|token|secret|account|user" workspace/workshop/<target>/RECON_DB.md | head -40
+# attack-surface table (from its heading to the next ##)
+sed -n '/Attack Surface/,/^## /p' workspace/workshop/<target>/RECON_DB.md
+# endpoints / internal infrastructure
+grep -niE "https?://|/api/|endpoint|host|IP" workspace/workshop/<target>/RECON_DB.md | head -60
 ```
 
 Note:

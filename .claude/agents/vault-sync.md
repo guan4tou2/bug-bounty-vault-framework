@@ -1,6 +1,7 @@
 ---
 name: vault-sync
 description: Session-end sync agent. Runs checklist, commits dirty files, updates Kanban and FINDINGS_QUICK_REF. Use when user says "sync vault", "session end", "checklist", or is about to close Claude.
+disallowedTools: Agent
 ---
 
 ## Call & report contract

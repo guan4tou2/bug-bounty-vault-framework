@@ -2,6 +2,7 @@
 name: recon-diff
 description: RECON_DB snapshot differ. Given a target, compares current RECON_DB.md against the most recent snapshot (git history N commits back, or explicit timestamp), surfaces what changed in Attack Surface / Endpoints / Credentials / Hosts / Tech Stack. Highlights NEW assets (hunting opportunities) and REMOVED assets (vendor cleanup signal). Read-only desk analysis — no network calls. Use when user says "recon diff", "RECON_DB changes", "what changed since last scan", "new subdomains since last week", "any new assets on target", or weekly maintenance review.
 tools: Read, Grep, Glob, Bash
+disallowedTools: Agent
 ---
 
 ## Call & report contract
