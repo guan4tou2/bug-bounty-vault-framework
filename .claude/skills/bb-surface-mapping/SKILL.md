@@ -22,6 +22,76 @@ A target that has discovered endpoints but an **empty Attack Surface Map is inco
 
 **Scan-time block:** the reference automation ships `automation/surface_map_gate.sh`, a `PreToolUse(Bash)` hook that **blocks the scan in real time** — `bbflow hunt <target>` / `hunt-*.sh <target>` exits 2 when that target's RECON_DB has Discovered Paths but an empty Surface Map. Loud override: prefix with `BB_SKIP_SURFACE_GATE=1`.
 
+## Context discipline (delegate the large reads)
+
+Mapping means reading a lot of recon files / URL lists — a "bulk read" chore. When an endpoint list exceeds a few dozen rows, **dispatch an `Explore` or `endpoint-interest-scorer` subagent to read it and return only a Surface Map summary + top-N + reasons**; do not `Read` the raw recon files one by one on the main thread. The map body (nodes/edges) is written to the graph file, not pasted back into the main context.
+
+## Pre-gates (run in this order, before Method)
+
+### Gate -3 — Is your ranking criterion a *search* filter or a *submit* filter?
+
+Before ranking candidates or deciding "what to hunt first", answer one sentence:
+
+> **Is the criterion I'm about to rank by a *search* condition or a *submission* condition?**
+
+They often look identical, but using one for the other prunes away the vein.
+
+- A *submission* condition ("can this be reported? does it reach a shipping surface? is impact enough?") decides **reporting and resource allocation**.
+- A *search* condition ("could there be something here?") decides **where to look**.
+
+**A submission condition must never be used to prune the search tree.** Whether a bug is worth reporting is only knowable *after* you've found it and judged channel + impact — using it as a filter beforehand is deciding with information you don't have yet. (Real case: a class of findings was deemed low-value for *submission*; that reasoning was then wrongly used as a *search* filter, down-ranking a bucket — and the one real finding of the round was sitting in that bucket.) Same misuse to watch for: pruning by "this target's historical finding types" (you'll only ever find more of the same); pruning by "where source is available to run a sanitizer" (verifiability ≠ value).
+
+### Gate -2 — Passive OSINT before any active request
+
+**Mandatory before Gate -1** (needs no authorization, does not touch the target, zero risk). Active recon never surfaces these — they live in other people's repos, historical snapshots, and TLS-certificate SANs, not in the target's HTTP responses. (A target whose active recon is exhausted after many rounds routinely yields employee accounts, historical token patterns, and dozens of historical subdomains on the first passive-OSINT pass — see [[LL-336]].)
+
+| # | Item | Tool (example) | Output |
+|---|---|---|---|
+| 1 | CT logs | `crt.sh` + `certspotter` | historical subdomains |
+| 2 | Wayback | `waybackurls` / web.archive.org | historical endpoints / config paths |
+| 3 | GitHub code search | `site:github.com "<domain>"` + `org:<org>` + employee `*-test/*-poc` repos | leaked config / token / endpoint / account |
+| 4 | Gitee search | `site:gitee.com "<domain>"` (mandatory for CN-region targets, else `skipped:not-cn-target`) | same |
+| 5 | Shodan / Censys | `shodan search hostname:<domain>` | IP / port / service / banner |
+| 6 | Passive DNS | SecurityTrails / passive-DNS source | historical A/CNAME/NS |
+| 7 | Disclosed reports | public hacktivity / advisory archives | known vuln types → avoid dupes, find regressions |
+| 8 | DNS infra mapping | `dig` all names → group by IP → TLS SAN → default vhost | infrastructure topology |
+
+Items 1–7 are pure passive; item 8's TLS-SAN / bare-IP requests are active, so split that tracking. **The seven items are a floor, not a ceiling** — above the floor, add target-specific OSINT (job-board tech-stack disclosures, FCC filings for IoT, app-store version history for mobile, regulatory filings for finance, …).
+
+**Search-First principle (all phases, not just version/CVE):** any factual claim about the outside world → **search before claiming**, never from training data or memory. Test: if the fact "was A a year ago and might not be A now", search it; only principles fixed since an RFC/spec may be answered directly. This covers versions/CVEs/PoCs, default behaviors, WAF-bypass techniques, default creds, program scope/status, technique validity, API behavior, vendor patch status.
+
+**Version → CVE instant trigger:** the moment any node's response carries a version string (`Server:` header, JSON `version`, `<meta generator>`) → **immediately** search `"<product> <version> CVE"` + `"… exploit"`. Do not wait for a dedicated CVE round.
+
+**Three-tier verification ladder (version match ≠ exploitable):**
+
+| Level | Evidence | Status | Reportable? |
+|---|---|---|---|
+| Version match | CVE affected range includes this version | `suspected` | ❌ |
+| Static confirm | vulnerable code path found in source/binary; standalone sanitizer harness triggers | `suspected` | ❌ |
+| Dynamic verify | **a full PoC achieves `expected_impact` on an authorized target or a proven-equivalent controlled environment** | `validated` | ✅ |
+| Cannot dynamically verify | risk too high or environment-limited | `suspected` + `blocked:needs_auth` | ⚠️ ask for authorization or downgrade |
+
+A matched version is `suspected`, not `validated`; a static/harness hit is still `suspected`; "a packet went out" ≠ impact. When a verification PoC would write data, disrupt service, or modify data, stop and ask for authorization first — the ceiling for acting without asking is pure reads (GET/HEAD/OPTIONS). Finding-creation rules: `expected_impact` is mandatory at creation (it is the success criterion); `suspected` requires a `verification_plan`; `validated` requires `verification_method` + `poc_ref`. Schema → [[Reference Card - Attack Surface Graph Schema]].
+
+### Gate -1 — Disclosed pre-read evidence
+
+Before Method step 0, confirm the disclosed-findings pre-read is complete (`automation/check_disclosed_preread.sh <target>`): an evidence file with `status: pre_read_complete` must exist. For a competition / prior-disclosure program this is mandatory — you may not skip it by claiming "no disclosed section". See [[Checklist - Disclosed Findings Pre-Read Gate]].
+
+### Gate 0.5 — Find the system's own authorization model before testing authz
+
+**Before testing any missing authorization, find out how the application itself defines who may do what.** That is the only evidence of "defect vs by-design" a vendor cannot overturn with "works as designed".
+
+| Strength | Form | How to find |
+|---|---|---|
+| **Strongest** | a role × function matrix (RBAC policy table) | look for "permission"/"role"/"privilege" entities or pages; often a detail endpoint returning a wide table |
+| Strong | the app enforces the same model elsewhere | e.g. one module overwrites a response field with the session's value → it knows the limit; another place not doing so = inconsistent enforcement |
+| Medium | frontend gate bound to an operation code | map the endpoint to its UI gate |
+| **Zero** | "this looks sensitive" | **not admissible as a basis** |
+
+Getting this early makes every later authz judgment faster and more accurate: the matrix doubles as an authoritative coverage list (a `0/N` test account means anything it can do is a violation) and as the system's-own basis for "defect, not design" on each related finding.
+
+> ⚠️ **When design intent is genuinely ambiguous, write it as a question to the client, not a Finding.** Reporting a by-design behavior as a defect damages the credibility of the genuinely-valid items in the same report.
+
 ## Method
 
 0. **Run a recon floor first** (do not skip). Recon tool output is the raw material for the Surface Map; manual browsing alone does not count. At minimum: subdomain enumeration + live-host probing + historical URL mining (e.g. wayback/CDX) + crawl + a known-vuln scan pass + JS analysis. See `Playbook - Recon`. **APK / mobile target → use the static-SAST floor in the "Mobile / APK target branch" below instead of the web recon floor.**
