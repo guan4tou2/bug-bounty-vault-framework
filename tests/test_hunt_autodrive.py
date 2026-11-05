@@ -64,7 +64,8 @@ def _make_dispatch(reg, counter):
         hid = task.hyp.hyp_id
         t_out, c_out = _outcomes(hid)
         test = Observation(action_id=task.hyp.test_action, ok=(t_out is not None),
-                           outcome=t_out, evidence_ref=f"ev:{hid}",
+                           outcome=t_out,
+                           evidence_ref={"kind": "observation", "text": f"reproduced {hid} in test"},
                            error=None if t_out is not None else "timeout")
         ctrl = Observation(action_id=task.hyp.control_action, ok=True, outcome=c_out,
                            evidence_ref=f"ctl:{hid}")

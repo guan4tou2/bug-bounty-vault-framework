@@ -66,9 +66,17 @@ def dead_paths(loop: HuntLoop) -> list[dict]:
     return [latest[k] for k in sorted(latest)]
 
 
-def next_action(cap: dict, inflight: list[str], run_state: RunState) -> str:
+def next_action(cap: dict, inflight: list[str], run_state: RunState,
+                dead_ids: frozenset[str] = frozenset()) -> str:
     """One deterministic next step, so a resumed session continues rather than
-    re-deciding from scratch. Priority: reconcile interrupts first."""
+    re-deciding from scratch. Priority: reconcile interrupts first.
+
+    `dead_ids` excludes already-dead-ended hypotheses from the RUN branch.
+    capsule()'s `ready_hypotheses` only reflects `verdict` events (CONFIRMED/
+    REFUTED) -- a `dead_end` event leaves no verdict, so a hyp_id can be
+    simultaneously "ready" per capsule() and listed in this same brief's
+    `dead_paths`. Without this filter, a reader of next_action would be told to
+    RUN a hypothesis the SAME brief already flags as dead."""
     if inflight:
         return (f"RECONCILE interrupted action '{inflight[0]}' (check its evidence/output to decide "
                 f"if it completed) before running anything else")
@@ -79,8 +87,12 @@ def next_action(cap: dict, inflight: list[str], run_state: RunState) -> str:
         return f"RESUME research intent '{research['running_intents'][0]}' before starting duplicate work"
     if research.get("ready_intents"):
         return f"RUN research intent '{research['ready_intents'][0]}' and record its outputs"
-    if cap["ready_hypotheses"]:
-        return f"RUN hypothesis '{cap['ready_hypotheses'][0]}' (test action vs control)"
+    live_ready = [h for h in cap["ready_hypotheses"] if h not in dead_ids]
+    rejected_ready = sorted(set(live_ready) & set(cap.get("evidence_rejected", {})))
+    if rejected_ready:
+        return f"REPAIR evidence for '{rejected_ready[0]}' and record a fresh verdict"
+    if live_ready:
+        return f"RUN hypothesis '{live_ready[0]}' (test action vs control)"
     if cap["untested_surface"]:
         return f"MAP/HYPOTHESISE on untested surface '{cap['untested_surface'][0]}' (replanning; not done)"
     if cap["blocked_hypotheses"]:
@@ -92,18 +104,20 @@ def next_action(cap: dict, inflight: list[str], run_state: RunState) -> str:
     return "COMPLETED — no ready work, no untested surface, nothing disputed/blocked"
 
 
-def resume_brief(loop: HuntLoop) -> dict:
-    cap = loop.capsule()
+def resume_brief(loop: HuntLoop, *, cap: dict | None = None) -> dict:
+    cap = loop.capsule() if cap is None else cap
     inflight = inflight_actions(loop)
     # run_state: a genuine interrupt keeps us in RUNNING-with-work, but the brief
     # surfaces the interrupt explicitly via inflight + next_action.
     run_state = loop.run_state()
     lessons = sorted({e["lesson_id"] for e in loop.events if e.get("type") == "lesson"})
     # surfaces positively swept clean (probed, uniformly gated, no anomaly). Without
-    # this, resume can't tell "checked and clean" from "never checked" — live wms-r1
-    # friction #1. These are already excluded from untested_surface.
+    # this, resume can't tell "checked and clean" from "never checked". These are
+    # already excluded from untested_surface.
     swept = sorted({s for e in loop.events if e.get("type") == "surface_swept"
                     for s in e.get("surfaces", [])})
+    dp = dead_paths(loop)
+    dead_ids = frozenset(d["hyp_id"] for d in dp)
     from asg_research import project, brief as research_brief
     research = project(loop.events, loop.base_path, cap=cap)
     return {
@@ -115,18 +129,25 @@ def resume_brief(loop: HuntLoop) -> dict:
         "ready_hypotheses": cap["ready_hypotheses"],
         "blocked_hypotheses": cap["blocked_hypotheses"],
         "disputed": cap["disputed"],
+        "evidence_rejected": sorted(cap.get("evidence_rejected", {})),
         "invalidated_hypotheses": cap.get("invalidated_hypotheses", []),
         "untested_surface": cap["untested_surface"],
         "swept_clean": swept,                  # probed + gated, no anomaly (positive evidence)
-        "dead_paths": dead_paths(loop),        # tried + dead (scoped) + when to reopen — don't re-tread
+        "dead_paths": dp,                      # tried + dead (scoped) + when to reopen — don't re-tread
         "inflight_actions": inflight,          # interrupted — reconcile before re-run
         "lessons_available": lessons,
-        "next_action": next_action(cap, inflight, run_state),
+        "next_action": next_action(cap, inflight, run_state, dead_ids),
     }
 
 
 def _render(brief: dict) -> str:
-    dead_labels = [f"{d['hyp_id']}({d['cause']})" for d in brief["dead_paths"]]
+    # show `scope` in the label, not just in --json: a dead path rendered as a bare
+    # "X(refuted)" reads as engagement-wide even when it was measured on one
+    # sub-system only, which can steer a session away from a never-tested sibling.
+    dead_labels = [
+        f"{d['hyp_id']}({d['cause']}" + (f"@{d['scope']}" if d.get("scope") else ", scope=?") + ")"
+        for d in brief["dead_paths"]
+    ]
     lines = ["── hunt resume brief ──"]
     if brief["objective"]:
         lines.append(f"objective : {brief['objective']}")
@@ -138,6 +159,7 @@ def _render(brief: dict) -> str:
         f"run_state : {brief['run_state']}   (events: {brief['event_cursor']})",
         f"caps      : {brief['capabilities'] or '—'}",
         f"ready     : {brief['ready_hypotheses'] or '—'}",
+        f"proof repair: {brief['evidence_rejected'] or '—'}",
         f"blocked   : {brief['blocked_hypotheses'] or '—'}",
         f"disputed  : {brief['disputed'] or '—'}",
         f"untested  : {brief['untested_surface'] or '—'}",

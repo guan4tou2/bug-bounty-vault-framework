@@ -146,13 +146,16 @@ class HuntLoop:
                     outcome=r.outcome)
 
     def record_verdict(self, hyp_id: str, verdict: Verdict,
-                       evidence: Optional[str] = None,
+                       evidence: "str | dict | None" = None,
                        provides: Optional[list[str]] = None,
                        confidence: str = "static") -> None:
-        # I1: CONFIRMED must carry evidence to be trusted for a capability grant.
+        # I1: CONFIRMED must carry evidence that RESOLVES to be trusted for a grant.
+        # Normalise (and pin) the evidence at write time so changed bytes can't follow.
+        from evidence_refs import normalize_evidence
         self.append("verdict", hypothesis=hyp_id, status=verdict.value,
-                    evidence=evidence, provides=provides or [],
-                    confidence=confidence)
+                    evidence=normalize_evidence(evidence, self.base_path, events=self.events,
+                                                subject=hyp_id, provides=provides or []),
+                    provides=provides or [], confidence=confidence)
 
     def revoke_capability(self, cap: str, reason: str) -> None:
         self.append("revoke", cap=cap, reason=reason)
@@ -169,34 +172,61 @@ class HuntLoop:
 
     # --- materialization (I3/I4/I5: pure projection over the event log) ---
     def capsule(self) -> dict:
+        from evidence_refs import evidence_resolves
         surfaces: dict[str, bool] = {}          # node_id -> untested?
         hyp_requires: dict[str, list[str]] = {}
         confirmed: dict[str, list[str]] = {}    # hyp_id -> provides (CONFIRMED)
         confidence: dict[str, str] = {}
         refuted: set[str] = set()
         disputed: set[str] = set()
+        withdrawn: set[str] = set()
         capabilities: set[str] = set()
         revoked: set[str] = set()
+        evidence_rejected: dict[str, object] = {}  # CONFIRMED whose evidence did not resolve
 
         for e in self.events:
             k = e["type"]
             if k == "surface":
                 surfaces[e["name"]] = e.get("untested", True)
             elif k == "hypothesis":
-                hyp_requires.setdefault(e["id"], e.get("requires", []))
+                hyp_requires[e["id"]] = e.get("requires", [])   # latest event wins
+            elif k == "finding_state":
+                fid = str(e.get("finding_id", ""))
+                ids = (fid, f"finding:{fid}")
+                if e.get("to") == "withdrawn":
+                    for hid in ids:
+                        withdrawn.add(hid)
+                        confirmed.pop(hid, None)
+                        disputed.discard(hid)
+                        refuted.discard(hid)
+                        evidence_rejected.pop(hid, None)
+                else:
+                    withdrawn.difference_update(ids)
             elif k == "verdict":
                 hid, v = e["hypothesis"], e["status"]
+                hyp_requires.setdefault(hid, [])
                 confidence[hid] = e.get("confidence", "static")
+                if hid in withdrawn:
+                    continue
                 if v == Verdict.CONFIRMED.value:
                     if hid in refuted:                      # I3: conflict
                         disputed.add(hid); refuted.discard(hid)
                     elif hid in disputed:
                         pass
                     else:
-                        # I1: capability only from a CONFIRMED verdict WITH evidence.
-                        if e.get("evidence"):
+                        # I1: capability only from a CONFIRMED verdict whose evidence
+                        # RESOLVES to pinned proof. A rejection is recorded, not
+                        # silently dropped, so an unresolvable artifact reads as
+                        # "fix the evidence", not "the finding vanished".
+                        if evidence_resolves(e.get("evidence"), self.base_path, self.events,
+                                             subject=hid, provides=e.get("provides") or []):
                             confirmed[hid] = e.get("provides", [])
+                            evidence_rejected.pop(hid, None)
+                        else:
+                            confirmed.pop(hid, None)
+                            evidence_rejected[hid] = e.get("evidence")
                 elif v == Verdict.REFUTED.value:
+                    evidence_rejected.pop(hid, None)
                     if hid in confirmed:                    # I3: conflict
                         disputed.add(hid); confirmed.pop(hid, None)
                     else:
@@ -228,7 +258,7 @@ class HuntLoop:
         # I5: an action/hypothesis whose required cap was revoked is blocked.
         ready, blocked = [], []
         for hid, reqs in hyp_requires.items():
-            if hid in confirmed or hid in refuted or hid in disputed:
+            if hid in confirmed or hid in refuted or hid in disputed or hid in withdrawn:
                 continue
             missing = [r for r in reqs if r not in capabilities]
             revoked_dep = [r for r in reqs if r in revoked]
@@ -252,9 +282,11 @@ class HuntLoop:
             "static_only": static_only,
             "refuted": sorted(refuted),
             "disputed": sorted(disputed),          # I3
+            "withdrawn_hypotheses": sorted(withdrawn),
             "ready_hypotheses": sorted(ready),
             "blocked_hypotheses": sorted(blocked), # I5
             "untested_surface": sorted(untested_surface),
+            "evidence_rejected": dict(sorted(evidence_rejected.items())),
         }
         from asg_research import project
         research = project(self.events, self.base_path, cap=result)

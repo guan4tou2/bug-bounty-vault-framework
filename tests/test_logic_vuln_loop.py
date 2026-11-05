@@ -42,7 +42,7 @@ def test_real_violation_is_confirmed():
     lp = HuntLoop()
     r = research_step(
         lp, _hyp(), PROD,
-        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref="poc/a"),
+        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref={"kind": "observation", "text": "unpaid order fulfilled in test"}),
         run_control=lambda: Observation("fulfil_normal_path", ok=True, outcome="payment_required"),
     )
     assert r["verdict"] == Verdict.CONFIRMED
@@ -147,7 +147,7 @@ def test_confirmed_grants_declared_provides():
     lp = HuntLoop()
     r = research_step(
         lp, _hyp(provides=["P:read=config"]), PROD,
-        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref="poc/a"),
+        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref={"kind": "observation", "text": "unpaid order fulfilled in test"}),
         run_control=lambda: Observation("fulfil_normal_path", ok=True, outcome="payment_required"),
     )
     assert r["verdict"] == Verdict.CONFIRMED
@@ -161,7 +161,7 @@ def test_terminal_verdict_marks_surface_tested():
     lp.add_surface("ep1", untested=True)
     research_step(
         lp, _hyp(surface_id="ep1"), PROD,
-        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref="poc/a"),
+        run_test=lambda: Observation("fulfil_unpaid", ok=True, outcome="fulfilled", evidence_ref={"kind": "observation", "text": "unpaid order fulfilled in test"}),
         run_control=lambda: Observation("fulfil_normal_path", ok=True, outcome="payment_required"),
     )
     assert "ep1" not in lp.capsule()["untested_surface"]        # marked tested
@@ -209,7 +209,7 @@ def test_established_invariant_allows_confirmation():
                                     source="doc", confidence="stated"))
     r = research_step(
         lp, _hyp(hyp_id="H", invariant_ref="INV-unpaid", provides=["P:order=fulfilled"]), PROD,
-        run_test=lambda: Observation("t", ok=True, outcome="fulfilled", evidence_ref="poc/x"),
+        run_test=lambda: Observation("t", ok=True, outcome="fulfilled", evidence_ref={"kind": "observation", "text": "invariant violated in test"}),
         run_control=lambda: Observation("c", ok=True, outcome="payment_required"),
     )
     assert r["verdict"] == Verdict.CONFIRMED

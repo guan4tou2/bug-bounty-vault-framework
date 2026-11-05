@@ -14,7 +14,7 @@ from hunt_worker import (model_for_tier, render_worker_prompt,  # noqa: E402
                          parse_worker_result, make_dispatch)
 from logic_vuln_loop import Env, LogicHypothesis, judge_logic  # noqa: E402
 
-ENV = Env(version="2.6", role="unauth", host="wms-r1")
+ENV = Env(version="2.6", role="unauth", host="app-01")
 
 
 def _hyp(hid="h1", surface="/api/config"):
@@ -43,7 +43,7 @@ def test_prompt_is_bounded_and_scope_injected():
     p = render_worker_prompt(_task(failed=["h0: refuted (reopen: different role)"]))
     assert "curl_probe" in p and "GET/HEAD only" in p              # GET-only enforced
     assert "GET /api/config (no creds)" in p and "baseline" in p   # both actions
-    assert "version=2.6 role=unauth host=wms-r1" in p              # scope injected
+    assert "version=2.6 role=unauth host=app-01" in p              # scope injected
     assert "h0: refuted" in p                                      # failed path to avoid
     assert "patient PII" in p                                      # stop condition
     assert "```json" in p and "verdict is NOT yours" in p          # structured contract
@@ -87,7 +87,7 @@ def test_orchestrator_runs_with_real_dispatch_shape():
 
     def spawn(prompt, model):
         seen_models.append(model)
-        return {"test": {"ok": True, "outcome": "200", "evidence_ref": "e"},
+        return {"test": {"ok": True, "outcome": "200", "evidence_ref": {"kind": "observation", "text": "config read in test"}},
                 "control": {"ok": True, "outcome": "302", "evidence_ref": "c"}}
 
     rep = autodrive(
@@ -114,7 +114,7 @@ def test_orchestrator_tiers_up_for_chain_judgement():
 
     def spawn(prompt, model):
         seen.append(model)
-        return {"test": {"ok": True, "outcome": "200", "evidence_ref": "ev"},
+        return {"test": {"ok": True, "outcome": "200", "evidence_ref": {"kind": "observation", "text": "stacked refund+coupon in test"}},
                 "control": {"ok": True, "outcome": "409", "evidence_ref": "c"}}
 
     autodrive(loop, current_env=ENV, dispatch=make_dispatch(spawn),

@@ -64,7 +64,7 @@ def test_reconcile_takes_priority_over_ready_work():
 def test_dispute_and_untested_surface_next_steps():
     lp = HuntLoop()
     lp.add_hypothesis("d")
-    lp.record_verdict("d", Verdict.CONFIRMED, evidence="a")
+    lp.record_verdict("d", Verdict.CONFIRMED, evidence={"kind": "observation", "text": "reproduced in test"})
     lp.record_verdict("d", Verdict.REFUTED, evidence="b")   # -> disputed
     assert resume_brief(lp)["next_action"].startswith("RESOLVE dispute on 'd'")
 
