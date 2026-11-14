@@ -110,7 +110,22 @@ XSS         : 3 (0 on target, 3 on stack)
 
 The top 3 classes = where to bias hunting time.
 
-## Step 5 — Output briefing
+## Step 5.5 — Deep-research loop (when the target is high-value or Step 2-4 came back thin)
+
+> Borrowed from DeerFlow-style deep research: instead of one pass of searches, run an iterative plan → fan-out → critique → fill-gap loop, entirely inside this agent (no MCP server, no external research framework). Budget: max 3 iterations — diminishing returns past that.
+
+Run this loop when ANY of: (a) target is a high-value program (top payouts / big vendor), (b) Steps 2-4 returned < 5 usable disclosures, (c) the operator asked for "deep research".
+
+One iteration =
+
+1. **Plan.** From what Steps 2-4 found (and failed to find), write 3-5 open questions a hunter would need answered. Examples: "Does vendor X's appliance line N still ship the vulnerable CGI from CVE-...?", "Are there any 2025+ writeups on this OAuth stack?", "What did the vendor patch LAST time — is the variant still alive?"
+2. **Fan out.** Dispatch those questions as parallel WebSearch/WebFetch passes, using bb-multi-search's source-category table (CVE/Advisory, Writeup, Research, H1, GitHub, Exploit-DB) — pick the 4-6 categories that fit each question.
+3. **Critique.** Reread the accumulated evidence and ask: which open questions are now answered, which answers contradict each other, and what NEW question did the answers surface? Contradictions must be resolved by a targeted follow-up search, not by picking the more exciting claim (anti-exaggeration applies: ambiguity stays labeled as unknown).
+4. **Fill-gap or stop.** Next iteration plans only the unanswered/surfaced questions. Stop when 3 iterations are done, or a full iteration answers nothing new.
+
+Loop output merges into Step 5's briefing: new disclosures land in the tables, resolved questions become "Why re-test" evidence, permanently unanswered questions go to "Already-Known Dead Ends" only if vendor-patched — otherwise a `Open questions (unresolved)` footnote.
+
+## Step 6 — Output briefing
 
 Return this exact structure (no preamble, no closing chatter):
 
@@ -170,6 +185,7 @@ Next-step suggestions for operator
 ## Rules
 
 - **READ-ONLY.** Output is a markdown briefing returned as your final message. Do not write files, do not edit workspace, do not call `bash` to mutate anything.
+- **Deep-research loop discipline.** In Step 5.5, each iteration's questions come from evidence, not speculation; contradictions get targeted follow-ups, and an iteration that answers nothing new ends the loop (stop-loss, don't burn the token budget on a 4th pass).
 - **Cite every claim.** Every disclosure entry must have a URL in the Sources section. No fabricated H1 IDs, no hallucinated CVEs.
 - **If WebSearch returns nothing**, say so explicitly — never invent disclosures to fill the table.
 - **Anti-exaggeration.** "Prior art on Laravel Ignition exists" does not equal "target has Ignition exposed". Frame everything as re-testing hypotheses, never as confirmed weakness.
