@@ -413,7 +413,7 @@ def frontier(loop):
     from credentials import project as credentials, card as credential_card
     for row in credentials(loop.events, loop.base_path):
         if row['state'] != 'valid':
-            queue = ('human' if row['kind'] == 'password' else 'ready'
+            queue = ('waiting' if credential_card(row)['missing_context'] else 'human' if row['kind'] == 'password' else 'ready'
                      if row['state'] == 'unvalidated' and row['attempts'] < row['validation_limit'] else 'waiting')
             items.append({'kind': 'credential-validation', 'ref': row['credential_ref'], 'queue': queue,
                           'priority': 1, 'action': 'validate_credential', 'work_card': credential_card(row)})

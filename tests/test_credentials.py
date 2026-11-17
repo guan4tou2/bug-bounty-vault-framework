@@ -181,7 +181,9 @@ def test_model_uses_opaque_requirements_and_never_reads_credential_source(tmp_pa
     loop, store, ref = setup(tmp_path)
     loop.append('model_processing_authorization', allowed_locations=['fixture'], policy_ref='owned:fixture')
     required = ref + ':permission:read:own'
-    source = credentials.project(loop.events, loop.base_path)[0]['evidence']
+    source = dict(credentials.project(loop.events, loop.base_path)[0]['evidence'])
+    copied = tmp_path / 'copied-source.json'; copied.write_bytes(Path(source['path']).read_bytes())
+    source['path'] = str(copied)
     wc.propose_exploration(loop, question='Investigate after a scoped capability is acquired', reason='bounded fixture gap',
                            evidence=source, requires=[required])
     card = next(i['work_card'] for i in wc.frontier(loop) if i['kind'] == 'exploration-review')
@@ -195,3 +197,56 @@ def test_model_uses_opaque_requirements_and_never_reads_credential_source(tmp_pa
     wd._analyze(loop, card, {'model': 'fixture', 'processing_location': 'fixture', 'allowed_locations': ['fixture']}, model, lambda _: None)
     assert wc.adopted_hypothesis(loop, 'followup').requires == [required]
     assert 'followup' in loop.capsule()['blocked_hypotheses']
+
+
+def test_new_reference_cannot_reset_same_account_attempt_budget(tmp_path):
+    loop, store, ref = setup(tmp_path)
+    assert not validate(loop, store, ref, tmp_path, role='wrong')
+    assert not validate(loop, store, ref, tmp_path, role='wrong')
+    row = credentials.project(loop.events, loop.base_path)[0]
+    other = credentials.discover(loop, value='different-synthetic-fixture-value', context=CONTEXT, kind='bearer',
+        evidence=row['evidence'], expires_at=row['expires_at'], store=store)
+    with pytest.raises(ValueError, match='account validation budget'):
+        validate(loop, store, other, tmp_path)
+    assert sum(e['type'] == 'action_started' for e in loop.events) == 2
+
+
+def test_unknown_credential_identity_is_not_a_validation_target(tmp_path):
+    loop, store, ref = setup(tmp_path)
+    with pytest.raises(ValueError, match='unknown'):
+        credentials.select(loop, ref, {**CONTEXT, 'role': 'unknown'}, validation=True)
+
+
+def test_unknown_owner_is_saved_then_bound_before_any_validation(tmp_path):
+    loop, store, ref = setup(tmp_path)
+    source = credentials.project(loop.events, loop.base_path)[0]['evidence']
+    pending = credentials.discover(loop, value='unattributed-synthetic-fixture-value',
+        context={**CONTEXT, 'service': 'unknown', 'account_ref': 'unknown', 'role': 'unknown'}, kind='bearer',
+        evidence=source, expires_at=(datetime.now(UTC) + timedelta(hours=1)).isoformat(), store=store)
+    assert store.get(pending) and not loop.capsule()['capabilities']
+    with pytest.raises(ValueError):
+        credentials.select(loop, pending, CONTEXT, validation=True)
+    credentials.bind_context(loop, pending, context=CONTEXT, evidence=source, reason='owned fixture issuer and identity context')
+    assert credentials.select(loop, pending, CONTEXT, validation=True)['attempts'] == 0
+    with pytest.raises(ValueError, match='redirect'):
+        credentials.bind_context(loop, pending, context={**CONTEXT, 'tenant': 'other'}, evidence=source, reason='incorrect new tenant')
+
+
+def test_account_stop_survives_token_expiry_and_can_be_cleared_without_reviving_token(tmp_path, monkeypatch):
+    loop, store, ref = setup(tmp_path)
+    assert not validate(loop, store, ref, tmp_path, status='locked')
+    future = datetime.now(UTC) + timedelta(hours=2)
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return future
+    monkeypatch.setattr(credentials, 'datetime', Clock)
+    row = credentials.project(loop.events, loop.base_path)[0]
+    other = credentials.discover(loop, value='new-isolated-synthetic-value', context=CONTEXT, kind='bearer',
+        evidence=row['evidence'], expires_at=(future + timedelta(hours=1)).isoformat(), store=store)
+    with pytest.raises(ValueError, match='lock signal'):
+        credentials.select(loop, other, CONTEXT, validation=True)
+    proof = tmp_path / 'external-unlock'; proof.write_text('fresh fixture account unlock evidence')
+    credentials.recover(loop, ref, evidence=fixture.artifact(proof), changed_condition='external account unlock')
+    assert credentials.select(loop, other, CONTEXT, validation=True)['state'] == 'unvalidated'
+    assert next(r for r in credentials.project(loop.events, loop.base_path) if r['credential_ref'] == ref)['state'] == 'expired'

@@ -4,6 +4,8 @@
 
 ### Scoped planning, credential resources and supplemental research — 2026-11-17
 
+- Hardened applicability boundaries: unknown credential ownership stays pending until evidence-backed binding; unknown product versions can be researched but cannot support method adoption. Added account-wide rolling validation limits, persistent lock signals across token expiry, and credential-source copy/hash withholding before model processing.
+
 - Added cycle-safe impact traversal over recorded evidence, EFSM/delivery/research links, credential use and explicit revision-pinned dependencies. Only affected work/delivery is paused or marked stale; history and unrelated records remain readable.
 - Added evidence-gap work tied to existing goal criteria. A checked discriminating-test proposal enters exploration review; original criterion acceptance alone resolves the gap.
 - Unified preview and dispatch admission, added exact declared-comparison deduplication across IDs, and exposed observed model/tool/gap metrics. Missing provider token/cost telemetry remains unknown.

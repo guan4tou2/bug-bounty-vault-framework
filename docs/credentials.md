@@ -24,7 +24,11 @@ explicit extraction mapping and ownership context are known. This is not automat
 detection of every credential format or inference of an unknown credential's owner.
 
 `context` names exactly `service` (explicit origin), `account_ref`, `role`, `tenant`
-and `scope_ref`. Wildcards and cross-service/account/role/tenant/scope reuse are
+and `scope_ref`. Discovery may preserve explicit `unknown` ownership fields in a
+pending resource; validation/reuse requires known matching context. The `bind` CLI
+completes missing fields from current evidence before any probe, preserving history
+and refusing changes to already-known service/account/role/tenant/scope fields.
+Wildcards and cross-service/account/role/tenant/scope reuse are
 rejected. `expires_at` is an explicit usable-until bound, not an inferred issuer TTL.
 Repeated discovery of the same value/context reuses its reference/history.
 
@@ -60,7 +64,9 @@ secret values; this is not universal DLP or process-memory isolation. Child envi
 access follows the host's normal process security. Original source artifacts remain
 private evidence, separate from general logs/prompts and public exports.
 
-Two validation attempts per reference are retained across recovery. Lock/rate-limit
+Two validation attempts per reference are retained across recovery, with an additional
+limit of two attempts per service/account in a 15-minute window across references.
+Unknown ownership/applicability is rejected. Lock/rate-limit
 signals stop the account's further validations; failed tools become
 `validation_blocked`, not proof that a credential is invalid. Structured authentication
 failure during reuse withdraws permissions. Expiry/revocation/stale validation evidence
@@ -73,7 +79,9 @@ python3 automation/credentials.py TARGET recover --input PRIVATE_RECOVERY.json
 
 Recovery supplies `reference`, fresh `evidence` and `changed_condition`; it requires
 remaining original budget and reconciled execution. Revoked/expired references are
-not revived. `password` discovery is supported as a protected pending resource, but
+not revived. Fresh account-unlock evidence may clear an account stop even after its
+old token expires, without reviving that token or resetting attempt counters.
+`password` discovery is supported as a protected pending resource, but
 generic password login/refresh, arbitrary service adapters, and remote secret transport
 are not implemented. The former `credential_reuse_tester.sh` is disabled: no default
 password fallback or plaintext account dump runs through that entry.

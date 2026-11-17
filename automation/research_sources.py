@@ -14,7 +14,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from blocked_research import _proof, _required
-from evidence_applicability import _time, latest_context
+from evidence_applicability import _time, _known, latest_context
 from evidence_refs import artifact_hash, evidence_resolves
 
 
@@ -192,6 +192,8 @@ def apply(loop, work_card, operation, payload):
         raise ValueError('existing read sources must support the decision')
     proposal = None
     if payload['decision'] == 'adopt':
+        if not _known(row['profile']['version']):
+            raise ValueError('known applicable version required before method adoption')
         applicable = next((s for s in selected if s['version'] == row['profile']['version']), None)
         if not applicable:
             raise ValueError('applicable version evidence required before method adoption')

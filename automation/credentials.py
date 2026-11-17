@@ -8,12 +8,12 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from blocked_research import _proof, _required
-from evidence_applicability import _time, latest_context
+from evidence_applicability import _time, _known, latest_context
 from evidence_refs import evidence_resolves
 
 SERVICE = 'vault.research.credentials.v1'
@@ -47,11 +47,17 @@ class KeyringStore:
             raise ValueError('protected secret retrieval failed') from None
 
 
-def _context(context):
+def _context(context, *, allow_unknown=False):
     if not isinstance(context, dict) or set(context) != set(MATCH):
         raise ValueError('exact service/account/role/tenant/scope references required')
     _required(*(context[k] for k in MATCH))
+    if not allow_unknown and any(not _known(context[k]) for k in MATCH):
+        raise ValueError('unknown credential ownership/applicability cannot be validated')
     url = urlsplit(context['service'])
+    if allow_unknown and not _known(context['service']):
+        if '*' in json.dumps(context):
+            raise ValueError('wildcard credential reuse is prohibited')
+        return dict(context)
     if url.scheme not in {'http', 'https'} or not url.hostname or url.username or url.password or url.query or url.fragment or url.path not in {'', '/'}:
         raise ValueError('credential service must be an explicit origin without userinfo or wildcards')
     if '*' in json.dumps(context):
@@ -61,7 +67,7 @@ def _context(context):
 
 def discover(loop, *, value, context, kind, evidence, expires_at, store=None):
     """Explicit structured discovery ingress; value is never appended or hashed alone."""
-    context = _context(context)
+    context = _context(context, allow_unknown=True)
     if kind not in {'bearer', 'api_key', 'password', 'session'} or not isinstance(value, str) or not 1 <= len(value.encode()) <= 8192 or '\x00' in value:
         raise ValueError('bounded supported credential value required')
     if _time(expires_at) <= datetime.now(UTC):
@@ -99,16 +105,21 @@ def project(events, base=None, now=None):
     for event in events:
         reference = event.get('credential_ref')
         if event['type'] == 'credential_discovered':
-            rows[reference] = {**event, 'kind': event['credential_kind'], 'state': 'unvalidated', 'attempts': 0, 'permissions': []}
+            rows[reference] = {**event, 'kind': event['credential_kind'], 'state': 'unvalidated', 'attempts': 0, 'permissions': [], 'account_stop': False}
         elif reference in rows:
             if event['type'] == 'credential_validation_started':
                 rows[reference].update(state='validating', attempts=rows[reference]['attempts'] + 1)
             elif event['type'] == 'credential_validated':
                 rows[reference].update(state='valid', permissions=event['permissions'], validation_evidence=event['evidence'])
             elif event['type'] == 'credential_status':
-                rows[reference].update(state=event['state'], permissions=[])
+                rows[reference].update(state=event['state'], permissions=[],
+                                       account_stop=event['state'] in {'rate_limited', 'locked'} or rows[reference]['account_stop'])
             elif event['type'] == 'credential_recovered':
-                rows[reference].update(state='unvalidated', permissions=[], evidence=event['evidence'])
+                rows[reference].update(state='unvalidated', permissions=[], evidence=event['evidence'], account_stop=False)
+            elif event['type'] == 'credential_account_recovered':
+                rows[reference]['account_stop'] = False
+            elif event['type'] == 'credential_context_bound':
+                rows[reference].update(context=event['context'], evidence=event['evidence'], state='unvalidated', permissions=[])
             elif event['type'] == 'credential_validation_failed':
                 rows[reference].update(state='validation_blocked', permissions=[])
     instant = _time(now) if now else datetime.now(UTC)
@@ -129,10 +140,30 @@ def select(loop, reference, context, *, validation=False):
     allowed = {'unvalidated', 'invalid'} if validation else {'valid'}
     if row['state'] not in allowed or (validation and row['attempts'] >= row['validation_limit']):
         raise ValueError('credential is not eligible for this operation or validation budget is exhausted')
-    if validation and any(r['context']['service'] == context['service'] and r['context']['account_ref'] == context['account_ref']
-                          and r['state'] in {'rate_limited', 'locked'} for r in project(loop.events, loop.base_path)):
-        raise ValueError('account validation stopped by rate-limit or lock signal')
+    if validation:
+        account = [r for r in project(loop.events, loop.base_path) if
+                   r['context']['service'] == context['service'] and r['context']['account_ref'] == context['account_ref']]
+        if any(r['account_stop'] for r in account):
+            raise ValueError('account validation stopped by rate-limit or lock signal')
+        refs = {r['credential_ref'] for r in account}
+        cutoff = datetime.now(UTC) - timedelta(minutes=15)
+        attempts = [e for e in loop.events if e['type'] == 'credential_validation_started' and e['credential_ref'] in refs
+                    and (not e.get('started_at') or _time(e['started_at']) >= cutoff)]
+        if len(attempts) >= 2:
+            raise ValueError('account validation budget exhausted; new references cannot reset it')
     return row
+
+
+def bind_context(loop, reference, *, context, evidence, reason):
+    context = _context(context)
+    _required(reason)
+    row = next((r for r in project(loop.events, loop.base_path) if r['credential_ref'] == reference), None)
+    if not row or row['state'] != 'unvalidated' or row['attempts']:
+        raise ValueError('only an untested credential can complete missing ownership context')
+    if any(_known(row['context'][k]) and row['context'][k] != context[k] for k in MATCH):
+        raise ValueError('binding cannot redirect a known credential to another service/account/role/tenant/scope')
+    proof = _proof(loop, evidence)
+    loop.append('credential_context_bound', credential_ref=reference, context=context, evidence=proof, reason=reason)
 
 
 def status(loop, reference, state, *, reason):
@@ -153,6 +184,16 @@ def status(loop, reference, state, *, reason):
 def recover(loop, reference, *, evidence, changed_condition):
     row = next((r for r in project(loop.events, loop.base_path) if r['credential_ref'] == reference), None)
     _required(changed_condition)
+    if row and row['account_stop'] and row['state'] in {'expired', 'revoked'}:
+        from command_lifecycle import unresolved_actions
+        if any(a.startswith(reference + ':') for a in unresolved_actions(loop.events)):
+            raise ValueError('reconcile account validation execution before recovery')
+        proof = _proof(loop, evidence)
+        if proof == row['evidence'] or proof == row.get('validation_evidence'):
+            raise ValueError('new account recovery evidence required')
+        loop.append('credential_account_recovered', credential_ref=reference, evidence=proof, changed_condition=changed_condition)
+        loop.append('reassessment_trigger', reason='conditions_changed', scope='target')
+        return
     if not row or row['state'] not in {'locked', 'rate_limited', 'invalid', 'stale', 'validation_blocked', 'validating'} or row['attempts'] >= row['validation_limit']:
         raise ValueError('recoverable credential and remaining original validation budget required')
     from command_lifecycle import unresolved_actions
@@ -176,7 +217,7 @@ def validate(loop, ledger, reference, context, *, hyp_id, argv, output, permissi
     secret = (store or KeyringStore()).get(reference)
     if not secret:
         raise ValueError('credential value unavailable')
-    loop.append('credential_validation_started', credential_ref=reference)
+    loop.append('credential_validation_started', credential_ref=reference, started_at=datetime.now(UTC).isoformat())
     loop.save(ledger)
     from hunt_integration import execute_command
     action_id = reference + ':validate:' + str(row['attempts'] + 1)
@@ -255,10 +296,12 @@ def inject(loop, declaration, argv, *, store=None):
 
 
 def card(row):
+    missing = [key for key in MATCH if not _known(row['context'][key])]
     return {'schema': 1, 'kind': 'credential-validation', 'ref': row['credential_ref'],
             'credential_ref': row['credential_ref'], 'question': 'Verify credential identity and explicit permissions',
             'goal': 'Establish a scoped resource without creating a vulnerability verdict', 'context': row['context'],
-            'next_action': 'validate_credential', 'facts': [], 'requires': [],
+            'next_action': 'identify_credential_context' if missing else 'validate_credential',
+            'missing_context': missing, 'facts': [], 'requires': [],
             'success': 'Saved identity and permission checks match the declared service/account/role/tenant',
             'stop': ['expiry', 'two validation attempts', 'rate limit or locked account', 'original authorization gates'],
             'budget_remaining': row['validation_limit'] - row['attempts'],
@@ -275,7 +318,7 @@ def main():
     parser.add_argument('target')
     sub = parser.add_subparsers(dest='command', required=True)
     sub.add_parser('view')
-    for name in ('capture', 'validate', 'discover', 'recover'):
+    for name in ('capture', 'validate', 'discover', 'recover', 'bind'):
         command = sub.add_parser(name); command.add_argument('--input', type=Path, required=True)
     revoke = sub.add_parser('status'); revoke.add_argument('credential_ref')
     revoke.add_argument('state', choices=['revoked', 'invalid', 'rate_limited', 'locked']); revoke.add_argument('--reason', required=True)
@@ -299,6 +342,8 @@ def main():
                     capture(loop, **data)
                 elif args.command == 'recover':
                     recover(loop, **data)
+                elif args.command == 'bind':
+                    bind_context(loop, **data)
                 else:
                     validate(loop, ledger, **data)
             guarded_save(loop, ledger, token)

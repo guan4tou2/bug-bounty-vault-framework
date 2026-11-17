@@ -390,7 +390,9 @@ def _analyze(loop, card, worker, spawn, received, usage=None):
             proof = blocked._proof(loop, ref)
             ref = f'evidence:{len(catalog)}'
             catalog[ref] = proof
-            sensitive = any(e['type'] == 'credential_discovered' and e['evidence'].get('path') == proof['path'] for e in loop.events)
+            sensitive = any(e['type'] == 'credential_discovered' and
+                            (e['evidence'].get('path') == proof['path'] or e['evidence'].get('sha256') == proof['sha256'])
+                            for e in loop.events)
             if sensitive:
                 snippet = '[credential source withheld; original remains in controlled storage]'
             else:

@@ -12,9 +12,9 @@ import work_dispatch as wd
 from tests import test_blocked_research as fixture
 
 
-def setup(tmp_path, *, version='1.0', retrieval_kind='full_source', empty=False):
+def setup(tmp_path, *, version='1.0', profile_version='1.0', retrieval_kind='full_source', empty=False):
     loop, proof = fixture.setup(tmp_path)
-    sources.profile(loop, public_terms=['ExampleProduct', 'access control'], version='1.0', allowed_domains=['docs.example.org'])
+    sources.profile(loop, public_terms=['ExampleProduct', 'access control'], version=profile_version, allowed_domains=['docs.example.org'])
     rid = sources.request(loop, question='Which method distinguishes private customer conditions?',
                           decision='select the next comparison', excluded=['same condition already failed'], evidence=proof)
     page = tmp_path / 'source.txt'; page.write_text('Official fixture: sharing can be cached; use a new server request. Applies to release ' + version)
@@ -85,3 +85,12 @@ def test_query_rejects_addresses_credentials_and_profile_change_stales_work(tmp_
             sources.profile(loop, public_terms=[term], version='1.0', allowed_domains=['docs.example.org'])
     sources.profile(loop, public_terms=['ExampleProduct'], version='2.0', allowed_domains=['docs.example.org'])
     assert next(r for r in sources.project(loop) if r['request_id'] == rid)['stale']
+
+
+def test_unknown_version_can_be_researched_but_cannot_support_adoption(tmp_path):
+    loop, rid, config = setup(tmp_path, version='unknown', profile_version='unknown')
+    assert wd.run_ready(loop, tmp_path / 'ledger', config, persist=lambda lp: lp.save(tmp_path / 'ledger'))['state'] == 'completed'
+    row = next(r for r in sources.project(loop) if r['request_id'] == rid)
+    with pytest.raises(ValueError, match='known applicable version'):
+        wc.apply(loop, sources.card(row), 'review', {'decision': 'adopt', 'source_ids': ['official'],
+                  'reason': 'unknown is not a version confirmation', 'question': 'test after identifying version', 'requires': []})

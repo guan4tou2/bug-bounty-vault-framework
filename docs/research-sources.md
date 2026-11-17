@@ -46,7 +46,8 @@ decision. Adoption requires matching declared version evidence and creates an ex
 proposal with prerequisites; normal hypothesis adoption, scope and actual testing still
 follow. The source remains `source-claimed`, never an observed target result.
 
-Question/profile/evidence signatures reuse prior research until conditions or the
+Unknown product versions may be researched, but cannot establish method applicability
+or support adoption until the version is known. Question/profile/evidence signatures reuse prior research until conditions or the
 configured 1–168 hour refresh horizon change. Stale/altered cards are rejected. Empty
 search results retain an `insufficient` gap and do not refute a hypothesis. Changed
 source artifacts make dependent exploration proposals stale, preserving original
