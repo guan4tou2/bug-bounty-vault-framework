@@ -32,6 +32,7 @@ def execute_alternative(
     loop, ledger, card, *, comparison_hyp_id, test_argv, control_argv, output_dir, scope_ref, interpret, timeout=30,
     producer_id='unattributed-worker',
     on_result=None,
+    credentials=None,
 ):
     """Controlled executor seam. Caller holds the canonical writer lock/authorization.
 
@@ -116,6 +117,7 @@ def execute_alternative(
                 paths[branch],
                 timeout=timeout,
                 scope_ref=scope_ref,
+                credential=(credentials or {}).get(branch),
             )
         except PermissionError:
             loop.append(
@@ -274,6 +276,12 @@ def attach(items, events, base_path=None):
 
 def apply(loop, card, operation, payload):
     """Caller owns canonical lock/save; result never bypasses a tool gate or sets a verdict."""
+    if card.get('kind') == 'research-source':
+        from research_sources import apply as source_review
+        return source_review(loop, card, operation, payload)
+    if card.get('kind') == 'evidence-gap':
+        from evidence_gaps import apply as apply_gap
+        return apply_gap(loop, card, operation, payload)
     if card.get('kind') == 'reassessment':
         if operation != 'decide':
             raise ValueError('reassessment requires checked decisions')
@@ -394,6 +402,27 @@ def adopted_hypothesis(loop, hyp_id):
 
 def frontier(loop):
     items = []
+    from research_sources import project as research_sources, card as source_card
+    for row in research_sources(loop):
+        if row['superseded']:
+            continue
+        if row['state'] in {'retrieve', 'review', 'insufficient'} or row['stale'] or row['expired']:
+            items.append({'kind': 'research-source', 'ref': row['request_id'], 'priority': 1,
+                          'action': source_card(row)['next_action'], 'work_card': source_card(row),
+                          'queue': 'waiting' if row['stale'] or row['expired'] or row['state'] == 'insufficient' else 'ready'})
+    from credentials import project as credentials, card as credential_card
+    for row in credentials(loop.events, loop.base_path):
+        if row['state'] != 'valid':
+            queue = ('human' if row['kind'] == 'password' else 'ready'
+                     if row['state'] == 'unvalidated' and row['attempts'] < row['validation_limit'] else 'waiting')
+            items.append({'kind': 'credential-validation', 'ref': row['credential_ref'], 'queue': queue,
+                          'priority': 1, 'action': 'validate_credential', 'work_card': credential_card(row)})
+    from evidence_gaps import project as gaps, card as gap_card
+    for gap in gaps(loop):
+        if gap['state'] != 'resolved':
+            items.append({'kind': 'evidence-gap', 'ref': gap['gap_id'], 'action': 'design_gap_test',
+                          'queue': 'ready' if gap['state'] == 'ready' else 'human' if gap['state'] == 'rejected' else 'waiting',
+                          'priority': 1, 'work_card': gap_card(gap)})
     for row in blocked.project(loop.events, loop.base_path):
         if obstruction_queue(row) != 'completed':
             items.append({'kind': 'blocked-research', 'ref': row['obstruction_id'], 'action': row['next'],

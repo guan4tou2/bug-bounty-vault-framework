@@ -532,9 +532,14 @@ def autodrive(
         ready_ids = rank(cap["ready_hypotheses"], cap, loop) if rank else cap["ready_hypotheses"]
         from reassessment import priorities as reassessment_priorities
         suggested = reassessment_priorities(loop)
+        from research_dependencies import project as change_impact
+        impacted = {r['ref'] for r in change_impact(loop)['affected']}
         ready_ids = sorted(ready_ids, key=lambda hid: -suggested.get('hypothesis:' + hid, 0))
         hyp: Optional[LogicHypothesis] = None
         for hid in ready_ids:
+            if 'hypothesis:' + hid in impacted:
+                rep.trace.append((hid, 'blocked', 'recorded dependency requires revalidation'))
+                continue
             from blocked_research import project as blocked_project
             if any(r['hyp_id'] == hid and (r['state'] != 'completed' or r['stale'])
                    for r in blocked_project(loop.events, loop.base_path)):
@@ -686,6 +691,10 @@ def autodrive(
             rep.handoff_reason = 'research intent prerequisites pending: ' + '; '.join(
                 f"{n['ref']} [{n['effective_state']}] missing={n.get('missing', [])}" for n in bound
                 if n['effective_state'] != 'open' or n.get('missing'))
+            break
+        if 'hypothesis:' + hyp.hyp_id in {r['ref'] for r in change_impact(loop)['affected']}:
+            rep.handoff_reason = 'recorded dependency requires revalidation before dispatch'
+            rep.trace.append((hyp.hyp_id, 'blocked', rep.handoff_reason))
             break
         if hyp and not set(hyp.requires).issubset(cap['capabilities']):
             loop.add_hypothesis(hyp.hyp_id, requires=list(hyp.requires))

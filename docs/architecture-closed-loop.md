@@ -117,6 +117,13 @@ the browser Lab is a synthetic fixture, not a universal GUI executor. Full exter
 systems are not deployed. See [work cards](blocked-research.md),
 [flow models](flow-model.md) and [pipeline limits](scan-pipeline.md).
 
+Recorded dependency impact now scopes revalidation; evidence gaps attach discriminating
+questions to existing goal criteria. Read-only preview shares dispatch admission checks.
+Credential references and expiring proven permissions remain separate from Finding
+verification, while supplemental source research yields method proposals, not target
+observations. See [planning](research-planning.md), [credentials](credentials.md) and
+[source research](research-sources.md) for configured adapters and acceptance limits.
+
 ### Explore-first remains the front gate
 
 Ring 3 does **not** start at pattern-matching. It starts at a vuln-agnostic surface map. This is the single most-skipped, highest-value discipline in the loop.

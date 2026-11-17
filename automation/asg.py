@@ -1087,6 +1087,11 @@ def write_snapshot(target: str | Path) -> Path:
         "blocked_research": blocked_project(events, target_dir(target)),
         'work_dispatch': __import__('work_dispatch').jobs(events),
         'reassessments': __import__('reassessment').view(s["state"]["loop"]),
+        'dependency_impact': __import__('research_dependencies').project(s['state']['loop']),
+        'evidence_gaps': __import__('evidence_gaps').project(s['state']['loop']),
+        'research_metrics': __import__('research_progress').metrics(s['state']['loop']),
+        'credentials': __import__('credentials').project(events, s['state']['loop'].base_path),
+        'research_sources': __import__('research_sources').project(s['state']['loop']),
         "candidate_analysis": [{k: j.get(k) for k in
             ("job_id", "candidate_id", "status", "stale", "evidence_problems", "failure_class", "recovery")}
             for j in project_analysis(events, target_dir(target))],

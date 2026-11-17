@@ -12,7 +12,8 @@ tool/bbflow wiring is a separate layer that calls `record_execution`.
 
 Design invariants it ENFORCES (the point of building the spine bottom-up):
   I1  execution success != vulnerability confirmed != capability acquired.
-      A capability is granted ONLY by an explicit CONFIRMED verdict carrying
+      Credential permissions are separately evidence-backed, expiring resources.
+      Vulnerability-derived capability is granted ONLY by an explicit CONFIRMED verdict carrying
       evidence — never auto-derived from exit_code == 0.
   I2  stop != (pending == 0). No ready actions but untested surface -> REPLANNING.
       Only explicit completion / blocked / needs_input / waiting ends active work.
@@ -241,13 +242,16 @@ class HuntLoop:
         # and a revoke (I5) removes it too.
         # Least fixed point: downstream confirmations cannot bootstrap themselves
         # or survive loss of their required capabilities. Independent support stays.
+        from credentials import capabilities as credential_capabilities
+        credential_caps = credential_capabilities(self.events, self.base_path)
+        capabilities = set(credential_caps) - revoked
         supported = {}
         while True:
             newly_supported = {
                 h: cs for h, cs in confirmed.items()
                 if all(r in capabilities for r in hyp_requires.get(h, []))
             }
-            next_caps = {c for cs in newly_supported.values() for c in cs} - revoked
+            next_caps = ({c for cs in newly_supported.values() for c in cs} | credential_caps) - revoked
             if next_caps == capabilities:
                 supported = newly_supported
                 break

@@ -85,6 +85,16 @@ def inventory(loop, scope='target'):
                             for e in loop.events if e['type'] == 'dead_end'
                             and (subjects is None or e['hyp_id'] in subjects)],
              'limits': 'Traversal is not security coverage; summaries do not replace original artifacts.'}
+    from research_dependencies import project as change_impact
+    value['affected_dependencies'] = [r for r in change_impact(loop)['affected']
+        if subjects is None or r['ref'] in {'hypothesis:' + h for h in subjects}]
+    if subjects is None:
+        from evidence_gaps import project as gaps
+        value['evidence_gaps'] = [{k: g[k] for k in ('gap_id', 'goal', 'criterion', 'state', 'question', 'stale')}
+                                  for g in gaps(loop)]
+        from credentials import project as credential_rows
+        value['credentials'] = [{k: r[k] for k in ('credential_ref', 'context', 'kind', 'state', 'expires_at', 'permissions')}
+                                for r in credential_rows(loop.events, loop.base_path)]
     return value
 
 
@@ -144,6 +154,10 @@ def collect(loop, *, batch_size=4):
         elif kind == 'delivery_record' and e.get('record_kind') in {'report', 'trace'}:
             triggers.add(('pre_delivery', 'target'))
     cap = loop.capsule()
+    from credentials import project as credential_rows
+    if any(r['state'] in {'expired', 'revoked', 'invalid', 'rate_limited', 'locked', 'stale'}
+           for r in credential_rows(loop.events, loop.base_path)):
+        triggers.add(('conditions_changed', 'target'))
     for hid in cap['disputed']:
         triggers.add(('evidence_conflict', 'hypothesis:' + hid))
     if any(not p['integrity'] or p['applicability'] != 'applicable'

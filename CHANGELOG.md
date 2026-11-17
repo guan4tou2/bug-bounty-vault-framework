@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Scoped planning, credential resources and supplemental research — 2026-11-17
+
+- Added cycle-safe impact traversal over recorded evidence, EFSM/delivery/research links, credential use and explicit revision-pinned dependencies. Only affected work/delivery is paused or marked stale; history and unrelated records remain readable.
+- Added evidence-gap work tied to existing goal criteria. A checked discriminating-test proposal enters exploration review; original criterion acceptance alone resolves the gap.
+- Unified preview and dispatch admission, added exact declared-comparison deduplication across IDs, and exposed observed model/tool/gap metrics. Missing provider token/cost telemetry remains unknown.
+- Added protected credential references with OS keyring support, opt-in structured JSON ingress, identity/permission validation, controlled injection, expiry/revocation/lock handling and evidence-backed bounded recovery. Credential permissions never promote Findings.
+- Added supplemental research work: local KB lookup, explicit public-only queries, configured source-reading providers, pinned primary-source receipts, version/applicability review and test proposals. Snippets and empty search results cannot establish target conclusions.
+- Updated README diagrams and operator contracts. OS keyring, real search providers, generic password login and representative research-quality/total-token effects remain outside the claimed fixture acceptance.
+
 ### Research continuation and reassessment — 2026-11-17
 
 - Fixed successful obstruction comparisons getting stuck before independent verification. Separate fresh TEST/CONTROL evidence now yields supported, not-supported, or needs-evidence research results without promoting Findings.

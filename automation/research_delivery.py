@@ -249,6 +249,11 @@ def project(events):
         return False
     result = {k: [{**v['data'], 'revision': v['revision'], 'stale': stale(k, v)}
                   for v in state[k].values()] for k in sorted(KINDS)}
+    from research_dependencies import project as change_impact
+    affected = {r['ref'] for r in change_impact(__import__('hunt_loop').HuntLoop(events))['affected']}
+    for kind in KINDS:
+        for row in result[kind]:
+            row['stale'] = row['stale'] or 'delivery:' + kind + ':' + row['id'] in affected
     result['queue'] = [t for t in result['task'] if t['state'] in {'open','blocked'}]
     result['repair'] = [{'kind': k, 'id': r['id']} for k in sorted(KINDS) for r in result[k] if r['stale']]
     return result

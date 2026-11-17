@@ -19,6 +19,7 @@ flowchart TB
     ASG["ASG ledger<br/>Hypotheses · evidence · research state"]
     EFSM["Product flow model<br/>Roles · objects · states · conditions"]
     KB["Knowledge Base<br/>Methods and references"]
+    CRED["Credential metadata<br/>Scoped references · lifecycle · proven permissions"]
   end
   subgraph HARNESS["Harness — next-step control"]
     REASSESS["Event-driven reassessment<br/>Scoped inventory · checked plan decisions"]
@@ -35,6 +36,8 @@ flowchart TB
   CHECK["Result validation<br/>Evidence checks · independent reproduction"]
   DELIVERY["Finding management and reports<br/>Existing verification / delivery gates"]
   VIEW["Read-only Obsidian views<br/>Progress · blockers · evidence gaps"]
+  SOURCE["Optional research-source adapter<br/>Public-only query · read-source receipts"]
+  KEYRING["OS-protected keyring<br/>Raw credential values"]
   ASG --> NEXT
   ASG -->|"changed facts or stalled research"| REASSESS
   REASSESS -->|"current, checked plan changes"| NEXT
@@ -48,6 +51,13 @@ flowchart TB
   CHECK -->|"checked results or remaining gaps"| ASG
   ASG -->|"eligible findings"| DELIVERY
   ASG --> VIEW
+  ASG --> CRED
+  ASG -->|"recorded dependencies and evidence gaps"| NEXT
+  NEXT -.->|"bounded supplemental research"| SOURCE
+  SOURCE -->|"method proposals, not target observations"| ASG
+  CRED -->|"validated permission prerequisites"| NEXT
+  ASG --> CRED
+  KEYRING -->|"matched reference; executor only"| TOOL
   DELIVERY -->|"reusable lessons"| KB
 ```
 
@@ -66,6 +76,13 @@ and [reassessment](docs/reassessment.md) for contracts and remaining limits.
 
 These adapters are opt-in. Faraday, Reconmap and ARTEX remain evaluation/design
 references; this architecture does not deploy them as additional orchestrators.
+
+The current pilot also supports [scoped change impact, evidence gaps and read-only
+dispatch preview](docs/research-planning.md), [reference-based credentials](docs/credentials.md),
+and [supplemental source research](docs/research-sources.md). Credential validation uses
+operator-owned identity/permission probes; password login requires a service-specific
+adapter. External research requires an explicitly configured provider and public search
+profile. OS keyring and real external-provider acceptance remain environment-specific.
 
 ### The operating loop
 

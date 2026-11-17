@@ -84,6 +84,14 @@ def compute(target: str) -> dict:
                           'action': '補齊受阻結果、正常對照與環境證據', 'detail': event['reason'], 'priority': 0})
     from work_cards import frontier
     items.extend(frontier(state['loop']))
+    from research_dependencies import project as change_impact
+    impact = change_impact(state['loop'])
+    for affected in impact['affected']:
+        if not affected['ref'].startswith('evidence:'):
+            items.append({'kind': 'dependency-revalidation', 'ref': affected['ref'],
+                          'action': '複驗受變更影響的證據依賴', 'detail': affected['causes'],
+                          'priority': 0, 'queue': 'human'})
+    suspended_hypotheses.update(r['ref'][11:] for r in impact['affected'] if r['ref'].startswith('hypothesis:'))
     from research_delivery import project as delivery_project
     delivery = delivery_project(state['loop'].events)
     for problem in delivery['repair']:

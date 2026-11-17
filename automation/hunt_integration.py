@@ -102,7 +102,7 @@ def retrieve_lessons(loop, hyp_id, tags):
 
 def execute_command(loop, ledger, hyp_id, action_id, argv, output, timeout=30, *,
                     cancel_requested=None, scope_ref=None, tool_version=None,
-                    command_ref=None, heartbeat_interval=10, _remote=False):
+                    command_ref=None, heartbeat_interval=10, _remote=False, _secret_env=None, credential=None):
     """Persist intent before execution. An interrupted action is never auto-retried.
 
     Caller owns scope authorization; the existing machine-readable program gate
@@ -118,6 +118,15 @@ def execute_command(loop, ledger, hyp_id, action_id, argv, output, timeout=30, *
     if (not isinstance(heartbeat_interval, (int, float)) or isinstance(heartbeat_interval, bool)
             or not 0 < heartbeat_interval < float('inf')):
         raise ValueError('heartbeat interval must be finite and positive')
+    if credential:
+        from credentials import inject
+        _secret_env = inject(loop, credential, argv)
+    secret_env = _secret_env or {}
+    if (not isinstance(secret_env, dict) or any(k != 'VAULT_CREDENTIAL' or not isinstance(v, str) or not v
+            or '\x00' in v or len(v.encode()) > 8192 for k, v in secret_env.items())):
+        raise ValueError('bounded credential environment injection required')
+    if any(value in argument for value in secret_env.values() for argument in argv):
+        raise ValueError('credential values cannot appear in argv')
     _remote = _remote or Path(argv[0]).name == 'ssh'
     import program_rules_gate
     # judge() strips shell comments. In an argv API a literal '#' is data, so do
@@ -136,6 +145,9 @@ def execute_command(loop, ledger, hyp_id, action_id, argv, output, timeout=30, *
     if output.exists():
         raise ValueError('refusing to overwrite evidence')
     output.parent.mkdir(parents=True, exist_ok=True)
+    if credential:
+        loop.append('credential_used', credential_ref=credential['credential_ref'], action_id=action_id,
+                    hyp_id=hyp_id, permission=credential['permission'])
     loop.append('action_started', action_id=action_id, hyp_id=hyp_id,
                 argv=command_summary(argv), output_ref=str(output),
                 status='starting', started_at=timestamp(), owner_pid=os.getpid(),
@@ -149,13 +161,15 @@ def execute_command(loop, ledger, hyp_id, action_id, argv, output, timeout=30, *
     status, error, stop_confirmed, returncode = 'failed', None, False, None
     interrupted = None
     try:
-        with output.open('xb') as stream:
+        from credential_output import protected_output
+        with protected_output(output, secret_env.values()) as stream:
             output_created = True
             if cancel_requested and cancel_requested():
                 status, stop_confirmed = 'cancelled', True
             else:
                 process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                           start_new_session=os.name == 'posix')
+                                           start_new_session=os.name == 'posix',
+                                           env={**os.environ, **secret_env} if secret_env else None)
                 os.set_blocking(process.stdout.fileno(), False)
                 loop.append('action_running', action_id=action_id, hyp_id=hyp_id,
                             status='running', pid=process.pid, at=timestamp())
@@ -226,6 +240,17 @@ def execute_command(loop, ledger, hyp_id, action_id, argv, output, timeout=30, *
     loop.save(ledger)
     if interrupted is not None:
         raise interrupted
+    if credential and exit_ok and output.is_file() and output.stat().st_size <= 1024 * 1024:
+        try:
+            response = json.loads(output.read_text())
+        except (ValueError, OSError, UnicodeError):
+            response = {}
+        if isinstance(response, dict) and response.get('auth_status') in {'unauthenticated', 'invalid', 'expired', 'rate_limited', 'locked'}:
+            from credentials import status as credential_status
+            state = response['auth_status'] if response['auth_status'] in {'rate_limited', 'locked'} else 'invalid'
+            credential_status(loop, credential['credential_ref'], state, reason='adapter reported authentication failure or stop signal')
+            loop.save(ledger)
+            return False
     return exit_ok
 
 
@@ -451,6 +476,11 @@ def handoff(loop):
                          'blocked_research': blocked_project(loop.events, loop.base_path),
                          'work_dispatch': __import__('work_dispatch').jobs(loop.events),
                          'reassessments': __import__('reassessment').view(loop),
+                         'dependency_impact': __import__('research_dependencies').project(loop),
+                         'evidence_gaps': __import__('evidence_gaps').project(loop),
+                         'research_metrics': __import__('research_progress').metrics(loop),
+                         'credentials': __import__('credentials').project(loop.events, loop.base_path),
+                         'research_sources': __import__('research_sources').project(loop),
                          'candidate_analysis': [{k: j.get(k) for k in
                              ('job_id', 'candidate_id', 'status', 'stale', 'evidence_problems', 'failure_class', 'recovery')}
                              for j in analysis]},
