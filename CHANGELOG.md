@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Research continuation and reassessment — 2026-11-17
+
+- Fixed successful obstruction comparisons getting stuck before independent verification. Separate fresh TEST/CONTROL evidence now yields supported, not-supported, or needs-evidence research results without promoting Findings.
+- Fixed waiting research with stale evidence: fresh external evidence and changed conditions restore work while preserving history and consumed budgets.
+- Partitioned ready, waiting and human queues before selecting three cards; waiting parent hypotheses no longer re-enter through legacy path/intent projections. Preserved the public `items` alias.
+- Connected capability-routed dispatch to `run_hunt`, `hunt_live` and a production CLI. Added durable work/result receipts, original authorization checks, shared-state reconciliation and explicit interrupted-work settlement. Generic work types still require native adapters.
+- Connected exploration proposals to evidence-linked adopt/reject review and normal hypothesis planning, preserving prerequisites and execution gates.
+- Added scoped, event-driven reassessment with deterministic inventory, trigger/version deduplication, semantic-event cooldown, stale-result rejection and checked atomic plan decisions. Ordering suggestions expire with their evidence and do not override repair/authorization classes. No Finding verification or running-command cancellation authority is added.
+- Updated README architecture diagrams, dispatch/recovery documentation and reassessment contracts. Added isolated real-process CLI comparisons and continuation/reassessment regressions; representative research-quality/token improvements and universal GUI execution remain unverified.
+
 ### Evidence-driven research execution — 2026-11-17
 
 - Updated the README architecture diagram and the detailed Ring 3 execution diagram to show ASG/EFSM separation, scheduling/work cards, gated tools, evidence validation, report delivery and optional adapter positions. Kept the broader learning cycle separate from the execution loop.

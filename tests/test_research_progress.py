@@ -33,8 +33,10 @@ def test_repeated_comparison_stops_without_refuting_or_exhausting_hypothesis():
     assert report.rounds == 3
     assert loop.capsule()["refuted"] == []
     assert not any(e["type"] == "dead_end" for e in loop.events)
-    assert loop.events[-1]["type"] == "research_progress"
-    assert loop.events[-1]["unchanged_rounds"] == 2
+    progress = [e for e in loop.events if e['type'] == 'research_progress']
+    assert progress[-1]['unchanged_rounds'] == 2
+    assert any(e['type'] == 'reassessment_requested' and e['reason'] == 'no_information_gain'
+               for e in loop.events)
 
 
 def test_new_action_ids_and_failed_executions_are_not_research_progress():

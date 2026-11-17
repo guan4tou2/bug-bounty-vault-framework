@@ -429,6 +429,7 @@ def autodrive(
     rank: Optional[Callable[[list[str], dict, HuntLoop], list[str]]] = None,
     persist: Optional[Callable[[HuntLoop], None]] = None,
     round_log: Optional[Callable[[dict], None]] = None,
+    work_driver: Optional[Callable[[HuntLoop], dict]] = None,
     templater: Optional[Callable[[HuntLoop, dict], Optional[LogicHypothesis]]] = None,
     capability_model: str = "finding-finding",
     worker_skill: str = "bb-exploit-chain",
@@ -496,6 +497,19 @@ def autodrive(
                                   f"— FINAL wrap-up, no new exploration")
             break
 
+        if work_driver:
+            scheduled = work_driver(loop)
+            if scheduled.get('unsafe'):
+                rep.handoff_reason = 'scheduled execution requires reconciliation before target operations'
+                break
+            if scheduled.get('handled'):
+                budget.actions += 1
+                rep.rounds += 1
+                rep.trace.append(('work-card', scheduled['state'], scheduled['work_id']))
+                if persist:
+                    persist(loop)
+                continue
+
         # Research work uses the native runner's existing web/file tools. Never
         # silently skip it or turn a plain-language intent into an arbitrary shell.
         from asg_research import project as research_graph, worker_context, append_to_loop, settle_test_intent
@@ -516,10 +530,14 @@ def autodrive(
         dead = _dead_ended(loop)
         _hg_go, _hg_decline = human_go_decisions(loop)
         ready_ids = rank(cap["ready_hypotheses"], cap, loop) if rank else cap["ready_hypotheses"]
+        from reassessment import priorities as reassessment_priorities
+        suggested = reassessment_priorities(loop)
+        ready_ids = sorted(ready_ids, key=lambda hid: -suggested.get('hypothesis:' + hid, 0))
         hyp: Optional[LogicHypothesis] = None
         for hid in ready_ids:
             from blocked_research import project as blocked_project
-            if any(r['hyp_id'] == hid for r in blocked_project(loop.events, loop.base_path)):
+            if any(r['hyp_id'] == hid and (r['state'] != 'completed' or r['stale'])
+                   for r in blocked_project(loop.events, loop.base_path)):
                 # Work cards diagnose and compare alternatives; do not automatically
                 # replay the original failed action while that research is unresolved.
                 continue
@@ -542,7 +560,12 @@ def autodrive(
                                         "fix the environment / sharpen the control")
                         rep.dead_ended.append(hid)
                 continue
-            cand = ready_hyp(hid) if ready_hyp else None
+            from work_cards import adopted_hypothesis
+            try:
+                cand = adopted_hypothesis(loop, hid) or (ready_hyp(hid) if ready_hyp else None)
+            except ValueError:
+                rep.trace.append((hid, 'blocked', 'exploration source requires revalidation'))
+                continue
             if not cand:
                 continue
             # human_go authorization (bb_authorize.py, clicked in operator UI) overrides the
@@ -629,6 +652,10 @@ def autodrive(
             was_replan = True
             if hyp is None:
                 rep.interventions += 1
+                from reassessment import request as request_reassessment
+                request_reassessment(loop, 'queue_exhausted')
+                if persist:
+                    persist(loop)
                 if rep.needs_human_go:
                     # the read-only loop ran itself dry; what remains is write/impact
                     # work waiting on human authorization — this is the intended
@@ -823,6 +850,10 @@ def autodrive(
         if persist:
             persist(loop)
         if no_progress_rounds >= budget.max_no_progress_rounds:
+            from reassessment import request as request_reassessment
+            request_reassessment(loop, 'no_information_gain', 'hypothesis:' + hyp.hyp_id)
+            if persist:
+                persist(loop)
             rep.handoff_reason = ("no evidence progress: inspect the missing discriminator or prerequisites; "
                                   "no hypothesis was refuted by this stop")
             break

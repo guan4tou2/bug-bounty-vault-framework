@@ -4,14 +4,34 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
 import blocked_research as blocked
 
 
+TRANSITIONS = {
+    "wait_for_recovery": {"resume"},
+    'recover_waiting_evidence': {'resume'},
+    'validate_original_claim': {'request_validation', 'close'},
+    'perform_independent_validation': {'validate', 'close'},
+    'validation_needs_evidence': {'request_validation', 'close'},
+    "reconcile_execution": {"close"},
+    "establish_normal_control": {"diagnose", "close"},
+    "discriminate_obstruction": {"diagnose", "close"},
+    "stop_budget_exhausted": {"close"},
+    "assess_alternatives_or_stop": {"propose", "close"},
+    "review_alternative_under_existing_gate": {"attempt", "close"},
+    "original_authorization_path": {"close"},
+    "revalidate_evidence": {"revalidate", "close"},
+}
+
+
 def execute_alternative(
-    loop, ledger, card, *, comparison_hyp_id, test_argv, control_argv, output_dir, scope_ref, interpret, timeout=30
+    loop, ledger, card, *, comparison_hyp_id, test_argv, control_argv, output_dir, scope_ref, interpret, timeout=30,
+    producer_id='unattributed-worker',
+    on_result=None,
 ):
     """Controlled executor seam. Caller holds the canonical writer lock/authorization.
 
@@ -132,6 +152,9 @@ def execute_alternative(
         )
         else "inconclusive"
     )
+    if on_result:
+        on_result({'interpretation': interpreted, 'test_artifact': str(paths['test']),
+                   'control_artifact': str(paths['control'])})
     refreshed = apply(
         loop,
         card,
@@ -142,6 +165,7 @@ def execute_alternative(
             "result": result,
             "test_evidence": proof("test"),
             "control_evidence": proof("control"),
+            'producer_id': producer_id,
         },
     )
     loop.save(ledger)
@@ -153,6 +177,8 @@ def obstruction_card(row):
     card = {
         "schema": 1,
         "kind": "blocked-research",
+        'research_state': row['state'],
+        'queue': obstruction_queue(row),
         "ref": row["obstruction_id"],
         "question": row["hyp_id"],
         "goal": "Resolve the obstruction without inferring a negative vulnerability result",
@@ -174,6 +200,10 @@ def obstruction_card(row):
         }
         if alternative
         else None,
+        'comparison_evidence': [{key: a['attempt'][key] for key in
+                                 ('test_evidence', 'control_evidence', 'producer_id') if key in a['attempt']}
+                                for a in row['alternatives'] if a.get('attempt', {}).get('result') == 'behavior_observed'],
+        'validation_request': row.get('validation_request'),
         "budget_remaining": row["limit"]
         - row.get("spent_attempts", 0)
         - sum(bool(a.get("attempt")) for a in row["alternatives"]),
@@ -192,19 +222,40 @@ def obstruction_card(row):
         "authority": "Existing executor gates still apply; this card grants no authorization",
         "proposal_escape": "propose a new exploration hypothesis with evidence; no automatic execution",
     }
+    import inspect
+    card['allowed_operations'] = sorted(TRANSITIONS.get(row['next'], set()))
+    card['output_requirements'] = {operation: {
+        name: 'required' if parameter.default is inspect.Parameter.empty else 'optional'
+        for name, parameter in inspect.signature(getattr(blocked, operation)).parameters.items()
+        if name not in {'loop', 'obstruction_id'}} for operation in card['allowed_operations']}
     card["state_version"] = hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()
     return card
+
+
+def obstruction_queue(row):
+    if row['cause'] in blocked.HARD or row['next'] == 'reconcile_execution':
+        return 'human'
+    if row['state'] == 'waiting':
+        return 'waiting'
+    if row['state'] == 'completed' and not row['stale']:
+        return 'completed'
+    return 'ready'
 
 
 def attach(items, events, base_path=None):
     rows = {r["obstruction_id"]: r for r in blocked.project(events, base_path)}
     for item in items:
+        if 'work_card' in item:
+            continue
         if item["kind"] == "blocked-research" and item["ref"] in rows:
             item["work_card"] = obstruction_card(rows[item["ref"]])
         else:
             item["work_card"] = {
                 "schema": 1,
                 "kind": item["kind"],
+                'dispatchable': False,
+                'result_contract': 'existing native adapter required; no generic self-completion',
+                'state_version': hashlib.sha256(json.dumps([len(events), item], sort_keys=True).encode()).hexdigest(),
                 "ref": item.get("ref"),
                 "question": item["action"],
                 "goal": item["action"],
@@ -223,22 +274,20 @@ def attach(items, events, base_path=None):
 
 def apply(loop, card, operation, payload):
     """Caller owns canonical lock/save; result never bypasses a tool gate or sets a verdict."""
+    if card.get('kind') == 'reassessment':
+        if operation != 'decide':
+            raise ValueError('reassessment requires checked decisions')
+        from reassessment import apply as apply_reassessment
+        return apply_reassessment(loop, card, **payload)
+    if card.get('kind') == 'exploration-review':
+        if operation != 'review':
+            raise ValueError('exploration work requires a review result')
+        return exploration_card(review_exploration(loop, card, **payload))
     rows = {r["obstruction_id"]: r for r in blocked.project(loop.events, loop.base_path)}
     row = rows.get(card.get("ref"))
     if not row or card != obstruction_card(row):
         raise ValueError("stale or altered work card; refresh canonical state")
-    allowed = {
-        "wait_for_recovery": {"resume"},
-        "reconcile_execution": {"close"},
-        "establish_normal_control": {"diagnose", "close"},
-        "discriminate_obstruction": {"diagnose", "close"},
-        "stop_budget_exhausted": {"close"},
-        "assess_alternatives_or_stop": {"propose", "close"},
-        "review_alternative_under_existing_gate": {"attempt", "close"},
-        "original_authorization_path": {"close"},
-        "revalidate_evidence": {"diagnose", "close"},
-    }
-    if operation not in allowed.get(row["next"], set()) or "obstruction_id" in payload:
+    if operation not in TRANSITIONS.get(row["next"], set()) or "obstruction_id" in payload:
         raise ValueError("result is not a valid next transition")
     if operation == "attempt" and payload.get("alternative_id") != row["next_alternative"]:
         raise ValueError("result must match the selected single alternative")
@@ -255,11 +304,143 @@ def apply(loop, card, operation, payload):
 
 
 def propose_exploration(loop, *, question, reason, evidence, requires):
-    if not question.strip() or not reason.strip() or not isinstance(requires, list):
+    if (not isinstance(question, str) or not question.strip() or not isinstance(reason, str) or not reason.strip()
+            or not isinstance(requires, list) or any(not isinstance(r, str) or not r.strip() for r in requires)):
         raise ValueError("explicit exploration question, reason and prerequisites required")
     proof = blocked._proof(loop, evidence)
-    # Remains a proposal for normal planning/authorization, not a ready hypothesis.
-    loop.append("exploration_proposal", question=question, reason=reason, evidence=proof, requires=requires)
+    proposal = dict(question=question, reason=reason, evidence=proof, requires=sorted(set(requires)))
+    pid = proposal_id(proposal)
+    if not any(p['proposal_id'] == pid for p in exploration_view(loop)):
+        loop.append('exploration_proposal', proposal_id=pid, **proposal)
+    return pid
+
+
+def proposal_id(proposal):
+    return hashlib.sha256(json.dumps([proposal['question'], proposal['evidence'].get('sha256'),
+                                    sorted(proposal['requires'])], sort_keys=True).encode()).hexdigest()
+
+
+def exploration_view(loop):
+    rows = {}
+    for e in loop.events:
+        if e['type'] == 'exploration_proposal':
+            pid = e.get('proposal_id') or proposal_id(e)
+            rows[pid] = {**e, 'proposal_id': pid, 'state': 'proposed'}
+        elif e['type'] == 'exploration_decision' and e['proposal_id'] in rows:
+            rows[e['proposal_id']].update(e)
+    from evidence_refs import evidence_resolves
+    from evidence_applicability import assess_artifact
+    for row in rows.values():
+        proofs = [row['evidence']]
+        if row.get('review_evidence'):
+            proofs.append(row['review_evidence'])
+        row['stale'] = any(not evidence_resolves(p, loop.base_path, loop.events)
+                           or assess_artifact(p, loop.events)['requires_revalidation'] for p in proofs)
+    return list(rows.values())
+
+
+def exploration_card(row):
+    return {'schema': 1, 'kind': 'exploration-review', 'ref': row['proposal_id'],
+            'question': row['question'], 'goal': 'Assess a new exploration direction against current facts',
+            'facts': [{'evidence': row['evidence'], 'reason': row['reason']}], 'requires': row['requires'],
+            'next_action': 'review_exploration' if row['state'] == 'proposed' else 'exploration_' + row['state'],
+            'allowed_operations': ['review'],
+            'output_requirements': {'decision': 'adopt or reject', 'reason': 'evidence-based reason',
+                'evidence': 'supplied evidence reference', 'hypothesis': 'complete LogicHypothesis for adopt'},
+            'success': 'Adopt an explicit hypothesis or reject with evidence',
+            'stop': ['scope and operation gates remain unchanged', 'stale source evidence'],
+            'state_version': hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()}
+
+
+def review_exploration(loop, card, *, decision, reason, evidence, hypothesis=None):
+    from logic_vuln_loop import Env, LogicHypothesis
+    row = next((p for p in exploration_view(loop) if p['proposal_id'] == card.get('ref')), None)
+    if not row or row['state'] != 'proposed' or row['stale'] or card != exploration_card(row):
+        raise ValueError('current unreviewed exploration work card required')
+    blocked._required(reason)
+    if decision not in {'adopt', 'reject'}:
+        raise ValueError('explicit adopt/reject decision required')
+    proof = blocked._proof(loop, evidence)
+    data = None
+    if decision == 'adopt':
+        data = dict(hypothesis or {})
+        data['applies_env'] = Env(**data.get('applies_env', {}))
+        hyp = LogicHypothesis(**data)
+        if not set(row['requires']).issubset(hyp.requires):
+            raise ValueError('adoption cannot drop proposal prerequisites')
+        if any(e['type'] == 'hypothesis' and e['id'] == hyp.hyp_id for e in loop.events):
+            raise ValueError('adoption requires a fresh comparison identity')
+        for key in ('hyp_id', 'invariant', 'test_action', 'control_action', 'violation_outcome', 'expected_normal'):
+            blocked._required(getattr(hyp, key))
+        # No dispatch here. Canonical capability and operation gates still apply.
+        data = asdict(hyp)
+        loop.add_hypothesis(hyp.hyp_id, requires=hyp.requires)
+    loop.append('exploration_decision', proposal_id=row['proposal_id'], state='adopted' if data else 'rejected',
+                reason=reason, review_evidence=proof, hypothesis=data)
+    return next(p for p in exploration_view(loop) if p['proposal_id'] == row['proposal_id'])
+
+
+def adopted_hypothesis(loop, hyp_id):
+    from logic_vuln_loop import Env, LogicHypothesis
+    for row in exploration_view(loop):
+        data = row.get('hypothesis')
+        if row['state'] == 'adopted' and data and data['hyp_id'] == hyp_id:
+            if row['stale']:
+                raise ValueError('adopted exploration source requires revalidation')
+            data = {**data, 'applies_env': Env(**data['applies_env'])}
+            return LogicHypothesis(**data)
+    return None
+
+
+def frontier(loop):
+    items = []
+    for row in blocked.project(loop.events, loop.base_path):
+        if obstruction_queue(row) != 'completed':
+            items.append({'kind': 'blocked-research', 'ref': row['obstruction_id'], 'action': row['next'],
+                          'detail': row['recovery'], 'queue': obstruction_queue(row), 'priority': 0,
+                          'work_card': obstruction_card(row)})
+    for proposal in exploration_view(loop):
+        if proposal['state'] == 'proposed':
+            items.append({'kind': 'exploration-review', 'ref': proposal['proposal_id'],
+                          'action': 'review_exploration', 'queue': 'waiting' if proposal['stale'] else 'ready',
+                          'priority': 1, 'work_card': exploration_card(proposal)})
+    from reassessment import view as reassessments, card as reassessment_card
+    for row in reassessments(loop):
+        if row['state'] in {'proposed', 'cooldown'}:
+            items.append({'kind': 'reassessment', 'ref': row['reassessment_id'],
+                          'action': 'reassess', 'queue': 'waiting' if row['stale'] or row['state'] == 'cooldown' else 'ready',
+                          'priority': 1, 'work_card': reassessment_card(row)})
+    from work_dispatch import jobs, admission_version
+    routing = next((e for e in reversed(loop.events) if e['type'] == 'work_routing_config'), None)
+    for item in items:
+        unavailable = next((e for e in reversed(loop.events) if e['type'] == 'work_adapter_unavailable'
+                            and e['state_version'] == item['work_card']['state_version']
+                            and routing and e['config_version'] == routing['config_version']
+                            and e.get('admission_version') == admission_version(loop)), None)
+        if unavailable:
+            item.update(queue=unavailable.get('queue', 'human'), dispatch_state='capability-unavailable',
+                        detail=unavailable['reason'])
+        prior = next((j for j in reversed(jobs(loop.events))
+                      if j['card']['state_version'] == item['work_card']['state_version']
+                      and (not routing or j['config_version'] == routing['config_version'])), None)
+        if prior and prior['state'] in {'running', 'awaiting_validation'}:
+            item.update(queue='human' if prior.get('reconciliation_required') else 'waiting',
+                        dispatch_state=prior['state'])
+        elif prior and prior['state'] in {'failed', 'cancelled'}:
+            item.update(queue='human', dispatch_state=prior['state'])
+    return items
+
+
+def partition(items):
+    queues = {'ready': [], 'waiting': [], 'human': []}
+    for item in items:
+        queue = item.get('queue')
+        if queue is None:
+            queue = ('human' if item['kind'] == 'human-go' else
+                     'waiting' if item.get('state') in {'waiting', 'blocked', 'paused'} else 'ready')
+        if queue in queues:
+            queues[queue].append(item)
+    return queues
 
 
 def main():

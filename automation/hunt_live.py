@@ -247,6 +247,7 @@ def run_live(
     max_rounds: int = 40,
     kb_tags: Optional[list[str]] = None,
     kb_dir=None,
+    work_config: dict | None = None,
 ) -> tuple[DriveReport, HuntLoop]:
     """Acquire the ledger and let autodrive self-drive to a clean hand-back.
     `spawn` defaults to headless `claude -p` (subprocess_spawn) — the real driver.
@@ -280,12 +281,18 @@ def run_live(
             heartbeat(ledger, token)
             guarded_save(lp, ledger, token)
 
+        def work_driver(lp):
+            from work_dispatch import run_ready
+            persist(lp)
+            return run_ready(lp, ledger, work_config, persist=persist)
+
         from hyp_templates import make_templater
         effective_gate = human_gate or make_risk_gate(risk)
         rep = autodrive(
             loop, current_env=env, dispatch=make_dispatch(spawn), propose=propose,
             ready_hyp=_ready, budget=budget, human_gate=effective_gate,
             rank=value_rank, persist=persist,
+            work_driver=work_driver if work_config is not None else None,
             templater=make_templater(env, registry), max_rounds=max_rounds)
         guarded_save(loop, ledger, token)
         # policy A — auto-DRAFT LL candidates from what the loop just learned (refuted

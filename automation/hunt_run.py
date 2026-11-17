@@ -69,6 +69,7 @@ def run_hunt(
     kb_dir=None,
     ttl_s: int = 1800,
     max_rounds: int = 200,
+    work_config: dict | None = None,
 ) -> tuple[DriveReport, HuntLoop]:
     """Acquire the ledger, drive the loop to a clean hand-back, release, then refresh
     the projections. Address by `target` (resolved through the single asg resolver)
@@ -122,11 +123,17 @@ def run_hunt(
             if round_logger is not None:
                 round_logger.log("round", **entry)
 
+        def work_driver(lp):
+            from work_dispatch import run_ready
+            persist(lp)
+            return run_ready(lp, ledger, work_config, persist=persist, target=target)
+
         rep = autodrive(
             loop, current_env=current_env, dispatch=dispatch, propose=propose,
             ready_hyp=ready_hyp, budget=budget, human_gate=human_gate,
             kb_tags=kb_tags, kb_dir=kb_dir, rank=value_rank, persist=persist,
             round_log=round_log, max_rounds=max_rounds,
+            work_driver=work_driver if work_config is not None else None,
         )
         guarded_save(loop, ledger, token)     # final durable state
         if round_logger is not None and rep.handoff_reason:

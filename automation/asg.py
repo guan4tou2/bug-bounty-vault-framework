@@ -1085,6 +1085,8 @@ def write_snapshot(target: str | Path) -> Path:
         "evidence_applicability": evidence_review(events),
         "flow_model": flow_summary(events, target_dir(target)),
         "blocked_research": blocked_project(events, target_dir(target)),
+        'work_dispatch': __import__('work_dispatch').jobs(events),
+        'reassessments': __import__('reassessment').view(s["state"]["loop"]),
         "candidate_analysis": [{k: j.get(k) for k in
             ("job_id", "candidate_id", "status", "stale", "evidence_problems", "failure_class", "recovery")}
             for j in project_analysis(events, target_dir(target))],

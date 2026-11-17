@@ -81,6 +81,7 @@ product roles, object relations, states and expected transitions in linked flow 
 flowchart TB
   ASG["ASG ledger<br/>Facts · hypotheses · evidence · blockers"]
   FLOW["EFSM product model<br/>Expected conditions and candidate paths"]
+  REVIEW["Reassessment<br/>Changed facts · scoped inventory · bounded decisions"]
   NEXT["Next-work scheduler<br/>Current evidence · prerequisites · remaining budget"]
   CARD["Versioned work card<br/>Goal · selected evidence · completion and stop conditions"]
   AGENT["Agent<br/>Interpretation and discriminating hypotheses"]
@@ -91,6 +92,7 @@ flowchart TB
   GW["Optional GraphWalker<br/>Offline planned paths only"]
   AF["Optional Attack Flow<br/>Read-only dependency export"]
   ASG --> NEXT
+  ASG -->|"meaningful events"| REVIEW -->|"version-checked plan decisions"| NEXT
   FLOW --> NEXT
   FLOW -.-> GW -.-> NEXT
   NEXT --> CARD --> AGENT --> GATE --> RUN --> RAW --> VALID

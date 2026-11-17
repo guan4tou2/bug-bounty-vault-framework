@@ -21,6 +21,7 @@ flowchart TB
     KB["Knowledge Base<br/>Methods and references"]
   end
   subgraph HARNESS["Harness — next-step control"]
+    REASSESS["Event-driven reassessment<br/>Scoped inventory · checked plan decisions"]
     NEXT["Scheduler<br/>Gaps · prerequisites · stopping rules"]
     CARD["Versioned work card<br/>One question · evidence refs · result contract"]
     AGENT["Agent<br/>Interpret evidence · propose hypotheses"]
@@ -35,6 +36,8 @@ flowchart TB
   DELIVERY["Finding management and reports<br/>Existing verification / delivery gates"]
   VIEW["Read-only Obsidian views<br/>Progress · blockers · evidence gaps"]
   ASG --> NEXT
+  ASG -->|"changed facts or stalled research"| REASSESS
+  REASSESS -->|"current, checked plan changes"| NEXT
   EFSM -->|"candidate paths"| NEXT
   NEXT --> CARD --> AGENT
   KB -.->|"on-demand references"| AGENT
@@ -50,7 +53,10 @@ flowchart TB
 
 ASG research state and EFSM product state remain distinct. A generated path is a
 proposal; blocked work is inconclusive; a successful alternative is not automatically
-a verified Finding. Data-processing policy applies before evidence reaches a model.
+a verified Finding. Data-processing policy applies before evidence reaches a model. Reassessment is
+event-driven and versioned; duplicate triggers do not cause repeated model calls.
+Only configured work types execute automatically. See [dispatch and recovery](docs/blocked-research.md#continuation-and-production-dispatch)
+and [reassessment](docs/reassessment.md) for contracts and remaining limits.
 
 | Optional integration | Position and authority |
 |---|---|

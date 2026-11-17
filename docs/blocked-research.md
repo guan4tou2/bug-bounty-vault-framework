@@ -67,3 +67,66 @@ python3 automation/work_cards.py TARGET --explore --input EXPLORATION_PROPOSAL.j
 驗收涵蓋可觀察替代路徑、無法繼續、不得繞過的授權限制、舊卡、缺對照、重複／預算、
 回應變化冒充成功、真實本機子程序與 gate 拒絕。尚未量測完整任務 token 或漏測率，
 因此沒有先刪除現有核心規範，也沒有宣稱工作卡已帶來總成本下降。
+
+## Continuation and production dispatch
+
+Successful alternatives now enter `request_validation` then
+`perform_independent_validation`. A separately identified executor must produce
+fresh TEST/CONTROL artifacts distinct from the producer's evidence. Results are
+`supported`, `not_supported` or `needs_evidence`; none sets a Finding to verified.
+Missing evidence can park the work, and bounded repeated validation cannot loop
+forever. Waiting work with stale evidence resumes only with fresh evidence and an
+explicit changed condition; its previous comparison budget remains consumed.
+
+`next_work` partitions ready, waiting and human work before selecting three ready
+cards. Waiting parent hypotheses cannot re-enter through legacy path/intent views.
+Exploration proposals receive explicit adopt/reject review. Adoption creates a
+normal hypothesis preserving prerequisites; it does not authorize execution.
+
+`work_dispatch.run_ready` is called by the existing `run_hunt` and `hunt_live`
+entry points when `work_config` is supplied, and by this CLI:
+
+```sh
+python3 automation/work_dispatch.py TARGET --config PRIVATE_ROUTING.json
+```
+
+Operator configuration has `workers`, `bindings` and private `output_dir` fields.
+Supported capability/adapter pairs are:
+
+| Capability | Adapter |
+|---|---|
+| `obstruction-analysis`, `exploration-review`, `reassessment-analysis` | `analysis` |
+| `controlled-comparison` | `argv-comparison` |
+| `independent-verification` | `argv-verification` |
+| `evidence-revalidation` | `artifact-refresh` |
+
+Each worker declares an `actor`. Analysis additionally declares a configured `model`,
+`processing_location`, and `allowed_locations`, consistent with the canonical
+model-processing policy. Analysis cannot run commands or independently verify itself.
+A validation request is a deterministic built-in transition requiring no model.
+
+Execution bindings are keyed by `OBSTRUCTION_ID/ALTERNATIVE_ID` for comparisons,
+and `OBSTRUCTION_ID` for verification. They declare a ready comparison `hypothesis`,
+`scope_ref`, `risk`, `test_argv`, `control_argv`, and explicit JSON outcome `checks`.
+Checks `normal`, `behavior`, `impact` (and optional `rejection`) each contain `field`
+and literal `equals`. Exactly one argv argument may differ in an alternative test.
+Normal success alone or changed HTTP responses cannot establish impact. Predicates
+are operator configuration, not model-generated facts or a universal semantic oracle.
+
+For `artifact-refresh`, a binding supplies fresh `evidence`, `changed_condition` and
+`recovery`; it can restore stale waiting work without a model or a tool invocation.
+All actual tool actions retain scope/policy/risk checks, operation timeouts and their
+original approval path. Unknown effects prevent takeover. Work records, owner,
+heartbeats and private result receipts are saved before accepting results. Missing
+adapters appear in the human/waiting queue instead of occupying ready slots.
+
+After confirming underlying command stop/effects, settle an interrupted work with:
+
+```sh
+python3 automation/work_dispatch.py TARGET --settle-work WORK_ID --receipt LOCAL_RECEIPT --effects effects-checked --state failed
+```
+
+Settlement records failure/cancellation, not research success, and does not auto-replay
+a possibly executed action. Failed/invalid results remain available for inspection.
+Other generic work-card types still require their native adapters. See
+[reassessment](reassessment.md) for event-driven plan review and its limits.

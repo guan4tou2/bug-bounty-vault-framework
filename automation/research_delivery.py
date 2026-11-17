@@ -393,7 +393,8 @@ def main():
             p.add_argument('--body', type=Path)
     args = ap.parse_args()
     if args.command == 'record':
-        asg.append_events(args.target, [('delivery_record', {'record_kind': args.kind,
+        triggers = [('reassessment_trigger', {'reason': 'pre_delivery', 'scope': 'target'})] if args.kind == 'report' else []
+        asg.append_events(args.target, triggers + [('delivery_record', {'record_kind': args.kind,
                          'data': json.loads(args.file.read_text()), 'previous_revision': args.previous_revision})])
         asg.write_snapshot(args.target)
     events = HuntLoop.load(asg.ledger_path(args.target)).events

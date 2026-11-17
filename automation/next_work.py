@@ -76,16 +76,14 @@ def compute(target: str) -> dict:
     research = state.get("research", {})
     from blocked_research import project as blocked_project
     diagnosed_hypotheses = {r['hyp_id'] for r in blocked_project(state['loop'].events, TARGETS / target)}
+    suspended_hypotheses = {r['hyp_id'] for r in blocked_project(state['loop'].events, _targets() / target)
+                             if r['state'] != 'completed' or r['stale']}
     for event in state['loop'].events:
         if event['type'] == 'obstruction_evidence_gap' and event['hyp_id'] not in diagnosed_hypotheses:
             items.append({'kind': 'blocked-evidence', 'ref': event['hyp_id'],
                           'action': '補齊受阻結果、正常對照與環境證據', 'detail': event['reason'], 'priority': 0})
-    for obstruction in blocked_project(state['loop'].events, TARGETS / target):
-        items.append({'kind': 'blocked-research', 'ref': obstruction['obstruction_id'],
-                      'action': obstruction['next'], 'detail': obstruction['recovery'],
-                      'alternative_id': obstruction['next_alternative'],
-                      'priority': 0 if obstruction['next'] in
-                      {'establish_normal_control', 'discriminate_obstruction', 'reconcile_execution'} else 2})
+    from work_cards import frontier
+    items.extend(frontier(state['loop']))
     from research_delivery import project as delivery_project
     delivery = delivery_project(state['loop'].events)
     for problem in delivery['repair']:
@@ -143,6 +141,8 @@ def compute(target: str) -> dict:
         items.append({"kind": "research-resume", "ref": ref, "action": f"接續研究工作：{_redact_label(rnodes[ref]['text'])}",
                       "detail": "工作已領取；先查進度與已有輸出，避免重複執行", "priority": 0})
     for ref in sorted(rsummary.get("ready_intents", []), key=lambda r: (-rnodes[r].get("priority", 5), r)):
+        if rnodes[ref].get('hypothesis', '').removeprefix('hypothesis:') in suspended_hypotheses:
+            continue
         node = rnodes[ref]
         items.append({"kind": "research-intent", "ref": ref, "action": f"推進意圖：{_redact_label(node['text'])}",
                       "detail": f"goals={node.get('goals', [])}; parents={node.get('parents', [])}; hypothesis={node.get('hypothesis', '')}",
@@ -202,6 +202,8 @@ def compute(target: str) -> dict:
     TERMINAL = {"dead_end", "fixed_upstream", "not_applicable", "live-verified",
                 "code-confirmed", "withdrawn", "downgraded", "confirmed"}
     for p in paths:
+        if p['name'] in suspended_hypotheses:
+            continue
         st = str(p.get("status", "")).lower()
         if st not in TERMINAL and (p.get("findings")):
             items.append({"kind": "chain", "action": f"推進攻擊鏈：{p.get('name')}",
@@ -210,7 +212,7 @@ def compute(target: str) -> dict:
         elif state["source"] == "ledger" and st not in TERMINAL:
             action = {"needs_evidence": "補齊可解析證據", "disputed": "釐清互相矛盾的證據",
                       "blocked": "解除前置條件"}.get(st, "推進假設")
-            items.append({"kind": "hypothesis", "action": f"{action}：{p['name']}",
+            items.append({"kind": "hypothesis", "ref": 'hypothesis:' + p['name'], "action": f"{action}：{p['name']}",
                           "detail": f"status={st}", "skill": "bb-evidence-readiness" if st in
                           ("needs_evidence", "disputed") else "bb-exploit-chain", "priority": 2})
 
@@ -317,13 +319,19 @@ def compute(target: str) -> dict:
     # 的報酬高於「再去測繪一個只知道存在的新主機」。某 target 最值錢的那條鏈全部發生在
     # 同一個信任邊界內，而當時兩者混在同一層，於是拿到 token 之後常跑去掃新子網域。
     KIND_RANK = {"capability-unlock": -1, "research-intent": 0, "capability-sweep": 0, "scope-host": 1}
-    items.sort(key=lambda x: (x["priority"], KIND_RANK.get(x["kind"], 5)))
-    from work_cards import attach
-    attach(items[:3], state['loop'].events, TARGETS / target)
+    from reassessment import priorities as reassessment_priorities
+    priorities = reassessment_priorities(state['loop'])
+    items.sort(key=lambda x: (x["priority"],
+        -priorities.get(x.get('ref'), 0) if x['kind'] == 'hypothesis' else 0,
+        KIND_RANK.get(x["kind"], 5)))
+    from work_cards import attach, partition
+    queues = partition(items)
+    attach(queues['ready'][:3], state['loop'].events, _targets() / target)
     return {"target": target, "generated_from": state["source"],
             "event_cursor": state["event_cursor"],
             "note": "projection only — do NOT hand-edit; hunt_run/downstream readers read this",
-            "next_work": items[:3], "items": items[:3], "total_candidates": len(items)}
+            "next_work": queues['ready'][:3], "items": queues['ready'][:3], 'waiting': queues['waiting'], 'human_queue': queues['human'],
+            "total_candidates": len(items)}
 
 
 def write_human_go(target: str) -> Path:

@@ -449,6 +449,8 @@ def handoff(loop):
                                                    if r['bound'] and r['requires_revalidation']],
                          'flow_model': flow_summary(loop.events, loop.base_path),
                          'blocked_research': blocked_project(loop.events, loop.base_path),
+                         'work_dispatch': __import__('work_dispatch').jobs(loop.events),
+                         'reassessments': __import__('reassessment').view(loop),
                          'candidate_analysis': [{k: j.get(k) for k in
                              ('job_id', 'candidate_id', 'status', 'stale', 'evidence_problems', 'failure_class', 'recovery')}
                              for j in analysis]},

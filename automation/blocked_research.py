@@ -227,9 +227,11 @@ def attempt(
     normal_succeeds,
     behavior_observed=False,
     impact_observed=False,
+    producer_id='unattributed-worker',
 ):
     row = _row(loop, obstruction_id)
     _required(observation, excluded, recovery)
+    _required(producer_id)
     if not row or row["cause"] in HARD or row["state"] != "blocked" or row["stale"]:
         raise ValueError("obstruction is unavailable for alternative research")
     selected = next((a for a in row["alternatives"] if a["alternative_id"] == alternative_id), None)
@@ -261,6 +263,7 @@ def attempt(
         normal_succeeds=normal_succeeds,
         behavior_observed=behavior_observed,
         impact_observed=impact_observed,
+        producer_id=producer_id,
     )
     used = row.get("spent_attempts", 0) + sum(bool(a.get("attempt")) for a in row["alternatives"]) + 1
     if result != "behavior_observed" and used >= row["limit"]:
@@ -276,7 +279,7 @@ def attempt(
 def close(loop, obstruction_id, *, reason, recovery, untested_reason):
     row = _row(loop, obstruction_id)
     _required(recovery, untested_reason)
-    if not row or row["state"] != "blocked" or reason not in WAIT:
+    if not row or row["state"] not in {'blocked', 'awaiting_validation'} or reason not in WAIT:
         raise ValueError("open obstruction and explicit stopping reason required")
     used = row.get("spent_attempts", 0) + sum(bool(a.get("attempt")) for a in row["alternatives"])
     if (
@@ -302,7 +305,7 @@ def resume(loop, obstruction_id, *, changed_condition, evidence, recovery):
     if unresolved_actions(loop.events, row["hyp_id"]):
         raise ValueError("reconcile previous effects first")
     proof = _proof(loop, evidence)
-    if proof["sha256"] == row["evidence"]["sha256"]:
+    if (proof["sha256"], proof['path']) == (row["evidence"]["sha256"], row['evidence']['path']):
         raise ValueError("new evidence of changed premises required")
     loop.append(
         "obstruction_resumed",
@@ -313,12 +316,75 @@ def resume(loop, obstruction_id, *, changed_condition, evidence, recovery):
     )
 
 
+def revalidate(loop, obstruction_id, *, changed_condition, evidence, recovery):
+    row = _row(loop, obstruction_id)
+    if not row or row['state'] == 'waiting' or not row['stale'] or row['cause'] in HARD:
+        raise ValueError('stale active research requires revalidation; waiting research uses resume')
+    _required(changed_condition, recovery)
+    if unresolved_actions(loop.events, row['hyp_id']):
+        raise ValueError('reconcile previous effects first')
+    proof = _proof(loop, evidence)
+    if (proof['path'], proof['sha256']) == (row['evidence']['path'], row['evidence']['sha256']):
+        raise ValueError('fresh evidence artifact required, not relabelled source evidence')
+    loop.append('obstruction_resumed', obstruction_id=obstruction_id, changed_condition=changed_condition,
+                evidence=proof, recovery=recovery)
+
+
+def _source_version(row):
+    return hashlib.sha256(json.dumps(row['alternatives'], sort_keys=True).encode()).hexdigest()
+
+
+def request_validation(loop, obstruction_id, *, reason):
+    row = _row(loop, obstruction_id)
+    _required(reason)
+    if not row or row['stale'] or row['state'] not in {'blocked', 'completed'} or not any(
+            a.get('attempt', {}).get('result') == 'behavior_observed' for a in row['alternatives']):
+        raise ValueError('current observed behavior and impact required before independent validation')
+    if unresolved_actions(loop.events, row['hyp_id']):
+        raise ValueError('reconcile previous execution first')
+    version = _source_version(row)
+    prior = [v for v in row['validations'] if v['source_version'] == version]
+    if len(prior) >= 2:
+        close(loop, obstruction_id, reason='stop_condition', recovery='fresh discriminating evidence for verification',
+              untested_reason='Independent comparison budget exhausted; conclusion remains unverified')
+        return None
+    request_id = hashlib.sha256(json.dumps([obstruction_id, version, len(row.get('validations', []))]).encode()).hexdigest()
+    loop.append('obstruction_validation_requested', obstruction_id=obstruction_id,
+                request_id=request_id, source_version=version, reason=reason)
+    return request_id
+
+
+def validate(loop, obstruction_id, *, request_id, outcome, verifier_id, reason, recovery,
+             test_evidence, control_evidence):
+    row = _row(loop, obstruction_id)
+    _required(request_id, verifier_id, reason, recovery)
+    if (not row or row['state'] != 'awaiting_validation' or row['stale']
+            or row['validation_request']['request_id'] != request_id
+            or row['validation_request']['source_version'] != _source_version(row)):
+        raise ValueError('current matching independent validation request required')
+    if outcome not in {'supported', 'not_supported', 'needs_evidence'}:
+        raise ValueError('explicit independent comparison outcome required')
+    producers = {a['attempt'].get('producer_id', 'unattributed-worker') for a in row['alternatives'] if a.get('attempt')}
+    if verifier_id in producers:
+        raise ValueError('source producer cannot perform independent validation')
+    test, control = _proof(loop, test_evidence), _proof(loop, control_evidence)
+    source_paths = {p['path'] for a in row['alternatives'] if a.get('attempt')
+                    for p in (a['attempt']['test_evidence'], a['attempt']['control_evidence'])}
+    if test['path'] == control['path'] or {test['path'], control['path']} & source_paths:
+        raise ValueError('independent TEST/CONTROL artifacts must be distinct from the source')
+    loop.append('obstruction_validation_result', obstruction_id=obstruction_id, request_id=request_id,
+                source_version=_source_version(row), outcome=outcome, verifier_id=verifier_id,
+                reason=reason, recovery=recovery, test_evidence=test, control_evidence=control,
+                finding_verified=False, independence='runner-reported-separate-context')
+
+
 def project(events, base_path=None):
     rows = {}
     for event in events:
         kind, oid = event["type"], event.get("obstruction_id")
         if kind == "research_obstruction":
-            rows[oid] = {**event, "state": "blocked", "alternatives": [], "conclusion": "inconclusive"}
+            rows[oid] = {**event, "state": "blocked", "alternatives": [], "conclusion": "inconclusive",
+                         'validations': [], 'finding_verified': False}
         elif oid in rows:
             if kind == "obstruction_resumed":
                 rows[oid].pop("execution_problem", None)
@@ -329,8 +395,11 @@ def project(events, base_path=None):
                     bool(a.get("attempt")) for a in rows[oid]["alternatives"]
                 )
                 rows[oid]["alternatives"] = []
+                rows[oid].pop('validation_request', None)
+                rows[oid].pop('validation_outcome', None)
                 rows[oid].update(
                     state="blocked",
+                    conclusion='inconclusive',
                     normal="unknown",
                     evidence=event["evidence"],
                     recovery=event["recovery"],
@@ -360,12 +429,22 @@ def project(events, base_path=None):
                     recovery=event["recovery"],
                     untested_reason=event["untested_reason"],
                 )
+            elif kind == 'obstruction_validation_requested':
+                rows[oid].update(state='awaiting_validation', validation_request=event)
+            elif kind == 'obstruction_validation_result':
+                rows[oid]['validations'].append(event)
+                rows[oid].update(state='completed' if event['outcome'] != 'needs_evidence' else 'blocked',
+                                 validation_outcome=event['outcome'], recovery=event['recovery'],
+                                 conclusion=event['outcome'])
     for row in rows.values():
         proofs = [row["evidence"]]
         for a in row["alternatives"]:
             proofs.append(a["evidence"])
             if a.get("attempt"):
                 proofs += [a["attempt"]["test_evidence"], a["attempt"]["control_evidence"]]
+        if row.get('validation_outcome') and row['validations']:
+            latest = row['validations'][-1]
+            proofs += [latest['test_evidence'], latest['control_evidence']]
         row["stale"] = any(
             not evidence_resolves(p, base_path, events) or assess_artifact(p, events)["requires_revalidation"]
             for p in proofs
@@ -377,9 +456,15 @@ def project(events, base_path=None):
         if row["cause"] in HARD:
             row["next"] = "original_authorization_path"
         elif row["stale"]:
-            row["next"] = "revalidate_evidence"
+            row["next"] = "recover_waiting_evidence" if row['state'] == 'waiting' else 'revalidate_evidence'
         elif row["state"] == "waiting":
             row["next"] = "wait_for_recovery"
+        elif row['state'] == 'completed':
+            row['next'] = 'research_comparison_completed'
+        elif row['state'] == 'awaiting_validation':
+            row['next'] = 'perform_independent_validation'
+        elif row.get('validation_outcome') == 'needs_evidence':
+            row['next'] = 'validation_needs_evidence'
         elif row.get("execution_problem"):
             row["next"] = "reconcile_execution"
         elif any(a.get("attempt", {}).get("result") == "behavior_observed" for a in row["alternatives"]):
