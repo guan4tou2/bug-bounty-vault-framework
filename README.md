@@ -1,6 +1,6 @@
 # Bug Bounty Vault Framework
 
-An Obsidian vault that an **LLM coding agent operates** as a bug-bounty control plane — recon through disclosure. The skills, agents, and gates *are* the operating interface; the Markdown vault is the shared state the agent reads and writes.
+An Obsidian vault that an **LLM coding agent operates** as a bug-bounty control plane — recon through disclosure. The ASG ledger records research state and evidence; Markdown views expose that state. The optional research Harness supplies bounded work cards, while agents interpret evidence and propose hypotheses under existing gates.
 
 **LLM-first:** point an agent (Claude Code / Codex CLI / Gemini CLI) at `CLAUDE.md` / `CODEX.md` / `GEMINI.md` and start hunting. It still works by hand in plain Obsidian if you prefer — that is the fallback, not the default. No target data, no findings, no secrets included.
 
@@ -15,35 +15,57 @@ flows and independent verification through the existing ASG ledger. See the
 
 ```mermaid
 flowchart TB
-  subgraph VAULT["Obsidian Vault = repo root (git-tracked)"]
-    DASH["00 - Dashboard<br/>Dataview + Kanban"]
-    TGT["01 - Targets<br/>Findings · Submissions · Recon · Attempts · Services · Chains"]
-    TPL["07 - Templates<br/>Templater"]
-    KB["09 - Knowledge Base<br/>Patterns · Playbooks · Checklists · Lessons"]
+  subgraph STATE["Private Vault — canonical state"]
+    ASG["ASG ledger<br/>Hypotheses · evidence · research state"]
+    EFSM["Product flow model<br/>Roles · objects · states · conditions"]
+    KB["Knowledge Base<br/>Methods and references"]
   end
-  subgraph LLM["Optional LLM layer"]
-    SK[".claude / .codex / .gemini<br/>skills + agents (see .claude/)"]
+  subgraph HARNESS["Harness — next-step control"]
+    NEXT["Scheduler<br/>Gaps · prerequisites · stopping rules"]
+    CARD["Versioned work card<br/>One question · evidence refs · result contract"]
+    AGENT["Agent<br/>Interpret evidence · propose hypotheses"]
+    GATE["Execution gates<br/>Scope · effects · budgets"]
   end
-  subgraph LOCAL["workspace/ (gitignored, local only)"]
-    WS["workshop/&lt;target&gt;<br/>SCOPE · RECON_DB · HANDOFF · poc · scans"]
+  subgraph EXECUTION["Tool runtime and private workspace"]
+    TOOL["Configured executor<br/>Tool lifecycle and bounded comparisons"]
+    RAW["Raw artifacts and actual traces<br/>Local-only workspace/"]
+    IMPORT["Parser / adapter<br/>Observations and unverified candidates"]
   end
-  AUTO["automation/<br/>claim · init_target · session lifecycle"]
-  HUNT["bbflow tool layer<br/>(standalone install)<br/>zero-LLM candidate generation"]
-
-  AUTO -->|scaffolds| TGT
-  AUTO -->|scaffolds| WS
-  HUNT -->|"raw candidates"| WS
-  WS -->|"surface-map + OWASP gates<br/>then reviewed candidates"| TGT
-  TGT -->|"Finding → Submission → FORM"| DASH
-  TGT -->|"reusable lessons"| KB
-  KB -->|"informs hunting + new surface hypotheses"| TGT
-  TPL -.->|"creates notes in"| TGT
-  SK -.->|"drives the flow (optional)"| TGT
+  CHECK["Result validation<br/>Evidence checks · independent reproduction"]
+  DELIVERY["Finding management and reports<br/>Existing verification / delivery gates"]
+  VIEW["Read-only Obsidian views<br/>Progress · blockers · evidence gaps"]
+  ASG --> NEXT
+  EFSM -->|"candidate paths"| NEXT
+  NEXT --> CARD --> AGENT
+  KB -.->|"on-demand references"| AGENT
+  AGENT -->|"bounded test proposal"| GATE
+  GATE --> TOOL --> RAW --> IMPORT
+  IMPORT -->|"observations, not verified Findings"| ASG
+  ASG -->|"claims and evidence"| CHECK
+  CHECK -->|"checked results or remaining gaps"| ASG
+  ASG -->|"eligible findings"| DELIVERY
+  ASG --> VIEW
+  DELIVERY -->|"reusable lessons"| KB
 ```
+
+ASG research state and EFSM product state remain distinct. A generated path is a
+proposal; blocked work is inconclusive; a successful alternative is not automatically
+a verified Finding. Data-processing policy applies before evidence reaches a model.
+
+| Optional integration | Position and authority |
+|---|---|
+| GraphWalker | EFSM → bounded candidate-path planning; no execution or authorization |
+| Nmap XML / Nuclei JSONL / bbflow | Tool artifacts → parser → ASG observations and candidates |
+| Attack Flow | ASG dependency graph → read-only, labelled export |
+
+These adapters are opt-in. Faraday, Reconmap and ARTEX remain evaluation/design
+references; this architecture does not deploy them as additional orchestrators.
 
 ### The operating loop
 
-The agent runs a four-ring loop. The blue edge (④ → ①) is what makes it a *loop* and not a throwaway pipeline: lessons feed back into the wiki so each pass is stronger.
+The four-ring loop describes the broader learning cycle. Inside Ring 3, the Harness
+selects work from ASG state and supplies bounded cards to the agent, as shown above.
+The blue edge (④ → ①) closes the knowledge-capture loop.
 
 ```mermaid
 flowchart LR

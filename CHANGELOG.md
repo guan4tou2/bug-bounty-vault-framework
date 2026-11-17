@@ -4,6 +4,8 @@
 
 ### Evidence-driven research execution — 2026-11-17
 
+- Updated the README architecture diagram and the detailed Ring 3 execution diagram to show ASG/EFSM separation, scheduling/work cards, gated tools, evidence validation, report delivery and optional adapter positions. Kept the broader learning cycle separate from the execution loop.
+
 - Added shared ASG obstruction records and versioned work cards: establish normal CONTROL, discriminate unknown causes, compare bounded alternatives, retain inconclusive results, and persist budget stops with recovery conditions. Rewording a diagnosis or changing an obstruction ID cannot reset a hypothesis's history or budget.
 - Added controlled TEST/CONTROL execution with durable lifecycle receipts, cancellation, heartbeat/recovery handling, and program-policy checks. Completed steps resume from matching artifacts; uncertain execution requires reconciliation. Scope, platform, approval and safety boundaries cannot become bypass targets.
 - Added native Nmap XML/Nuclei JSONL imports, exact record references, immutable evidence hashes, actor/context-aware identity and repeat-import protection. Background candidate analysis remains advisory, uses explicit processing policy, and expires when evidence or its canonical role changes.

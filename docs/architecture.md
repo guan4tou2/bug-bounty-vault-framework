@@ -23,11 +23,18 @@ bbflow/
   Framework contract for connecting automation output back into the vault. The public repo includes design and example configs, not scanners.
 
 Automation
-  Local checks, initialization helpers, linting, and lifecycle validation.
+  ASG-backed research scheduling, versioned work cards, execution gates,
+  evidence/result validation, local checks and session lifecycle.
 
 Optional tooling runtime
   Recon or automation tools that can run independently from the vault.
 ```
+
+The [README architecture diagram](../README.md#architecture-at-a-glance) shows the
+research control plane. [Inside Ring 3](architecture-closed-loop.md#inside-ring-3-evidence-driven-research-execution)
+expands its execution loop, including the optional GraphWalker planner and
+read-only Attack Flow exporter. The folder map below describes storage, not
+execution authority or evidence quality.
 
 ## Vault Folders
 

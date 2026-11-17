@@ -71,6 +71,52 @@ But running Ring 4 is necessary, not sufficient. The `① → ③` edge ("inform
 
 ## 2. Ring 3's front gate: explore-first
 
+### Inside Ring 3: evidence-driven research execution
+
+The learning rings describe responsibilities; the execution loop below describes
+the implemented optional pilot. ASG owns research state, while the EFSM describes
+product roles, object relations, states and expected transitions in linked flow records.
+
+```mermaid
+flowchart TB
+  ASG["ASG ledger<br/>Facts · hypotheses · evidence · blockers"]
+  FLOW["EFSM product model<br/>Expected conditions and candidate paths"]
+  NEXT["Next-work scheduler<br/>Current evidence · prerequisites · remaining budget"]
+  CARD["Versioned work card<br/>Goal · selected evidence · completion and stop conditions"]
+  AGENT["Agent<br/>Interpretation and discriminating hypotheses"]
+  GATE["Existing authorization and execution gates"]
+  RUN["Configured tool adapter<br/>CONTROL / TEST · lifecycle receipts"]
+  RAW["Private raw artifacts<br/>Actual pre / action / post traces"]
+  VALID["Result contract and evidence checks<br/>Independent verification remains separate"]
+  GW["Optional GraphWalker<br/>Offline planned paths only"]
+  AF["Optional Attack Flow<br/>Read-only dependency export"]
+  ASG --> NEXT
+  FLOW --> NEXT
+  FLOW -.-> GW -.-> NEXT
+  NEXT --> CARD --> AGENT --> GATE --> RUN --> RAW --> VALID
+  VALID -->|"observations, remaining gaps, or checked results"| ASG
+  ASG -.-> AF
+```
+
+Missing normal CONTROL, unknown obstruction cause, an available alternative, and
+exhausted budget produce different work cards. Unsuccessful comparisons consume
+budget; identical premises cannot be retried by rewording or changing an ID. An
+exhausted comparison budget persists a stop and recovery condition. Scope, platform,
+approval and safety boundaries always return to the original authorization route.
+
+Model interpretation remains necessary: a response change, an observed operation,
+and independently established impact are different claims. Tool/import/analysis
+adapters cannot self-promote a Finding. The model can propose a new exploration
+question when current choices are inadequate; prerequisites and execution gates
+still apply. References are selected on demand rather than loaded wholesale.
+
+The controlled comparison adapter currently covers bounded argv operations;
+the browser Lab is a synthetic fixture, not a universal GUI executor. Full external
+systems are not deployed. See [work cards](blocked-research.md),
+[flow models](flow-model.md) and [pipeline limits](scan-pipeline.md).
+
+### Explore-first remains the front gate
+
 Ring 3 does **not** start at pattern-matching. It starts at a vuln-agnostic surface map. This is the single most-skipped, highest-value discipline in the loop.
 
 ```text
