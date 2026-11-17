@@ -1,6 +1,6 @@
 ---
 name: bb-agent-prompts
-description: Use when asked to use project Claude agents, agent-team-orchestrator, attack-chain-deep-dive, auto-poc-gen, bbflow-runner, chain-tracker, cve-monitor, cve-pattern-cross-gen, cvss-adversary, debug-leak-scanner, detection-rule-writer, disclosed-report-researcher, endpoint-interest-scorer, js-sourcemap-miner, lessons-miner, nuclei-template-gen, pre-recon, recon-diff, regression-tester, report-writer, sandbox-replay, skill-synthesizer, submit-form, triage-classifier, vault-sync, web-hunter, or to mirror bug bounty agent behavior in Gemini CLI.
+description: Use when asked to use project Claude agents, agent-team-orchestrator, attack-chain-deep-dive, auto-poc-gen, bbflow-runner, candidate-analyst, chain-tracker, cve-monitor, cve-pattern-cross-gen, cvss-adversary, debug-leak-scanner, detection-rule-writer, disclosed-report-researcher, endpoint-interest-scorer, js-sourcemap-miner, lessons-miner, nuclei-template-gen, pre-recon, recon-diff, regression-tester, report-writer, sandbox-replay, skill-synthesizer, submit-form, triage-classifier, vault-sync, web-hunter, or to mirror bug bounty agent behavior in Gemini CLI.
 ---
 
 # Bug Bounty Agent Prompt Router
@@ -15,6 +15,7 @@ Gemini CLI does not run Claude Code workspace agents natively. This skill makes 
 | `attack-chain-deep-dive` | `.claude/agents/attack-chain-deep-dive.md` |
 | `auto-poc-gen` | `.claude/agents/auto-poc-gen.md` |
 | `bbflow-runner` | `.claude/agents/bbflow-runner.md` |
+| `candidate-analyst` | `.claude/agents/candidate-analyst.md` |
 | `chain-tracker` | `.claude/agents/chain-tracker.md` |
 | `cve-monitor` | `.claude/agents/cve-monitor.md` |
 | `cve-pattern-cross-gen` | `.claude/agents/cve-pattern-cross-gen.md` |

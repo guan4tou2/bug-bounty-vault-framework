@@ -55,7 +55,7 @@ class Observation:
     action_id: str
     ok: bool
     outcome: Optional[str] = None      # e.g. "fulfilled", "payment_required", "403", "200_public"
-    evidence_ref: Optional[str] = None
+    evidence_ref: str | dict | None = None
     error: Optional[str] = None        # env/timeout/etc when ok is False
 
 
@@ -164,9 +164,36 @@ class LogicHypothesis:
     post_read_action: Optional[str] = None
     # explanations that must be ruled out before CONFIRMED is trusted
     alternative_explanations: list[str] = field(default_factory=list)
+    # explicit action risk tier (reads_only|state_query|writes_data|service_impact), set at
+    # GENERATION time by a template/brain that knows the action's nature. autodrive's risk gate
+    # prefers this over its runtime keyword heuristic — so the auto/defer decision is declared,
+    # not guessed. None → autodrive falls back to classifying test_action text.
+    action_risk: Optional[str] = None
 
 
 # ── evidence-verdict contract (the heart) ───────────────────────────────────
+def execution_status(test_obs: Observation, control_obs: Observation) -> str:
+    """The axis orthogonal to the verdict: did the actions RUN at all?
+
+    `verdict` answers "is the invariant broken"; this answers "did we get to look".
+    Both collapse to INCONCLUSIVE today, but they must not be counted together:
+    an undetermined RESULT is evidence that this hypothesis is hard to decide, while
+    a failed EXECUTION is evidence about the environment and says nothing about the
+    hypothesis. Letting the second accumulate toward a dead-end turns a login
+    timeout or an SSH hiccup into a permanently-skipped attack surface — the exact
+    failure the paper's §12 first batch warns about.
+
+    Returns "ok" when both actions ran, else "failed".
+
+    NOT split into env-fail vs tool-fail on purpose: `Observation.error` is free text
+    and no classifier exists, so the split would be a guess dressed as a field. The
+    raw message is kept alongside (`execution_error`) for whoever builds that later.
+    """
+    if not test_obs.ok or not control_obs.ok:
+        return "failed"
+    return "ok"
+
+
 def judge_logic(hyp: LogicHypothesis, test_obs: Observation, control_obs: Observation) -> tuple[Verdict, str]:
     """Decide a logic-vuln verdict from a test run + its control. Returns
     (verdict, reason). 200/tool-success alone is never enough — the control
@@ -248,15 +275,12 @@ def env_gate(hyp: LogicHypothesis, current_env: Env) -> Optional[str]:
 
 
 def reconcile(loop: HuntLoop, action_id: str) -> Optional[dict]:
-    """Interrupted-action reconciliation: if the ledger already has a SUCCESSFUL
+    """Interrupted-action reconciliation: if the ledger already has a completed
     execution for action_id, return it so we DON'T blindly re-run. Returns None if
-    it should run fresh. Failed executions (ok=False, timeout, error) are NOT reused
-    — the retry should re-execute with the corrected environment."""
+    it should run fresh."""
     for e in reversed(loop.events):
         if e.get("type") == "execution" and e.get("action_id") == action_id:
-            if e.get("exit_ok"):
-                return e
-            return None
+            return e if e.get("exit_ok") and e.get("outcome") is not None else None
     return None
 
 
@@ -319,32 +343,41 @@ def research_step(loop: HuntLoop, hyp: LogicHypothesis, current_env: Env,
     inv = invariant if invariant is not None else (
         resolve_invariant(loop, hyp.invariant_ref) if hyp.invariant_ref else None)
     if hyp.invariant_ref and inv is None and verdict == Verdict.CONFIRMED:
-        verdict, reason = Verdict.INCONCLUSIVE, (
-            f"invariant_ref '{hyp.invariant_ref}' cannot be resolved from the ledger; "
-            f"record the invariant first, then re-test. ({reason})")
+        verdict, reason = Verdict.INCONCLUSIVE, 'invariant reference unresolved; establish rule before confirmation'
     else:
         verdict, reason = guard_invariant_provenance(inv, verdict, reason)
-    # Capability grants still come only from a CONFIRMED verdict. The comparison
-    # record below keeps BOTH observations' evidence for every outcome, including
-    # refuted and inconclusive results; retaining evidence is not a capability.
+    # I1: only a CONFIRMED verdict carries evidence + grants the hypothesis's
+    # declared capabilities to the ledger's capability layer.
+    from evidence_refs import evidence_resolves, normalize_evidence
+    proof = normalize_evidence(test_obs.evidence_ref, loop.base_path,
+                               {"version": current_env.version, "role": current_env.role,
+                                "host": current_env.host}, events=loop.events,
+                               subject=hyp.hyp_id, provides=hyp.provides)
+    if verdict == Verdict.CONFIRMED and not evidence_resolves(proof, loop.base_path, loop.events,
+                                                            subject=hyp.hyp_id, provides=hyp.provides):
+        verdict = Verdict.INCONCLUSIVE
+        reason = "test evidence is missing or unresolved; repair the evidence before confirming"
     loop.record_verdict(hyp.hyp_id, verdict,
-                        evidence=(test_obs.evidence_ref if verdict == Verdict.CONFIRMED else None),
-                        provides=(hyp.provides if verdict == Verdict.CONFIRMED else []))
+                        evidence=(proof if verdict == Verdict.CONFIRMED else None),
+                        provides=(hyp.provides if verdict == Verdict.CONFIRMED else []),
+                        confidence="reproduced")
     # bookkeeping: a terminal verdict (confirmed/refuted) marks the exercised
     # surface tested, so resume advances instead of looping on replanning.
     if hyp.surface_id and verdict in (Verdict.CONFIRMED, Verdict.REFUTED):
         loop.add_surface(hyp.surface_id, untested=False)
-    from evidence_refs import normalize_evidence
+    exec_status = execution_status(test_obs, control_obs)
     comparison_evidence = {
         "kind": "comparison",
-        "test": normalize_evidence(test_obs.evidence_ref, loop.base_path, events=loop.events),
-        "control": normalize_evidence(control_obs.evidence_ref, loop.base_path, events=loop.events),
+        "test": proof,
+        "control": normalize_evidence(control_obs.evidence_ref, loop.base_path,
+                                      {"version": current_env.version, "role": current_env.role,
+                                       "host": current_env.host}, events=loop.events),
     }
     loop.append("logic_verdict", hyp_id=hyp.hyp_id, verdict=verdict.value, reason=reason,
                 test_outcome=test_obs.outcome, control_outcome=control_obs.outcome,
                 evidence=comparison_evidence,
-                execution="ok" if test_obs.ok and control_obs.ok and not test_obs.error and not control_obs.error else "error",
-                execution_error=test_obs.error or control_obs.error)
+                execution=exec_status,
+                execution_error=(test_obs.error or control_obs.error) if exec_status == "failed" else None)
     return {"verdict": verdict, "reason": reason, "next": next_hypotheses(hyp, verdict),
             "reused_prior_execution": bool(prior)}
 

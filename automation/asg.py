@@ -710,6 +710,9 @@ def append_events(target: str | Path, events: list[tuple[str, dict]], *,
                     events=loop.events, subject=data.get("hypothesis"), provides=data.get("provides") or [])
             from asg_research import normalize_event
             data = normalize_event(kind, data, loop)
+            if kind == 'delivery_record':
+                from research_delivery import normalize
+                data = normalize(data, loop)
             loop.append(kind, **data)
         guarded_save(loop, led, token)
     finally:
@@ -1054,6 +1057,13 @@ def write_snapshot(target: str | Path) -> Path:
     """Frontmatter/Dataview-friendly JSON snapshot of current state."""
     s = _summary(target); cap = s["cap"]; brief = s["brief"]
     chains = auto_chain(target, state=s["state"])
+    from asg_command_runs import action_runs
+    from candidate_analysis import project_analysis
+    from scan_import import evidence_valid
+    from evidence_review import project as evidence_review
+    from flow_model import summary as flow_summary
+    from blocked_research import project as blocked_project
+    events = s["state"]["loop"].events
     snap = {
         "target": _basename(target),
         "run_state": brief["run_state"],
@@ -1070,6 +1080,18 @@ def write_snapshot(target: str | Path) -> Path:
         "chain_entry_points": len(chains["entry_points"]),
         "chain_capabilities": len(chains["capabilities"]),
         "research": s["state"]["research"]["summary"],
+        "command_runs": action_runs(events),
+        "research_delivery": __import__('research_delivery').project(events),
+        "evidence_applicability": evidence_review(events),
+        "flow_model": flow_summary(events, target_dir(target)),
+        "blocked_research": blocked_project(events, target_dir(target)),
+        "candidate_analysis": [{k: j.get(k) for k in
+            ("job_id", "candidate_id", "status", "stale", "evidence_problems", "failure_class", "recovery")}
+            for j in project_analysis(events, target_dir(target))],
+        "scan_imports": [{"import_id": e["import_id"], "status": e["status"],
+                          "source": e["source"], "record_count": e["record_count"],
+                          "stale": any(not evidence_valid(a) for a in e["artifacts"])}
+                         for e in events if e["type"] == "scan_import"],
     }
     p = snapshot_path(target)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -1111,6 +1133,53 @@ def _render_generated(target: str | Path, *, state: Optional[dict] = None) -> st
     ]
     if s["state"]["research"]["enabled"]:
         blocks.append(research_markdown(s["state"]["research"]))
+    from asg_command_runs import action_runs
+    runs = action_runs(s["state"]["loop"].events)
+    from research_delivery import project as delivery_project
+    delivery = delivery_project(s["state"]["loop"].events)
+    if any(delivery.values()):
+        blocks.append(block("Finding management and report provenance", [
+            f"{kind}: {len(delivery[kind])}" for kind in ('flow', 'trace', 'instance', 'retest', 'group', 'report')]
+            + [f"work `{t['id']}` [{t['kind']}/{t['state']}]: {t['reason']}" for t in delivery['queue']]
+            + [f"stale {r['kind']}: `{r['id']}`" for r in delivery['repair']]))
+    if runs:
+        blocks.append(block("Tool execution attempts", [
+            f"`{r['id']}` — **{r['status']}**; evidence: `{r.get('output_ref') or 'missing'}`; "
+            f"sha256: `{r.get('sha256') or 'pending'}`; evidence: **{r['evidence_status']}**; "
+            f"stale: {r['stale']}; liveness: {r['liveness']}; stop confirmed: {r.get('stop_confirmed')}" for r in runs]))
+    from candidate_analysis import project_analysis
+    analysis = project_analysis(s["state"]["loop"].events, target_dir(target))
+    if analysis:
+        blocks.append(block("Candidate analysis (advisory only)", [
+            f"`{j['candidate_id']}` — **{j['status']}**; stale: {j['stale']}; "
+            f"evidence problems: {len(j['evidence_problems'])}; "
+            f"failure: {j.get('failure_class', 'none')}; recovery: {j.get('recovery', 'none')}; "
+            f"job: `{j['job_id']}`; sources: " + ", ".join(
+                f"`{a['path']}` ({a.get('locator', {})})" for a in j['snapshot']['artifacts'])
+            for j in analysis]))
+    receipts = [e for e in s["state"]["loop"].events if e['type'] == 'scan_import']
+    if receipts:
+        from scan_import import evidence_valid
+        blocks.append(block("Structured result imports", [
+            f"`{r['source']['run_id']}` — **{r['status']}**; parser: "
+            f"`{r['source']['parser']}/{r['source']['parser_version']}`; "
+            f"records: {r['record_count']}; errors: {len(r['errors'])}; sources: " + ", ".join(
+                f"`{a['path']}` (sha256: `{a['sha256']}`; stale: {not evidence_valid(a)})"
+                for a in r['artifacts']) for r in receipts]))
+    from evidence_review import project as evidence_review
+    freshness = evidence_review(s["state"]["loop"].events)
+    if freshness:
+        blocks.append(block("Evidence conditions and revalidation", [
+            f"`{r['owner']}` — **{r['status']}**; evidence: `{r['evidence_id']}`; "
+            f"bound: {r['bound']}; reasons: {', '.join(r['reasons']) or 'conditions match'}" for r in freshness]))
+    from flow_model import markdown as flow_markdown
+    flow_view = flow_markdown(s["state"]["loop"].events, target_dir(target))
+    if flow_view:
+        blocks.append(flow_view)
+    from blocked_research import markdown as blocked_markdown
+    obstruction_view = blocked_markdown(s['state']['loop'].events, target_dir(target))
+    if obstruction_view:
+        blocks.append(obstruction_view)
     return "\n\n".join(blocks)
 
 

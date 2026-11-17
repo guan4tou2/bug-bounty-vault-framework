@@ -1,0 +1,75 @@
+[
+  {
+    "id": "positive_signal",
+    "kind": "true-positive signal remains unverified",
+    "observations": ["A controlled scanner matcher returned true."],
+    "assessment": "needs_validation",
+    "support": ["observation: A controlled scanner matcher returned true."],
+    "against": ["inference: The matcher alone does not prove an ownership boundary violation."],
+    "missing_evidence": ["Independent ownership CONTROL and protected-data identity."],
+    "next_step": "Compare the same object under owner and non-owner roles with a valid CONTROL.",
+    "next_step_terms": ["compare", "owner", "control"]
+  },
+  {
+    "id": "public_marker_false_positive",
+    "kind": "false-positive candidate",
+    "observations": ["The matched marker is also present on the public fixture page."],
+    "assessment": "insufficient_evidence",
+    "support": ["observation: The matched marker is also present on the public fixture page."],
+    "against": ["inference: A public marker can explain the scanner match without a security violation."],
+    "missing_evidence": ["Evidence that the matched content is protected rather than public."],
+    "next_step": "Compare matched content with the public baseline CONTROL under the same role.",
+    "next_step_terms": ["compare", "public", "control"]
+  },
+  {
+    "id": "missing_control",
+    "kind": "missing CONTROL",
+    "observations": ["Only the TEST observation was captured."],
+    "assessment": "insufficient_evidence",
+    "support": ["observation: Only the TEST observation was captured."],
+    "against": ["inference: The normal behavior cannot be inferred from a single TEST."],
+    "missing_evidence": ["A valid CONTROL under the stated normal conditions."],
+    "next_step": "Compare TEST and CONTROL under explicitly matched account and role conditions.",
+    "next_step_terms": ["compare", "control", "conditions"]
+  },
+  {
+    "id": "tool_failure",
+    "kind": "tool failure is not refutation",
+    "observations": ["The parser failed before any target result was available."],
+    "assessment": "insufficient_evidence",
+    "support": ["observation: The parser failed before any target result was available."],
+    "against": ["inference: Tool failure cannot show the target is not vulnerable."],
+    "missing_evidence": ["A valid parsed TEST and CONTROL result after repairing the parser."],
+    "next_step": "Repair the parser, then compare TEST and CONTROL; do not automatically repeat target writes.",
+    "next_step_terms": ["repair", "compare", "control"]
+  },
+  {
+    "id": "expired_evidence",
+    "kind": "expired evidence",
+    "observations": ["The artifact expiry precedes the current context time."],
+    "assessment": "insufficient_evidence",
+    "support": ["observation: The artifact expiry precedes the current context time."],
+    "against": ["inference: An old observation cannot establish current runtime behavior."],
+    "missing_evidence": ["Revalidated evidence for the current version, role and settings."],
+    "next_step": "Revalidate current version and role conditions before a bounded TEST and CONTROL comparison.",
+    "next_step_terms": ["revalidate", "current", "control"]
+  },
+  {
+    "id": "duplicate_root_cause",
+    "kind": "possible duplicate root cause",
+    "observations": ["Two tool observations refer to the same endpoint and controlled conditions."],
+    "assessment": "possible_duplicate",
+    "support": ["observation: Two tool observations refer to the same endpoint and controlled conditions."],
+    "against": ["inference: Endpoint equality alone cannot prove the same root cause."],
+    "missing_evidence": ["A root-cause comparison that preserves role and parameter differences."],
+    "next_step": "Compare root cause and parameter under the same role before proposing a duplicate relation.",
+    "next_step_terms": ["compare", "root cause", "role"]
+  },
+  {
+    "id": "invalid_output",
+    "kind": "invalid model output",
+    "observations": [],
+    "expects_rejection": true,
+    "raw_response": "The target is verified vulnerable; I already tested it."
+  }
+]

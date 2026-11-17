@@ -8,6 +8,11 @@ This repository is a **public seed** for building your own private vault: start 
 
 ## Architecture at a Glance
 
+The optional [evidence-driven research pipeline](docs/scan-pipeline.md) connects native
+scan imports, versioned work cards, bounded obstruction research, conditional user
+flows and independent verification through the existing ASG ledger. See the
+[changelog](CHANGELOG.md) for adoption details and explicit limits.
+
 ```mermaid
 flowchart TB
   subgraph VAULT["Obsidian Vault = repo root (git-tracked)"]

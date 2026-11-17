@@ -33,15 +33,15 @@ def _task(tier="strong", failed=None):
 
 
 def test_model_tier_routes_by_difficulty():
-    assert model_for_tier("cheap").startswith("claude-haiku")
-    assert model_for_tier("strong") == "claude-sonnet-5"
-    assert model_for_tier("max") == "claude-opus-5"
+    assert model_for_tier("cheap") == 'haiku'
+    assert model_for_tier("strong") == 'sonnet'
+    assert model_for_tier("max") == 'opus'
     assert model_for_tier("unknown") == model_for_tier("strong")   # safe default
 
 
 def test_prompt_is_bounded_and_scope_injected():
     p = render_worker_prompt(_task(failed=["h0: refuted (reopen: different role)"]))
-    assert "curl_probe" in p and "GET/HEAD only" in p              # GET-only enforced
+    assert 'configured executor' in p and 'Do not infer safety from HTTP method' in p
     assert "GET /api/config (no creds)" in p and "baseline" in p   # both actions
     assert "version=2.6 role=unauth host=app-01" in p              # scope injected
     assert "h0: refuted" in p                                      # failed path to avoid
@@ -81,6 +81,7 @@ def test_orchestrator_runs_with_real_dispatch_shape():
     # the orchestrator drives end-to-end through make_dispatch, and model tier is
     # actually consulted per task (recorded by the fake spawn).
     loop = HuntLoop()
+    loop.asg = {'findings': [], 'recon_dimensions': {'passive_osint': {'status': 'completed'}}}
     h = _hyp("a", "/api/config")
     loop.add_hypothesis(h.hyp_id, requires=[])
     seen_models = []
@@ -98,12 +99,13 @@ def test_orchestrator_runs_with_real_dispatch_shape():
         budget=Budget(max_actions=5, max_replans=1),
     )
     assert rep.confirmed == ["/api/config"]                        # ran via real dispatch
-    assert seen_models == ["claude-sonnet-5"]                      # strong tier consulted
+    assert seen_models == ['sonnet']                              # strong tier consulted
 
 
 def test_orchestrator_tiers_up_for_chain_judgement():
     # a cross-flow (composed chain) hypothesis must get the strongest model.
     loop = HuntLoop()
+    loop.asg = {'findings': [], 'recon_dimensions': {'passive_osint': {'status': 'completed'}}}
     h = LogicHypothesis(
         hyp_id="cf", dimension="cross-flow", invariant="refund+coupon must not stack",
         applies_env=ENV, precondition="none", expected_normal="rejected",
@@ -119,5 +121,5 @@ def test_orchestrator_tiers_up_for_chain_judgement():
 
     autodrive(loop, current_env=ENV, dispatch=make_dispatch(spawn),
               propose=lambda l, c: None, ready_hyp=lambda hid: h,
-              budget=Budget(max_actions=5, max_replans=1))
-    assert seen == ["claude-opus-5"]                              # max tier for chain
+              budget=Budget(max_actions=5, max_replans=1), auto_risk=frozenset({'writes_data'}))
+    assert seen == ['opus']                                      # max tier for chain

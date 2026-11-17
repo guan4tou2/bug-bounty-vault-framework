@@ -1,0 +1,396 @@
+{
+  "attack_flow_commit": "6c26db9bbb34fcfd655f4fa7edfaa5a018c108ae",
+  "stix_commit": "c4f8d589acf2bdb3783655c89e0ffb6e150006ae",
+  "artifacts": [{
+    "path": "attack/attack-flow-extension-2.0.0.json",
+    "source": "https://raw.githubusercontent.com/center-for-threat-informed-defense/attack-flow/6c26db9bbb34fcfd655f4fa7edfaa5a018c108ae/stix/attack-flow-extension-2.0.0.json",
+    "sha256": "afdbac65edc9805ea2f3b2b84b4ae4908644e7f4190f28e8e836659d74d87e70"
+  }],
+  "schemas": [
+    {
+      "uri": "https://raw.githubusercontent.com/center-for-threat-informed-defense/attack-flow/main/stix/attack-flow-schema-2.0.0.json",
+      "id": "https://center-for-threat-informed-defense.github.io/attack-flow/schema/attack-flow-schema-2.0.0.json",
+      "path": "attack/attack-flow-schema-2.0.0.json",
+      "source": "https://raw.githubusercontent.com/center-for-threat-informed-defense/attack-flow/6c26db9bbb34fcfd655f4fa7edfaa5a018c108ae/stix/attack-flow-schema-2.0.0.json",
+      "sha256": "fff896f5e1bdc39d9b387c0d3571307037cf9be1059de9cd94d066d1da2997cc"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/bundle.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/bundle.json",
+      "path": "stix/common/bundle.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/bundle.json",
+      "sha256": "49cc034e8bb0d59ae01f902ad76c3009c996bf3149cfbfcec249c14629d8a494"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/extension-definition.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/extension-definition.json",
+      "path": "stix/common/extension-definition.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/extension-definition.json",
+      "sha256": "07fc8d42b40f7079d95718468470c1c23dba7659494b1e149a8eeefff1766c39"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/identity.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/identity.json",
+      "path": "stix/sdos/identity.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/identity.json",
+      "sha256": "c41996dd4c6467465f89bddc3b1c85f64bd70bce8606976a9e40ab19f89831dd"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/core.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/core.json",
+      "path": "stix/common/core.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/core.json",
+      "sha256": "e8562aa1dd674249c33a640d1d972183256e491b9af81eaa78d102da1c473ffb"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/cyber-observable-core.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/cyber-observable-core.json",
+      "path": "stix/common/cyber-observable-core.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/cyber-observable-core.json",
+      "sha256": "3196a7124b2f77be48bce4552b9cd9dc826bab642e0dfd5b7663f28a37eca0e0"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/identifier.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/identifier.json",
+      "path": "stix/common/identifier.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/identifier.json",
+      "sha256": "662be3c490c8f3b2aa82100d1dc41ec1acf93c04d099c857cc2f88217d688524"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/language-content.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/language-content.json",
+      "path": "stix/common/language-content.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/language-content.json",
+      "sha256": "325b864ce11ec020c6a50d343124cb14d4f08477ddb20088be4b7a25e4179128"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/marking-definition.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/marking-definition.json",
+      "path": "stix/common/marking-definition.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/marking-definition.json",
+      "sha256": "8259e1185380600436986164c401af2ac0d02e7e445957982cb4fd784b1f4f39"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/artifact.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/artifact.json",
+      "path": "stix/observables/artifact.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/artifact.json",
+      "sha256": "95b85955aa4fcc118d09f43cb8ee7ccbf19abe63c05d60ca664cfdde10c84db0"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/autonomous-system.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/autonomous-system.json",
+      "path": "stix/observables/autonomous-system.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/autonomous-system.json",
+      "sha256": "bca1d23f58f4dd338afb6c0a0f3d5d6f1e148e1b1471edadb917841d7ba0b98c"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/directory.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/directory.json",
+      "path": "stix/observables/directory.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/directory.json",
+      "sha256": "e2860b91eb26fbdc5868a5d18cfce63af278607b684199e9f18e26cba6cfcdec"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/domain-name.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/domain-name.json",
+      "path": "stix/observables/domain-name.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/domain-name.json",
+      "sha256": "b55ee99bb81a7761f87491bb9b99e6ef50d5fd60086b3371edcf69f1a0108a3d"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/email-addr.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/email-addr.json",
+      "path": "stix/observables/email-addr.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/email-addr.json",
+      "sha256": "8611e65a9be3d67a30150083cd4e7e60f910d316d71680023fa613417d811587"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/email-message.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/email-message.json",
+      "path": "stix/observables/email-message.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/email-message.json",
+      "sha256": "ee56f712c0552fa0750b5e510a89fbdbd11dec15379eacb37a4dd541731dd228"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/file.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/file.json",
+      "path": "stix/observables/file.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/file.json",
+      "sha256": "46fa0ace60a632600d85cb92c69970f3d1219f0d41b1bf1f767e3cc804bc8834"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/ipv4-addr.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/ipv4-addr.json",
+      "path": "stix/observables/ipv4-addr.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/ipv4-addr.json",
+      "sha256": "b49b75c2b47497b71329e7c2162205504daed7a85e411b501f94ec03709f5355"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/ipv6-addr.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/ipv6-addr.json",
+      "path": "stix/observables/ipv6-addr.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/ipv6-addr.json",
+      "sha256": "927d9947761fcb88c9c38529c2ff7b9118047070306db9242cc79952062e6a18"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/mac-addr.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/mac-addr.json",
+      "path": "stix/observables/mac-addr.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/mac-addr.json",
+      "sha256": "3b7a9b12f1417351b309ea70c8288023d165977672a59c24e7f4b438e2512079"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/mutex.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/mutex.json",
+      "path": "stix/observables/mutex.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/mutex.json",
+      "sha256": "f798fd910c8d7f7c42b10a853db7fdc24318f5a45563715d8414ff2ae06b46b6"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/network-traffic.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/network-traffic.json",
+      "path": "stix/observables/network-traffic.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/network-traffic.json",
+      "sha256": "23d2d00e1a79b7a8e29ae6f5c1c67ac59cc6520a711b6cb9cd5af9c649c0c49a"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/process.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/process.json",
+      "path": "stix/observables/process.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/process.json",
+      "sha256": "b215ea31a2b51329f9fa5ccabdf43f6b0ca2043f6cbb83705b3a48a20da68f39"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/software.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/software.json",
+      "path": "stix/observables/software.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/software.json",
+      "sha256": "63faf92104ffae8e63bbac86beb48803932bdfe5509e14af212f487c2ed03a99"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/url.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/url.json",
+      "path": "stix/observables/url.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/url.json",
+      "sha256": "668c7f14ace177984fc9eaed514e1583ddb3c77133f1427e324ad060f05483d2"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/user-account.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/user-account.json",
+      "path": "stix/observables/user-account.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/user-account.json",
+      "sha256": "d51b4e7cb2abba5980eff2e0cee32b34434a40df8d790e9d1cc8d809c100727d"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/windows-registry-key.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/windows-registry-key.json",
+      "path": "stix/observables/windows-registry-key.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/windows-registry-key.json",
+      "sha256": "b86625b39f87766de9895471c9292cc79ec4fe2ab4f11443a94b72d999c3e3ec"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/x509-certificate.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/observables/x509-certificate.json",
+      "path": "stix/observables/x509-certificate.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/observables/x509-certificate.json",
+      "sha256": "c0d0239b2f355325c4557902b0766f68e9e9c41f0c53ac723b24ec852a268369"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/attack-pattern.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/attack-pattern.json",
+      "path": "stix/sdos/attack-pattern.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/attack-pattern.json",
+      "sha256": "bf4c0263387b2295523342d3d91775e869a7c820b7701236a19040cae391e025"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/campaign.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/campaign.json",
+      "path": "stix/sdos/campaign.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/campaign.json",
+      "sha256": "8dd7f13eb44f1da74503c6c4ec1e59309457c711034ce51831b843bc617b0244"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/course-of-action.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/course-of-action.json",
+      "path": "stix/sdos/course-of-action.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/course-of-action.json",
+      "sha256": "56fd137d6d9e4bcfe56d7c98acc05a79957db924381ee40680d2e621274079c5"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/identity.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/identity.json",
+      "path": "stix/sdos/identity.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/identity.json",
+      "sha256": "c41996dd4c6467465f89bddc3b1c85f64bd70bce8606976a9e40ab19f89831dd"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/indicator.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/indicator.json",
+      "path": "stix/sdos/indicator.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/indicator.json",
+      "sha256": "735fe21394518bf1049696d5641fceee8882d6817f6db3eaf76a1e4627802dc8"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/infrastructure.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/infrastructure.json",
+      "path": "stix/sdos/infrastructure.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/infrastructure.json",
+      "sha256": "8ac849f0b836ee40df028c2ea24aadf651b4b671469dc8383f0ca369b74a3d45"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/intrusion-set.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/intrusion-set.json",
+      "path": "stix/sdos/intrusion-set.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/intrusion-set.json",
+      "sha256": "11abaad61fe257c460cb4ede79f0ec41a0bb2abc90642edf30c4017ac315686d"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/malware-analysis.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/malware-analysis.json",
+      "path": "stix/sdos/malware-analysis.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/malware-analysis.json",
+      "sha256": "c8798dca35b927ef289beca8ec38cde3195a9540b3c390e678b397274ba794fa"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/malware.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/malware.json",
+      "path": "stix/sdos/malware.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/malware.json",
+      "sha256": "364f9bf463862938d0f2a10c2355f4e186b2235358499d88133c2f9e63f140e6"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/observed-data.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/observed-data.json",
+      "path": "stix/sdos/observed-data.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/observed-data.json",
+      "sha256": "4e69375e7e3e34910f12173d35abb9cb528ebed963f9e90642e39d8833509573"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/report.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/report.json",
+      "path": "stix/sdos/report.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/report.json",
+      "sha256": "b231cbd1b57bb528ca3f01dc925fb012653c149436be44d24d6946cffe3beaf3"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/threat-actor.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/threat-actor.json",
+      "path": "stix/sdos/threat-actor.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/threat-actor.json",
+      "sha256": "8e790da27810d6fdc20c7d8612c352a5a417e88f8cce7c572c70678f072c5490"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/tool.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/tool.json",
+      "path": "stix/sdos/tool.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/tool.json",
+      "sha256": "c557d058218414b9355ddddddb507e4c60cd2859fee9b94a3a7734213374579e"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/vulnerability.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sdos/vulnerability.json",
+      "path": "stix/sdos/vulnerability.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sdos/vulnerability.json",
+      "sha256": "13fbd3d0b01a932bda713b81ee2922d1d6e65e6e539e7391625c9a2faa764d88"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sros/relationship.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sros/relationship.json",
+      "path": "stix/sros/relationship.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sros/relationship.json",
+      "sha256": "f70c0124084e8d22fc25998e4cae12c19dc96093a152bd93967aa2c7abe84cfc"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sros/sighting.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/sros/sighting.json",
+      "path": "stix/sros/sighting.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/sros/sighting.json",
+      "sha256": "7f54f7af80917093f4ef8dea98095509d36f8b9012ace538d8f4a888336546a7"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/timestamp.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/timestamp.json",
+      "path": "stix/common/timestamp.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/timestamp.json",
+      "sha256": "e816ad77e8f46b66aaaacac6b7f5f14dcd9d320c01d992455a7958481337d4d9"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/binary.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/binary.json",
+      "path": "stix/common/binary.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/binary.json",
+      "sha256": "18d0faef9f42579d5c7f337659ae6f72334029209035c05f21583ae2be17bf25"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/dictionary.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/dictionary.json",
+      "path": "stix/common/dictionary.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/dictionary.json",
+      "sha256": "4984a232a664bd54d2fb99a49c052a38da2ce90e43995a007a9e5fa8d208c116"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/extension.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/extension.json",
+      "path": "stix/common/extension.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/extension.json",
+      "sha256": "e4537cf608b709597ede2ad39027defa979df9ad79666b15643d625ac260f15d"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/external-reference.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/external-reference.json",
+      "path": "stix/common/external-reference.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/external-reference.json",
+      "sha256": "ade5360f0e7b0863ad933d34a54802e7ac9e85d1e0db53cf449e43465ba81127"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/granular-marking.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/granular-marking.json",
+      "path": "stix/common/granular-marking.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/granular-marking.json",
+      "sha256": "24c51ff9d99f1902b156e6e04e360e23ea01cded49d07a83fca709cef26884c0"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/hashes-type.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/hashes-type.json",
+      "path": "stix/common/hashes-type.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/hashes-type.json",
+      "sha256": "6493e13b08fbf0ced26e956166e03ab37011ae1bb2c26d80a449ea7c81155c50"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/hex.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/hex.json",
+      "path": "stix/common/hex.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/hex.json",
+      "sha256": "d079f4141f68615424756bd74d16b4a47b9a7388dd836845849595db6e59f253"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/kill-chain-phase.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/kill-chain-phase.json",
+      "path": "stix/common/kill-chain-phase.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/kill-chain-phase.json",
+      "sha256": "0ed76e8debb9eb358938e7454953e9fe28865b7941cabbbbf0d134fe7c7a2d7f"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/properties.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/properties.json",
+      "path": "stix/common/properties.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/properties.json",
+      "sha256": "ccb1920b6d2c9a80856d36e870163b3b298cf9c3ca42742f3f63dfbc87295754"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/timestamp.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/timestamp.json",
+      "path": "stix/common/timestamp.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/timestamp.json",
+      "sha256": "e816ad77e8f46b66aaaacac6b7f5f14dcd9d320c01d992455a7958481337d4d9"
+    },
+    {
+      "uri": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/url-regex.json",
+      "id": "http://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/stix2.1/schemas/common/url-regex.json",
+      "path": "stix/common/url-regex.json",
+      "source": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/c4f8d589acf2bdb3783655c89e0ffb6e150006ae/schemas/common/url-regex.json",
+      "sha256": "88a22341762c7b039a1ce349d808a1ed4e0b560af11dbc911532eeb580026115"
+    }
+  ]
+}

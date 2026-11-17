@@ -39,7 +39,8 @@ def inflight_actions(loop: HuntLoop) -> list[str]:
             started[e["action_id"]] = e
         elif e.get("type") == "action_finished":
             finished.add(e["action_id"])
-    return sorted(a for a in started if a not in finished)
+    from command_lifecycle import reconciled_actions
+    return sorted(a for a in started if a not in finished and a not in reconciled_actions(loop.events))
 
 
 def _objective(loop: HuntLoop) -> str | None:

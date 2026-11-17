@@ -105,6 +105,10 @@ def _resolved_proof(value, base, events, seen=frozenset(), *, subject=None, prov
         value = value if isinstance(value, dict) else normalize_evidence(value, base)
     if not isinstance(value, dict):
         return None
+    if "applicability" in value:
+        from evidence_applicability import assess_artifact
+        if assess_artifact(value, events)["requires_revalidation"]:
+            return None
     kind = value.get("kind")
     if kind == "artifact":
         try:

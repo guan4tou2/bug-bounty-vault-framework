@@ -115,7 +115,7 @@ def test_full_output_contract_candidate_is_ingested_as_lead(tmp_path):
 def test_remote_argv_wraps_ssh_safely():
     from hunt_integration import remote_argv
     assert remote_argv("vps-host", ["curl", "-s", "https://x/api"]) == \
-        ["ssh", "vps-host", "--", "curl", "-s", "https://x/api"]
+        ["ssh", "--", "vps-host", "curl -s https://x/api"]
     with pytest.raises(ValueError):
         remote_argv("evil; rm -rf /", ["curl"])   # shell metachars in host rejected
     with pytest.raises(ValueError):

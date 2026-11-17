@@ -115,7 +115,9 @@ def test_env_mismatch_blocks_execution():
 def test_interrupted_action_is_reconciled_not_rerun():
     lp = HuntLoop()
     # simulate a mid-run interrupt: the test execution was already recorded.
-    lp.record_execution(ExecutionResult("fulfil_unpaid", exit_ok=True, output_ref="poc/prior"))
+    lp.record_execution(ExecutionResult("fulfil_unpaid", exit_ok=True,
+                        output_ref={'kind': 'observation', 'text': 'Controlled prior unpaid fulfillment'},
+                        outcome='fulfilled'))
     assert reconcile(lp, "fulfil_unpaid") is not None
     reran = {"n": 0}
     research_step(
@@ -132,7 +134,8 @@ def test_three_cases_are_distinguished_in_one_ledger():
     verdicts = []
     # unique action_ids per experiment (the reconcile contract keys on action_id).
     for hid, ta, ca, t, c in [
-        ("V", "tV", "cV", Observation("tV", True, "fulfilled", "poc/x"), Observation("cV", True, "payment_required")),
+        ("V", "tV", "cV", Observation("tV", True, "fulfilled", {'kind': 'observation',
+          'text': 'Controlled fixture fulfilled an unpaid order'}), Observation("cV", True, "payment_required")),
         ("N", "tN", "cN", Observation("tN", True, "200_public"), Observation("cN", True, "200_public")),
         ("E", "tE", "cE", Observation("tE", False, error="timeout"), Observation("cE", True, "payment_required")),
     ]:

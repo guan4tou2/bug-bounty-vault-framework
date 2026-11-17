@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Evidence-driven research execution — 2026-11-17
+
+- Added shared ASG obstruction records and versioned work cards: establish normal CONTROL, discriminate unknown causes, compare bounded alternatives, retain inconclusive results, and persist budget stops with recovery conditions. Rewording a diagnosis or changing an obstruction ID cannot reset a hypothesis's history or budget.
+- Added controlled TEST/CONTROL execution with durable lifecycle receipts, cancellation, heartbeat/recovery handling, and program-policy checks. Completed steps resume from matching artifacts; uncertain execution requires reconciliation. Scope, platform, approval and safety boundaries cannot become bypass targets.
+- Added native Nmap XML/Nuclei JSONL imports, exact record references, immutable evidence hashes, actor/context-aware identity and repeat-import protection. Background candidate analysis remains advisory, uses explicit processing policy, and expires when evidence or its canonical role changes.
+- Added conditional user-flow models, separate planned/actual/reproduced traces, bounded declarative EFSM predicates and optional GraphWalker 1.0.4 offline planning. Paths and product guards never grant execution authority or prove security coverage.
+- Added read-only Attack Flow export with pinned official schemas, offline validation and explicit pending-state labels. The public bundle contains schema sources and licenses, not operational attack records.
+- Added synthetic Harness evaluation, resumable opt-in model comparison, an owned loopback browser fixture, evidence-condition checks, scoped failure memory, and no-progress stopping. No model calls, scanner execution or external services run by default.
+- Integrated the new state into ASG Markdown/snapshots, continuation and next-work selection, retained the public round-log callback, and shortened shared obstruction instructions after adding behavior tests. Included only generic code, synthetic tests and portable documentation; private runtime artifacts and evaluation transcripts remain excluded.
+
+See [research pipeline](docs/scan-pipeline.md), [flow models](docs/flow-model.md),
+[obstruction/work-card contract](docs/blocked-research.md) and [evaluation](docs/harness-evaluation.md).
+
 ### ASG research provenance
 
 - Goals with acceptance criteria, work intents, sourced facts, hints, and expandable digests share the existing ASG ledger and canonical Finding identities.

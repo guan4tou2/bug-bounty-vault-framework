@@ -74,8 +74,71 @@ def compute(target: str) -> dict:
     rd = state["recon_dimensions"]
     paths = [p for p in state["paths"] if isinstance(p, dict) and p.get("name")]
     research = state.get("research", {})
+    from blocked_research import project as blocked_project
+    diagnosed_hypotheses = {r['hyp_id'] for r in blocked_project(state['loop'].events, TARGETS / target)}
+    for event in state['loop'].events:
+        if event['type'] == 'obstruction_evidence_gap' and event['hyp_id'] not in diagnosed_hypotheses:
+            items.append({'kind': 'blocked-evidence', 'ref': event['hyp_id'],
+                          'action': '補齊受阻結果、正常對照與環境證據', 'detail': event['reason'], 'priority': 0})
+    for obstruction in blocked_project(state['loop'].events, TARGETS / target):
+        items.append({'kind': 'blocked-research', 'ref': obstruction['obstruction_id'],
+                      'action': obstruction['next'], 'detail': obstruction['recovery'],
+                      'alternative_id': obstruction['next_alternative'],
+                      'priority': 0 if obstruction['next'] in
+                      {'establish_normal_control', 'discriminate_obstruction', 'reconcile_execution'} else 2})
+    from research_delivery import project as delivery_project
+    delivery = delivery_project(state['loop'].events)
+    for problem in delivery['repair']:
+        items.append({'kind': 'delivery-evidence', 'ref': problem['id'],
+                      'action': '修復報告／流程的過期證據', 'priority': 0})
+    for task in delivery['queue']:
+        items.append({'kind': 'finding-work', 'ref': task['id'],
+                      'action': task['reason'], 'state': task['state'],
+                      'finding_id': task['finding_id'], 'priority': 1 if task['state'] == 'open' else 3})
     rsummary = research.get("summary", {})
     rnodes = {n["ref"]: n for n in research.get("nodes", [])}
+    from flow_model import summary as flow_summary
+    flow = flow_summary(state["loop"].events, TARGETS / target)
+    for trace in flow["traces"]:
+        if trace["status"] == "incomplete" and not trace["stale"]:
+            items.append({"kind": "flow-resume", "ref": trace["trace_id"],
+                          "action": "接續已保存的實際使用者操作軌跡", "detail": f"next step={trace['next_step']}",
+                          "priority": 0})
+    for replay in flow["reproductions"]:
+        if replay["stale"]:
+            items.append({"kind": "flow-revalidation", "ref": replay["reproduction_id"],
+                          "action": "重新核對流程重播與原始證據", "detail": replay["case_id"], "priority": 0})
+    from asg_command_runs import action_runs
+    from command_lifecycle import unresolved_actions
+    unresolved = set(unresolved_actions(state["loop"].events))
+    for run in action_runs(state["loop"].events):
+        if run["id"] in unresolved and (run["liveness"] in {"controller_lost", "heartbeat_stale"}
+                                        or run.get("stop_confirmed") is False):
+            items.append({"kind": "execution-recovery", "ref": run["id"],
+                          "action": "確認執行端停止與副作用", "detail": run["liveness"], "priority": 0})
+    from evidence_review import project as evidence_review
+    for proof in evidence_review(state["loop"].events):
+        if proof["bound"] and proof["requires_revalidation"]:
+            items.append({"kind": "evidence-revalidation", "ref": proof["owner"],
+                          "action": "複驗證據適用條件", "detail": "; ".join(proof["reasons"]),
+                          "evidence_id": proof["evidence_id"], "priority": 0})
+    from candidate_analysis import project_analysis
+    terminal_candidates = (set(state["capsule"]["confirmed"]) | set(state["capsule"]["refuted"]) |
+                           set(state["capsule"].get("withdrawn_hypotheses", [])) |
+                           {d.get("hyp_id") for d in state.get("dead_paths", [])})
+    for job in project_analysis(state["loop"].events, TARGETS / target):
+        if job["candidate_id"] in terminal_candidates:
+            continue
+        if job.get("superseded"):
+            continue
+        repair = bool(job["evidence_problems"])
+        items.append({"kind": "candidate-evidence" if repair else "candidate-analysis",
+                      "ref": job["candidate_id"], "job_id": job["job_id"],
+                      "action": "修復候選證據" if repair else
+                      "獨立驗證候選分析" if job["status"] == "completed" else "接續候選分析工作",
+                      "detail": f"status={job['status']}; stale={job['stale']}; "
+                      f"failure={job.get('failure_class')}; recovery={job.get('recovery')}; advisory only",
+                      "priority": 0 if repair else 1})
     for ref in rsummary.get("running_intents", []):
         items.append({"kind": "research-resume", "ref": ref, "action": f"接續研究工作：{_redact_label(rnodes[ref]['text'])}",
                       "detail": "工作已領取；先查進度與已有輸出，避免重複執行", "priority": 0})
@@ -255,6 +318,8 @@ def compute(target: str) -> dict:
     # 同一個信任邊界內，而當時兩者混在同一層，於是拿到 token 之後常跑去掃新子網域。
     KIND_RANK = {"capability-unlock": -1, "research-intent": 0, "capability-sweep": 0, "scope-host": 1}
     items.sort(key=lambda x: (x["priority"], KIND_RANK.get(x["kind"], 5)))
+    from work_cards import attach
+    attach(items[:3], state['loop'].events, TARGETS / target)
     return {"target": target, "generated_from": state["source"],
             "event_cursor": state["event_cursor"],
             "note": "projection only — do NOT hand-edit; hunt_run/downstream readers read this",

@@ -29,7 +29,7 @@ def _hyp(hid, surface, requires, provides):
         hyp_id=hid, dimension="roles", invariant=f"unauth {surface} must be denied",
         applies_env=ENV, precondition="none", expected_normal="denied",
         test_action=f"GET {surface}", control_action=f"GET {surface} (baseline)",
-        violation_outcome="200", provides=provides, surface_id=surface,
+        violation_outcome="200", requires=requires, provides=provides, surface_id=surface,
         expected_normal_outcome="302")
 
 
@@ -38,7 +38,7 @@ def _outcomes(hid):
     return {
         "a-config":  ("200", "302"),         # CONFIRMED -> provides cap:config
         "b-public":  ("302", "302"),         # REFUTED (test == control)
-        "c-flaky":   (None, "302"),          # INCONCLUSIVE (test env error)
+        "c-flaky":   ("404", "302"),         # Executed comparison, insufficient discriminator
         "d-chained": ("200", "302"),         # CONFIRMED (only reachable after cap:config)
         "e-variant": ("302", "302"),         # replan variant -> REFUTED
     }[hid]
@@ -46,6 +46,7 @@ def _outcomes(hid):
 
 def _build():
     loop = HuntLoop()
+    loop.asg = {'findings': [], 'recon_dimensions': {'passive_osint': {'status': 'completed'}}}
     reg = {
         "a-config":  _hyp("a-config", "/api/config", [], ["cap:config"]),
         "b-public":  _hyp("b-public", "/api/public", [], []),
@@ -148,6 +149,7 @@ def test_blocked_reopens_only_when_precondition_lands():
     # d-chained requires cap:config; with a-config removed it stays blocked forever
     # and the loop hands back (missing precondition) rather than spinning.
     loop = HuntLoop()
+    loop.asg = {'findings': [], 'recon_dimensions': {'passive_osint': {'status': 'completed'}}}
     d = _hyp("d-chained", "/api/chained", ["cap:config"], [])
     loop.add_hypothesis(d.hyp_id, requires=REQUIRES[d.hyp_id])
     rep = autodrive(
@@ -179,7 +181,9 @@ def test_round_log_receives_structured_per_round_entries():
     )
     assert entries, "round_log should have received at least one entry"
     for e in entries:
-        assert set(e) >= {"round", "hyp_id", "verdict", "reason", "tier"}
+        assert set(e) >= {"round", "hyp_id", "verdict", "reason", "tier",
+                          'dimension', 'knowledge_count', 'was_replan'}
+        assert len(e['reason']) <= 200
     rounds = [e["round"] for e in entries]
     assert rounds == sorted(rounds)
     verdicts = {e["hyp_id"]: e["verdict"] for e in entries}
