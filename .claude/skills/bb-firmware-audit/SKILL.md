@@ -28,6 +28,30 @@ Do not unpack until all pass:
 
 Also: resolve any deferred "must-do at session open" items from your handoff notes before new hunting.
 
+### Phase 0b — declare `recon_dimensions` up front (mandatory for hardware targets)
+
+A recon-completeness gate's floor is written for **internet-facing web assets**. A firmware / hardware target will collide with it — and several dimensions have **no structural counterpart** (the device has no domain, no cloud bucket, no ASN). Backfilling only when you hit the gate = redoing it for every firmware target.
+
+**Fill this into the Attack Surface Graph's `recon_dimensions` YAML block before you start.** Template (edit to the real situation — do not copy the reasons verbatim):
+
+```yaml
+recon_dimensions:
+  passive_osint:   { status: done, evidence: "model/firmware version vs NVD + vendor advisory; GPL release obtained" }
+  subdomain_enum:  { status: n/a,  reason: "target is a LAN device <IP>, no domain / DNS name to enumerate" }
+  live_host_port:  { status: done, evidence: "nc -z <IP>: <open ports> OPEN, <closed ports> closed" }
+  url_content_discovery: { status: done, evidence: "<N> endpoints / <M> operations recovered from shipped JS/bytecode" }
+  tech_stack_deep: { status: done, evidence: "<SoC>, <bootloader>, <httpd>, <component versions> — all from the unpacked image" }
+  js_analysis:     { status: done, evidence: "firmware web JS (<N> files) + login-protocol reverse" }
+  infra_layer:     { status: n/a,  reason: "no public IP / CDN / ASN" }
+  cloud_assets:    { status: n/a,  reason: "no S3/GCS/Azure endpoint in the firmware" }
+  asset_scope:     { status: n/a,  reason: "owned physical device, no WHOIS/RDAP/ASN attribution" }
+  leaked_credentials:  { status: n/a, reason: "device password is operator-set; no third-party leak to check" }
+  waf_cdn_fingerprint: { status: n/a, reason: "embedded LAN httpd, no WAF/CDN" }
+  screenshot_visual:   { status: skipped, reason: "single device / single web UI; visual clustering adds nothing" }
+```
+
+> ⚠️ `n/a` must carry a **real reason**, not a reason invented to pass the gate. If the target actually has a cloud component (an app backend, a bound service), those dimensions are `pending`, not `n/a` — a device that reports it is bound to a cloud service is a signal that **the backend is a separate target**, not an `n/a`.
+
 ---
 
 ## Phase 1 — Unpack & triage

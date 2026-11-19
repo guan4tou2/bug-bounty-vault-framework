@@ -32,6 +32,8 @@ ssh <vps-user>@<vps-ip> \
   "curl -s -o /dev/null -w '%{http_code}\n' https://<target>/"
 ```
 
+> The second observation point must have a **genuinely different egress IP**. A host that shares your egress (e.g. another VM on the same network / WSL instance) cannot distinguish "the target is down" from "my IP is banned" — both points would see the same 5xx.
+
 **Results:**
 - Local + VPS both 5xx → real disruption, continue to Step 2
 - Only local 5xx → you may be banned / network issue, not an incident; stop testing but no notification needed
@@ -56,6 +58,10 @@ Call vendor's customer service:
 Phone is the fastest channel to get a service restarted.
 
 ### Step 4 — Formal Apology Email (< 1 hour)
+
+**Pick the legal-protection anchor by context:**
+- **CVE / bug-bounty disclosure:** anchor = the disclosure platform / CERT case ID; email `security@<vendor>.com` (or the vendor's support address).
+- **Client engagement (authorized/contracted test):** anchor = the SOW / authorization letter + the client's project contact. Notify the **client's project contact first** (not only the system owner / vendor), through the existing communication channel, and follow any incident-reporting flow the contract specifies — in addition to this SOP.
 
 **To:** `security@<vendor>.com` (or vendor's support email)
 

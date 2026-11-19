@@ -19,6 +19,18 @@ Run this when:
 - a report severity feels uncertain
 - the user asks "can this chain further", "deep dive", "chain", "impact", or "dig deeper"
 
+## Second trigger: per-system assembly
+
+The question above is a **per-finding** escalation judgment. It never asks "this system already has 20 findings — should they be assembled into a chain?" The failure mode is a vault with hundreds of Findings and almost no Attack Chains, and a single host accumulating dozens of findings with zero chains.
+
+```bash
+bash automation/check_chain_assembly.sh [<target>]
+```
+
+A system flagged ❌ has accumulated ≥5 findings but no chain. Assemble each one, using `07 - Templates/Template - Attack Chain.md` (parallel ranked chains · each step traceable to an operation ID · weakest link stated explicitly · impact with a boundary statement · systemic defects in their own section).
+
+**In a red-team context this is fatal:** when the client asks "can you get in?", a stack of unassembled findings cannot answer — a stack of step-1 findings still sums to step-1 on the privilege ladder.
+
 ## Required Inputs
 
 - Target and scope source

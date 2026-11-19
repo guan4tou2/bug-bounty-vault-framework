@@ -47,6 +47,20 @@ T7 │ One-off inline orchestration (ad-hoc Workflow use)      │ ← disposabl
 
 ---
 
+## 2.0 Sedimentation pool: experience vs. process, the two axes (overview)
+
+> Before promoting a layer, first split: is this **hunting experience** (what the world looks like — recalled, needs judgment) or **process discipline** (how we act every time — auto-enforced, runnable mindlessly)? The two take different ladders; mechanizing experience by force makes a bad gate, and leaving process in prose repeats the mistake. Criteria and landing in `bb-knowledge-capture` §Sedimentation Pool Model.
+
+```
+raw observation → sedimentation pool (Attempt / Ledger-Tried / Experience-to-Tool / Auto-mem; dump mindlessly, no ID)
+   │  settle: same root cause ≥2 cases and a stable shape → crystallize, classify only now
+   ├─ experience → LL / Pattern (T2, recall, strong trigger; mechanization path may be N/A: judgment)
+   │          └─ graduation edge: the slice that can become a deterministic check → gate; judgment residue stays in the LL
+   ├─ process → Skill / gate (T4, enforce, mechanization path mandatory)
+   └─ drain: zero citations + > 6 months → status=archived (drops out of retrieval, git keeps history)
+            detection `lesson_citation_report.py --stale` (wired into vault_maintenance). This is the pool's only exit.
+```
+
 ## 2. Promote / demote decision trees
 
 ### Note → KB (T2)

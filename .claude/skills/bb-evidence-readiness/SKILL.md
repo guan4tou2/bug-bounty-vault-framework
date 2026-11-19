@@ -21,6 +21,7 @@ Run this when:
 
 | Gate | Ready condition |
 |---|---|
+| **Negative-result scoping** | Any conclusion that "an attacker **cannot** do X / is blocked / has no permission / is unaffected" must state in the sentence **the state it was tested under** (session level, account setup, environment). Cannot state it ⇒ mark `unverified`, not `disproven`. Distinguish the *shape* of a rejection: `403` is an authorization denial, whereas `400 field validation` means the endpoint **accepted the caller** and is only arguing about parameters — the two are not interchangeable. Inheriting someone else's negative result requires re-checking their test conditions and citing the source; no raw `.resp` means no evidence. Also ask the **inverse**: negate the precondition — does that make the attack harder or easier? Using this conclusion to set `A:N` / `C:N` / `I:N` holds it to the same bar as a positive claim. ([[LL-416]]) |
 | Repro steps | Another reviewer can reproduce with the given steps |
 | Request evidence | Full request / curl / command is present when applicable |
 | Response evidence | Relevant response excerpt, screenshot, file path, or raw artifact reference exists |

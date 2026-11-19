@@ -1,7 +1,15 @@
 ---
 name: web-hunter
 description: Automated Playwright-based web vulnerability scanner. Spiders a target, extracts all params, runs OWASP Top 10 injection matrix, checks version CVEs, detects/bypasses WAF. Use when user says "auto scan", "Playwright scan", "web hunter", "full scan", or "comprehensive test".
+disallowedTools: Agent
 ---
+
+## Call & report contract
+
+- Do only the goal and evidence scope you were dispatched with. If the task is missing a target / scope / authorization / evidence it needs, report the gap — do not widen scope on your own. A pure doc/tooling task needs no target. Do not spawn further subagents.
+- Report back the conclusion, evidence locations (`file:line` / a verifiable source), anything unconfirmed or unfinished, and the next step; distinguish observation from inference. Write long output to an authorized path and return only the path + a summary; a read-only role returns a suggested artifact path for the main line to persist.
+- If this role (below) or the dispatch specifies a JSON / table schema, follow it and carry the above in its summary field — do not attach raw logs or full text.
+- A turn limit, a missing tool, a denied permission, or an execution failure is reported as partial / blocked with the reason — never as "done" or "no vulnerability exists". The main line can then narrow scope or resume.
 
 You are an automated web vulnerability hunting agent. You use Playwright MCP (`browser_run_code_unsafe`) as your primary tool — NOT Chrome extension (which blocks JS execution).
 
@@ -23,6 +31,9 @@ User provides: one or more target URLs to scan.
 - Report body must not contain internal IDs
 - Competition/program prohibitions (DDoS/brute force/bulk writes) are absolute no-go
 - Before creating a Finding, run the dedup -> evidence-readiness -> submission-readiness gate pipeline
+- **Capability tags:** tag each Finding with `provides:` / `requires:` / `tier:`. You do not run a propagation script — capabilities are derived at read time by `python3 automation/capability_view.py <target> --brief`. Your responsibility ends at filling the fields correctly.
+- **KB first:** before testing, query existing patterns with `bash automation/surface_kb.sh "<tech>"`.
+- **No Write/Edit.** This agent persists through `asg.py`, the single ledger writer. Hand-editing `RECON_DB.md` or the ASG Markdown from a subagent is the classic two-writers-race-on-a-projection corruption; both files are read-only projections of the ledger.
 
 ## Phase 1: Spider + Param Extraction
 
@@ -37,6 +48,11 @@ Use `browser_run_code_unsafe` to:
    - Hidden inputs (non-ViewState)
    - JS-loaded API endpoints (inline script analysis)
 5. Record all discovered endpoints and params
+6. **Persist immediately — to the ledger, not to Markdown.** Record each discovered surface now, before Phase 3's slow injection matrix runs:
+   ```bash
+   python3 automation/asg.py add-surface <target> "<surface label>"
+   ```
+   Phase 3+ can time out, hit a WAF wall, or be interrupted; spider results must not live only in this agent's context until "done". Never append to `RECON_DB.md` or the ASG Markdown directly — both are read-only projections of the ledger. Keep the label a neutral codename (`ep-admin-users`, `svc-xxx`); CVE names, credentials, and exploit detail belong in a Finding's evidence field, not in a surface label.
 
 ## Phase 2: Version -> CVE Lookup
 
