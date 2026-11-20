@@ -194,6 +194,20 @@ Paste at the end of subagent prompts. Set the `effort:` parameter to match the t
 
 ---
 
+## Communication Discipline (always-on)
+
+### Output Shape (ADHD-informed)
+
+Lead with the action or conclusion; background follows. Number multi-step tasks — one bounded action per step. Restate state every turn ("Step 3/5 done: X. Next: Y"). Give concrete time estimates ("~15 min" not "some work"). Show completed work as visible results. No preamble ("Let me…"), no closing pleasantry ("Let me know if…"), no tangent asides.
+
+### Sentence Discipline (ASD-STE100 subset)
+
+Active voice ("the program copies the value", not "the value is copied"). One idea per sentence. One word per component throughout the document — no synonym variation. Conclusions use concrete numbers and status words; no invented euphemisms. Hedges for uncertainty are preserved ("most likely", "not confirmed") — partitioned application: do not compress inference into assertion.
+
+These rules apply to all output: conversation, findings, reports, and subagent prompts. The full reference is in `Reference Card - Report Writing Standard` §Sentence-level rules. For reports, `submit-form` Step 2b adds the formal partitioned-application structure.
+
+---
+
 ## After Any Changes
 
 ```bash
