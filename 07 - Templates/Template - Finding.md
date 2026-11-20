@@ -33,8 +33,8 @@ tags: []
 > **Discovery note only**: A Finding records how you found the issue, how you verified it, and your reasoning at the time.
 > Write the formal external report in `Submissions/Submission -*.md` and `FORM -*.md`.
 >
-> **Section rules** (see AGENTS.md §3b):
-> - **Must-have**: Summary / Discovery Log / Reasoning / Evidence / Impact / Follow-up
+> **Section rules** (see AGENTS.md §3b, updated 2026-11-20):
+> - **Must-have**: Summary / Discovery Log / Reasoning / Root Cause Analysis / Defense Bypass / Evidence / Impact / Follow-up
 > - **Nice-to-have**: Related / Vulnerable Code / Remediation / CVSS / Verification Status — include only if there is content
 > - H2 headings must be in English; body text may be in any language
 > - Delete any section you do not need — do not leave empty shells
@@ -101,11 +101,18 @@ curl -i 'https://target/api/endpoint' \
 
 ## Impact
 
+> **Impact quantification standard (2026-11-20 upgrade)**: Do not write vulnerability class names as impact.
+> Each impact line states the **furthest boundary** the attacker reaches — what token obtained / what data read / how many records affected.
+> High-bounty report pattern: show the obtained artifact (redacted screenshot), not just "theoretically possible".
+
 **Verified (proven by PoC):**
--
+- Concrete consequence:
+- Quantified scope (record count / user count / data scope):
+- Artifact shown (screenshot / token fragment, sensitive values redacted):
 
 **Potential (requires additional conditions, low confidence; delete this section if unsure):**
 - _Prerequisite:_
+- _If true → estimated blast radius:_
 
 ---
 
@@ -129,6 +136,35 @@ curl -i 'https://target/api/endpoint' \
 ---
 
 <!-- ====== Sections below are nice-to-have; delete the entire section if there is no content ====== -->
+
+## Root Cause Analysis
+
+> **Must-have (2026-11-20 upgrade)**: Trace root cause to component + function + parameter level, explaining *why* not just *what*.
+> OSS: trace to source code path and line number. Closed-source: use response diff inference, labeled `[inference]`.
+> High-bounty report pattern: $10K+ reports trace an average of 3–4 files, explaining data flow and the causal gap.
+
+**Root cause path:**
+1. `file:line` — `function()` — what it does
+2. `file:line` — `function()` — where it passes data, why it was not blocked
+3. Conclusion: what check is missing / what assumption is wrong
+
+**Analysis type:**
+- [ ] Source code trace (OSS — with file:line)
+- [ ] Response diff inference (closed-source — labeled `[inference]`)
+- [ ] Black-box behavioral inference (no source — labeled `[hypothesis]`)
+
+---
+
+## Defense Bypass
+
+> **Must-have (2026-11-20 addition)**: Even when the target has no defenses, explicitly state "no related defense observed" to prove you checked.
+> When defenses exist, document the bypass method — this is a confirmed bounty uplift factor.
+
+| Existing Defense | Bypass Method | Why It Works |
+|---|---|---|
+| _(none / CSP / WAF / rate limit / CSRF token / …)_ | _(method)_ | _(reason)_ |
+
+---
 
 ## Vulnerable Code
 

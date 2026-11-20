@@ -172,6 +172,59 @@ chain — keep chaining; report it standalone only if it stands on its own.
 > One root cause = one fix = one report. Before splitting into N reports, ask: "can the
 > vendor close all of them by changing one place?" If yes, it's one report.
 
+## Root Cause Depth (2026-11-20)
+
+A report that says "not validated" tells the triager what to look for.
+A report that says "`design_reference_filter.rb:75` URL-unescapes the filename then
+`abstract_reference_filter.rb:219` interpolates it into href without escaping" tells them
+where to fix.
+
+| Target type | Minimum | Ideal |
+|---|---|---|
+| OSS (source available) | Component + function + parameter | File path + line number + data flow |
+| Closed-source (black box) | Component + parameter + observed behavior | Response diff inference, labeled `[inference]` |
+| Firmware / binary | Function + offset (from reversing) | Decompiled path + patch suggestion |
+
+Do not write "the application does not validate X". Write *which* component, *which*
+parameter, and *what check is missing*. The triager writes an internal ticket from your
+report — make it possible without re-discovering the bug.
+
+## Defense Bypass Documentation (2026-11-20)
+
+When the target has a defense (CSP, WAF, rate limit, CSRF token, auth middleware), the
+report must name it and say how the attack gets past it. Use a three-column table:
+
+| Existing Defense | Bypass Method | Why It Works |
+
+When the target has no relevant defense, say so ("no related defense observed") to prove
+you checked.
+
+This is a confirmed bounty uplift factor: HexBrain top-10 reports by bounty all document
+at least one defense bypass.
+
+## Impact Quantification (2026-11-20)
+
+Impact must name what the attacker *obtains*, not what vulnerability class it is.
+
+| Bad | Good |
+|---|---|
+| "SSRF" | "Reads AWS instance metadata and obtains temporary credentials (AccessKeyId + SecretAccessKey)" |
+| "XSS leading to ATO" | "Executes JS in banking origin, exfiltrates session cookie via `document.cookie`, verified login as victim" |
+| "IDOR" | "Deletes any user's Spotlight video by replacing snap_id in DeleteStorySnaps mutation (801 upvotes on HackerOne)" |
+
+Quantify the blast radius: how many records, users, or resources. Show the artifact
+(redacted screenshot of the obtained token, shell, or data). Mark unproven extensions:
+"[assumption: if the token scope includes write…]".
+
+## Screenshot Embedding (2026-11-20)
+
+Embed screenshots at the trigger point and the final impact point. Each screenshot names
+the step it proves: `[Screenshot: step-3-idor-response.png]`. Do not pile screenshots at
+the end — place them inline after the step they evidence.
+
+curl + response remains the reproducibility backbone. Screenshots are supplementary visual
+evidence, not a replacement.
+
 ## Length
 
 Lean. The vulnerability description is 2-3 sentences; impact is 1-3 one-sentence points;
