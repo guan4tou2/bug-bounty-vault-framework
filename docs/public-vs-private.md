@@ -15,6 +15,58 @@ The framework is designed to start as a Public Seed and evolve into a Private Va
 | Obsidian | Recommended folder layout and plugin settings | Your complete research workspace and graph |
 | Git visibility | Public-safe by default | Usually private, because it contains target-specific and operational data |
 
+## Module Capability Map
+
+Not every module exists in both repos. The table below records which repo provides each documented entry point, so a clean install can tell whether a capability is available or requires the other repo.
+
+**Last verified: 2026-11-20** — run `python3 automation/check_documented_entries.py` to re-verify.
+
+### Flow model and state (documented in `docs/flow-model.md`)
+
+| Module | Entry point | Framework | Vault | Notes |
+|---|---|---|---|---|
+| `flow_model.py` | CLI: `flow_model.py TARGET {define,plan,bind,view}` | Y | Y | Shared; vault copy may carry private adapters |
+| `efsm_conditions.py` | `evaluate_guard()`, `parse_predicate()` | Y | Y | Pure predicate evaluator |
+| `graphwalker_adapter.py` | `run_graphwalker()` | Y | Y | Requires external `graphwalker-rs` binary |
+| `attack_flow_export.py` | CLI: `attack_flow_export.py TARGET --output` | Y | Y | STIX/ATT&CK Flow bundle |
+| `product_state.py` | `ProductState`, `strict_variables()` | Y | — | Observed/inferred provenance tracking |
+| `post_conditions.py` | `after_error`, `after_revoke`, … | Y | — | RESTler-pattern post-condition checks |
+| `sequence_minimizer.py` | `minimize_auto()`, `ResetAdapter` | Y | — | Minimal failure sequence reduction |
+| `trace_integration.py` | `before_step()`, `after_step()`, `shared_data_analysis()` | Y | — | Wires ProductState + PostConditions into traces |
+| `state_reset.py` | `ResetContract`, `RoundTracker` | Y | — | Multi-round reset and contamination check |
+| `async_completion.py` | `AsyncTracker`, `premature_verdict_check()` | Y | — | Async operation completion judgment |
+| `result_classifier.py` | `classify()`, `check_partial_effect()` | Y | — | Step result → 6-category classification |
+| `research_boundary.py` | `is_complete()` | Y | — | Research completion boundary |
+
+### Context precision (documented in `docs/flow-model.md` §Context precision)
+
+| Module | Entry point | Framework | Vault | Notes |
+|---|---|---|---|---|
+| `context_selector.py` | `ContextSelector`, `ContextBudget`, `CostTracker` | — | Y | Work-type-aware data selection + cost measurement |
+| `context_hygiene.py` | `MemoryFilter`, `CanaryTracker`, `sanitize_startup_output()` | — | Y | Sensitive data flow control |
+| `credential_backtest.py` | `discovery_feedback()`, `spray_hypotheses()` | — | Y | Credential re-exploitation loop |
+
+### Evidence and delivery (shared core)
+
+| Module | Entry point | Framework | Vault | Notes |
+|---|---|---|---|---|
+| `research_delivery.py` | CLI + `project()`, `render()`, `work_superseded()` | Y | Y | Report provenance and work-state dedup |
+| `evidence_gaps.py` | `project()`, `review_project()` | Y | Y | Evidence gap detection |
+| `evidence_applicability.py` | `assess_artifact()` | Y | Y | Evidence staleness assessment |
+| `research_dependencies.py` | `project()`, `link()` | Y | Y | Change-impact traversal |
+| `research_progress.py` | `metrics()` | Y | Y | Research progress metrics |
+
+### Vault-only operational modules (not in framework)
+
+These exist only in the private vault. They depend on target data, operational state, or private adapters.
+
+- `gen_handoff_capsule.py` — ledger-projected handoff JSON
+- `memory_*.py` — cross-session memory hooks
+- `delivery_gate.py` — submission delivery pipeline
+- `secret_scan_gate.py` — pre-commit secret scanning
+- `scope_lib.py` — operational scope resolution
+- 100+ additional check/lint/sync scripts (see vault `CLAUDE.md`)
+
 ## Boundary Rules
 
 Use the public seed for stable structure:
