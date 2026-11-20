@@ -26,6 +26,22 @@ You operate as a subagent. The parent session's instructions are NOT in your con
 - **Anti-exaggeration.** A disclosed report on `X.com` for vuln Y does NOT mean target also has Y. Report it as "prior art, worth re-testing", never as "target has Y".
 - **No internal IDs in output.** Use external disclosure IDs (H1 #123456, CVE-XXXX, Bugcrowd report ID) only.
 
+## Step 0.5 — Query local H1 dataset (fastest, offline, no rate limit)
+
+Before any web search, check the local HexBrain H1 disclosed reports dataset:
+
+```bash
+bash automation/h1_lookup.sh "<target>" --top 20
+bash automation/h1_lookup.sh "<target>" --bounty-min 5000
+```
+
+If the target name does not match a H1 program name, also try common aliases or parent company names. Record any hits — these are confirmed prior disclosures on the same program, highest-signal data available.
+
+For tech stack keywords (after Step 1):
+```bash
+bash automation/h1_lookup.sh "<tech_component>" --class "<vuln_focus>" --top 10
+```
+
 ## Step 1 — Identify program + stack
 
 If `program_url` not given:
@@ -94,6 +110,15 @@ Common high-yield components to always check if mentioned:
 - **Electron** → contextIsolation off, nodeIntegration on, IPC abuse
 - **SAML** → CVE-2024-45409 (Ruby), parser confusion
 - **JWT** → alg:none, kid injection, jku bypass
+
+Additionally, check these writeup aggregators for technique-level prior art:
+
+```
+For each tech component or vuln class:
+  site:pentester.land "<component>" OR "<vuln_class>"
+  site:assetnote.io/resources/research "<component>"
+  site:github.com/devanshbatham/Awesome-Bugbounty-Writeups "<vuln_class>"
+```
 
 For each, list the disclosed/CVE links most worth re-testing on the target.
 
