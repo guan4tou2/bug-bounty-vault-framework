@@ -32,6 +32,7 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-idor-coverage` | Use when testing or reporting IDOR; enforce full HTTP verb matrix (GET+PUT/PATCH/DELETE, cross-tenant) before marking complete | `.claude/skills/bb-idor-coverage/SKILL.md` |
 | `bb-multi-search` | Use when mid-hunting quick research is needed; parallel multi-source search and synthesis | `.claude/skills/bb-multi-search/SKILL.md` |
 | `bb-retest-gate` | Use when retesting vendor fixes; structured 6-phase verification methodology with regression scripts | `.claude/skills/bb-retest-gate/SKILL.md` |
+| `bb-ad-lateral-audit` | Use when an AD/Windows domain, LDAP, or Kerberos environment is in scope; structured lateral movement audit with DreadGOAD isolation and cost-aware gates | `.claude/skills/bb-ad-lateral-audit/SKILL.md` |
 
 ## Maintenance
 

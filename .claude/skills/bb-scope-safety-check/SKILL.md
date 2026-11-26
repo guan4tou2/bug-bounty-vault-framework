@@ -65,9 +65,25 @@ python3 -I automation/scope_check.py --command "<shell_command>" --scope "$WORKS
 - Runtime: local / VPS
 - Operation Log status:
 - Rate / scale:
+- Cost gate: <smoke-test result / not applicable>
 - Stop condition:
 - Allowed command class:
 ```
+
+## Cost-Aware Gate (from Decepticon ExploitBench)
+
+Before expensive operations, estimate cost and apply a smoke-test go/no-go gate:
+
+| Operation | Smoke Test | Go/No-Go |
+|---|---|---|
+| Full Nuclei scan (all templates) | Run 10 high-signal templates first | Full scan only if smoke finds results |
+| Password spray (AD) | Read lockout policy; try top-10 passwords on 3 accounts | Full spray only if smoke succeeds AND lockout policy allows |
+| Hash cracking (Kerberoast) | Try top-1000 wordlist first (~5 min) | Full wordlist only if top-1000 cracks at least 1 hash |
+| Full port scan (all ports) | Scan top-1000 ports first | Full scan only if top-1000 reveals unusual services |
+| Fuzzing (parameter/path) | 100 payloads per parameter first | Extend only if 100-payload run shows anomalies |
+| bbflow full hunt | Single pattern run first | Full hunt only if single pattern generates candidates |
+
+Record the smoke-test result and go/no-go decision in the Operation Log.
 
 ## Runtime Decision
 

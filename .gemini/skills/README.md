@@ -12,6 +12,7 @@ Generated wrappers:
 | Skill | Path |
 |---|---|
 | `bb-actuator-cloud-chain` | `.gemini/skills/bb-actuator-cloud-chain/SKILL.md` |
+| `bb-ad-lateral-audit` | `.gemini/skills/bb-ad-lateral-audit/SKILL.md` |
 | `bb-agent-prompts` | `.gemini/skills/bb-agent-prompts/SKILL.md` |
 | `bb-ai-audit` | `.gemini/skills/bb-ai-audit/SKILL.md` |
 | `bb-attack-chain-review` | `.gemini/skills/bb-attack-chain-review/SKILL.md` |

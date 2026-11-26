@@ -23,17 +23,24 @@ Read only the minimum necessary:
 
 1. Confirm scope and safety boundaries.
 2. Identify verified primitives.
-3. Build an attack graph:
+3. Run chain trigger automation for signal detection:
+   ```bash
+   python3 -I automation/chain_trigger.py --finding <finding_path>
+   ```
+4. Build an attack graph:
    - nodes = assets, identities, trust boundaries, data stores, services
+   - each node carries a **kill chain stage** (ATT&CK tactical phase: reconnaissance, initial-access, execution, persistence, privilege-escalation, defense-evasion, credential-access, discovery, lateral-movement, collection, exfiltration, impact)
    - edges = verified actions or concrete missing evidence
-4. Mark each edge:
+5. Mark each edge:
    - `verified`
    - `safe-to-test`
    - `needs-human-confirmation`
    - `blocked`
    - `theoretical-only`
-5. Decide whether the chain changes impact, fix boundary, platform choice, or report grouping.
-6. Produce a short plan or a "do not chain" conclusion.
+6. Map the **kill chain progression** — which ATT&CK stages does the chain traverse? A chain that spans more stages (e.g., `reconnaissance` → `credential-access` → `lateral-movement` → `collection`) demonstrates deeper compromise.
+7. Compare severity against `Reference Card - Severity Calibration Anchors` — find the closest anchor and adjust.
+8. Decide whether the chain changes impact, fix boundary, platform choice, or report grouping.
+9. Produce a short plan or a "do not chain" conclusion.
 
 ## Output Format
 
@@ -41,11 +48,14 @@ Read only the minimum necessary:
 ## Attack Chain Deep Dive
 - Scope:
 - Verified primitives:
+- Kill chain stages covered: [list ATT&CK phases]
+- Kill chain progression: stage1 → stage2 → stage3
 - Attack graph:
 - Missing edges:
 - Safe next checks:
 - Blocked / theoretical edges:
 - Impact delta:
+- Severity anchor: [closest anchor from Reference Card - Severity Calibration Anchors]
 - Report grouping:
 - Recommended output:
 - Knowledge capture:

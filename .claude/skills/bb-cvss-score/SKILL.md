@@ -47,3 +47,9 @@ Metric Reasoning:
 ```
 
 Always flag Scope decisions and any low-confidence metric for human review — Scope is the most error-prone.
+
+## Cross-References
+
+- `Reference Card - Severity Calibration Anchors` — concrete examples at each severity level for comparison
+- `bb-counterevidence` — mandatory 3-axis challenge before severity is finalized
+- `cvss-adversary` agent — adversarial review of scoring decisions

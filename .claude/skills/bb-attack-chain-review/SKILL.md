@@ -19,6 +19,14 @@ Run this when:
 - a report severity feels uncertain
 - the user asks "can this chain further", "deep dive", "chain", "impact", or "dig deeper"
 
+## Auto-Signal Detection
+
+Before the review checklist, run:
+```bash
+python3 -I automation/chain_trigger.py --finding <finding_path>
+```
+Use the detected signals, kill chain stage, and recommended extensions to focus the review.
+
 ## Required Inputs
 
 - Target and scope source
@@ -44,9 +52,13 @@ Run this when:
 ```markdown
 ## Attack Chain Review
 - Current primitive:
+- Kill chain stage: [ATT&CK phase]
+- Chain trigger signals: [from automation/chain_trigger.py]
 - Existing evidence:
 - Possible pivots:
 - Missing evidence:
+- Kill chain progression: [current stage → potential next stages]
+- Severity anchor: [closest from Reference Card - Severity Calibration Anchors]
 - Safety boundary:
 - Stop condition:
 - Escalate to agent: yes/no

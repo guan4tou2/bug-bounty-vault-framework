@@ -28,10 +28,30 @@ Read every Finding in the target directory. For each Finding, extract:
 - **Affected component** (e.g., `/api/users`, admin panel, firmware httpd)
 - **Severity** (Critical / High / Medium / Low / Informational)
 - **Current status** (New / Submitted / Triaged / Resolved / Parked)
+- **Kill chain stage** (ATT&CK tactical phase — see Stage Classification below)
 - **Prerequisite access** (unauthenticated, authenticated user, admin, local network)
 - **Output / what it yields** (credentials, session tokens, internal access, data, code execution)
 
 Record each finding as a node in the graph.
+
+**Stage Classification** — assign the ATT&CK tactical phase that best describes each finding's role:
+
+| Stage | Findings that belong here |
+|-------|--------------------------|
+| `reconnaissance` | Information disclosure, version leak, endpoint enumeration, source map mining |
+| `initial-access` | Auth bypass (unauth), public exploit, default credentials, phishing endpoint |
+| `execution` | RCE, command injection, deserialization, template injection, SSTI |
+| `persistence` | Backdoor, web shell upload, cron/scheduled task manipulation |
+| `privilege-escalation` | IDOR to admin, role escalation, permission bypass, JWT manipulation |
+| `defense-evasion` | WAF bypass, CSP bypass, rate limit bypass, logging blind spot |
+| `credential-access` | Credential leak, API key exposure, token extraction, password reset flaw |
+| `discovery` | Internal network mapping, cloud metadata access, service enumeration |
+| `lateral-movement` | SSRF to internal, cross-tenant access, shared service exploitation |
+| `collection` | Mass data extraction, file download, database dump |
+| `exfiltration` | Data exfil via DNS/HTTP, out-of-band channels |
+| `impact` | Data deletion, service disruption, defacement, ransomware-style |
+
+A finding can have multiple stages (e.g., SSRF is both `initial-access` and `lateral-movement`). List the primary stage first.
 
 ### Step 2: Load Previous State
 
@@ -93,7 +113,22 @@ Evaluate whether chain paths justify severity changes:
 - A Low finding that is a necessary link in a High-impact chain
 - Document the chain-based severity rationale clearly — this is a proposal, not an automatic change
 
-### Step 7: Cross-Reference bb-exploit-chain
+### Step 7: Auto-Trigger Chain Extension Check
+
+For each new node, run the chain trigger automation to identify extension opportunities:
+
+```bash
+python3 -I automation/chain_trigger.py --finding "01 - Targets/<target>/Findings/<finding>.md"
+```
+
+The script detects credential, access, identity, trust-boundary, privilege, data, and infrastructure signals in the finding, classifies them into kill chain stages, and outputs recommended chain extensions with confidence levels. Incorporate its recommendations into the edge evaluation (Step 3).
+
+For batch analysis of all findings:
+```bash
+python3 -I automation/chain_trigger.py --scan-dir "01 - Targets/<target>/Findings/"
+```
+
+### Step 8: Cross-Reference bb-exploit-chain
 
 For each new or upgraded edge, verify alignment with the `bb-exploit-chain` skill's 6-question framework:
 
@@ -106,7 +141,7 @@ For each new or upgraded edge, verify alignment with the `bb-exploit-chain` skil
 
 Note which questions each edge answers.
 
-### Step 8: Write CHAIN_GRAPH.md
+### Step 9: Write CHAIN_GRAPH.md
 
 Write or update the persistent graph file at `01 - Targets/<target>/Attack Chains/CHAIN_GRAPH.md`.
 
@@ -121,10 +156,10 @@ Write or update the persistent graph file at `01 - Targets/<target>/Attack Chain
 
 ## Nodes
 
-| ID | Type | Component | Severity | Status | Requires | Yields |
-|----|------|-----------|----------|--------|----------|--------|
-| SDX-014 | Auth bypass | /api/password | Medium | Submitted | Authenticated user | Password change without verification |
-| SDX-015 | Info disclosure | /api/template | Low | New | Unauthenticated | GUID validity oracle |
+| ID | Type | Component | Severity | Stage | Status | Requires | Yields |
+|----|------|-----------|----------|-------|--------|----------|--------|
+| SDX-014 | Auth bypass | /api/password | Medium | privilege-escalation | Submitted | Authenticated user | Password change without verification |
+| SDX-015 | Info disclosure | /api/template | Low | reconnaissance | New | Unauthenticated | GUID validity oracle |
 
 ## Edges
 
@@ -142,11 +177,13 @@ SDX-015 (unauthenticated GUID oracle)
   = Account takeover without authentication
 ```
 
+- **Kill chain progression**: `reconnaissance` → `credential-access` → `privilege-escalation`
 - **Entry point**: Unauthenticated
 - **Final impact**: Account takeover
 - **Chain confidence**: theoretical (weakest link)
 - **Cumulative severity**: High (chain of Low + Medium = account takeover)
 - **Severity upgrade proposal**: SDX-015 Low -> Medium (necessary chain link)
+- **Severity anchor**: closest to "Password reset token leak → ATO" (High) — see `Reference Card - Severity Calibration Anchors`
 
 ## Changelog
 
