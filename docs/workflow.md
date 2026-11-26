@@ -31,7 +31,9 @@ flowchart TD
   D --> S["Scope + safety<br/>(bb-scope-safety-check)"]
   S --> CH["Chain review<br/>(bb-attack-chain-review)"]
   CH --> E["Evidence readiness<br/>(bb-evidence-readiness)"]
-  E -->|passes| F["Finding"]
+  E -->|passes| CE["Counterevidence<br/>(bb-counterevidence)<br/>3-axis challenge"]
+  CE -->|"confidence ≥ Medium"| F["Finding"]
+  CE -->|"confidence = Low"| A
   E -->|fails| A["Attempt<br/>(bb-attempt-recorder)"]
   D -->|duplicate| A
   F --> SR["Submission readiness<br/>(bb-submission-readiness)"]
@@ -82,6 +84,10 @@ Assess whether a candidate can chain into higher impact before finalizing a Find
 ### Evidence gate (`bb-evidence-readiness`)
 
 Do not promote a candidate into a Finding until the evidence is reproducible, scoped, and minimally documented.
+
+### Counterevidence gate (`bb-counterevidence`)
+
+After evidence is ready, construct the strongest case AGAINST the finding: challenge root cause (feature? untested control?), impact (blast radius? preconditions?), and exploitability (works in prod? reliable?). Assign confidence (High/Medium/Low). Low confidence → Attempt, not Finding. Prohibits "None" or "N/A" as counterevidence.
 
 ### Submission gate (`bb-submission-readiness`)
 

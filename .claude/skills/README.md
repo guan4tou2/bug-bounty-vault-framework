@@ -22,6 +22,7 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-exploit-chain` | A vuln/leak was found; run the 6-question chain before moving to the next system (escalate, don't stop at exposure) | `.claude/skills/bb-exploit-chain/SKILL.md` |
 | `bb-attack-chain-review` | Finding candidate or observation may chain into higher impact | `.claude/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-evidence-readiness` | Finding / Submission / FORM evidence completeness and reproducibility review | `.claude/skills/bb-evidence-readiness/SKILL.md` |
+| `bb-counterevidence` | Mandatory counterevidence gate before Finding promotion or severity upgrade; "challenge this"; "is this real"; "devil's advocate" | `.claude/skills/bb-counterevidence/SKILL.md` |
 | `bb-attempt-recorder` | Failed hypothesis, false positive, blocked test, or useful negative result | `.claude/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-submission-readiness` | Final gate before Submission / FORM creation or ready_to_submit status | `.claude/skills/bb-submission-readiness/SKILL.md` |
 | `bb-knowledge-capture` | Reusable learning from finding candidate, attempt, chain review, tool result, or triage reply | `.claude/skills/bb-knowledge-capture/SKILL.md` |

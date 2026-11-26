@@ -18,6 +18,7 @@ Generated wrappers:
 | `bb-attempt-recorder` | `.gemini/skills/bb-attempt-recorder/SKILL.md` |
 | `bb-bucket-ownership` | `.gemini/skills/bb-bucket-ownership/SKILL.md` |
 | `bb-context-handoff` | `.gemini/skills/bb-context-handoff/SKILL.md` |
+| `bb-counterevidence` | `.gemini/skills/bb-counterevidence/SKILL.md` |
 | `bb-cve-citation` | `.gemini/skills/bb-cve-citation/SKILL.md` |
 | `bb-cvss-score` | `.gemini/skills/bb-cvss-score/SKILL.md` |
 | `bb-dedup-finding` | `.gemini/skills/bb-dedup-finding/SKILL.md` |
