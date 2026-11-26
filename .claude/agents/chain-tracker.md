@@ -105,7 +105,22 @@ Compare current graph against previous CHAIN_GRAPH.md:
 - **Downgraded edges**: edges invalidated by finding resolution or new information
 - **New paths**: complete chains that did not exist before
 
-### Step 6: Propose Severity Upgrades
+### Step 6: Query Cheapest Paths
+
+After constructing the graph, run the cost-model query to find the most efficient attack paths:
+
+```bash
+python3 -I automation/chain_query.py "01 - Targets/<target>/Attack Chains/CHAIN_GRAPH.md" --all-paths --cheapest --table
+```
+
+Also check kill chain coverage:
+```bash
+python3 -I automation/chain_query.py "01 - Targets/<target>/Attack Chains/CHAIN_GRAPH.md" --coverage --table
+```
+
+Include the cheapest path and coverage percentage in the output.
+
+### Step 8: Propose Severity Upgrades
 
 Evaluate whether chain paths justify severity changes:
 
@@ -128,7 +143,7 @@ For batch analysis of all findings:
 python3 -I automation/chain_trigger.py --scan-dir "01 - Targets/<target>/Findings/"
 ```
 
-### Step 8: Cross-Reference bb-exploit-chain
+### Step 9: Cross-Reference bb-exploit-chain
 
 For each new or upgraded edge, verify alignment with the `bb-exploit-chain` skill's 6-question framework:
 
@@ -141,7 +156,7 @@ For each new or upgraded edge, verify alignment with the `bb-exploit-chain` skil
 
 Note which questions each edge answers.
 
-### Step 9: Write CHAIN_GRAPH.md
+### Step 10: Write CHAIN_GRAPH.md
 
 Write or update the persistent graph file at `01 - Targets/<target>/Attack Chains/CHAIN_GRAPH.md`.
 

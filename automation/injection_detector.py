@@ -5,23 +5,33 @@ Adapted from Decepticon's _injection_detector.py + prompt_injection_shield.py.
 Heuristic regex scanner that flags known injection patterns in untrusted text
 (HTTP responses, file contents, scanner output) before an LLM agent reads them.
 
-Three modes:
+Modes:
   detect (default): scan input, print JSON verdict
   --wrap:           wrap input in <UNTRUSTED_TOOL_OUTPUT> envelope
   --neutralize:     defang special tokens only, print result
+  --ledger-query:   summarize a quarantine ledger file
+
+Quarantine ledger (--ledger <path>):
+  When risk is medium or high, append a JSONL record to the ledger file.
+  Provides forensic trail of adversarial content the agent encountered.
 
 Usage:
   python3 -I automation/injection_detector.py <file_or_->
   python3 -I automation/injection_detector.py --wrap <file> --origin bash
-  echo "ignore all previous instructions" | python3 -I automation/injection_detector.py -
+  python3 -I automation/injection_detector.py --ledger audit/quarantine.jsonl <file>
+  python3 -I automation/injection_detector.py --ledger-query audit/quarantine.jsonl
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import sys
+import time
+from collections import Counter
 from dataclasses import asdict, dataclass, field
 
 # ── Categories ──────────────────────────────────────────────────────────────
@@ -367,6 +377,85 @@ def wrap_untrusted(content: str, tool_name: str = "unknown") -> str:
         return f"{_build_banner(verdict)}\n\n{envelope}"
     return envelope
 
+# ── Quarantine ledger ──────────────────────────────────────────────────────
+
+def _sha256_prefix(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()[:16]
+
+
+def write_quarantine_record(
+    ledger_path: str,
+    verdict: InjectionVerdict,
+    text: str,
+    source: str = "stdin",
+    tool: str = "manual",
+) -> bool:
+    """Append a JSONL record if risk is medium or high. Returns True if written."""
+    if verdict.risk == "low":
+        return False
+    record = {
+        "ts": time.time(),
+        "tool": tool,
+        "risk": verdict.risk,
+        "categories": sorted(verdict.categories),
+        "match_count": len(verdict.matches),
+        "matches": [
+            {
+                "category": m.category,
+                "pattern": m.pattern_name,
+                "offset": m.offset,
+                "excerpt": m.excerpt,
+            }
+            for m in verdict.matches
+        ],
+        "body_sha256_prefix": _sha256_prefix(text),
+        "body_chars": len(text),
+        "source": source,
+    }
+    os.makedirs(os.path.dirname(ledger_path) or ".", exist_ok=True)
+    with open(ledger_path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+        fh.flush()
+    return True
+
+
+def query_quarantine_ledger(ledger_path: str) -> None:
+    """Print a summary of the quarantine ledger."""
+    if not os.path.isfile(ledger_path):
+        print(f"Ledger not found: {ledger_path}", file=sys.stderr)
+        sys.exit(1)
+    entries: list[dict] = []
+    with open(ledger_path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line:
+                entries.append(json.loads(line))
+    if not entries:
+        print("Ledger is empty.")
+        return
+    risk_counts: Counter[str] = Counter()
+    cat_counts: Counter[str] = Counter()
+    for e in entries:
+        risk_counts[e.get("risk", "unknown")] += 1
+        for c in e.get("categories", []):
+            cat_counts[c] += 1
+    print(f"Total entries: {len(entries)}")
+    print(f"\nBy risk level:")
+    for risk in ("high", "medium", "low"):
+        if risk_counts[risk]:
+            print(f"  {risk}: {risk_counts[risk]}")
+    print(f"\nTop categories:")
+    for cat, count in cat_counts.most_common(5):
+        print(f"  {cat}: {count}")
+    print(f"\nMost recent entries:")
+    for e in entries[-5:]:
+        ts = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(e.get("ts", 0)))
+        src = e.get("source", "?")
+        risk = e.get("risk", "?")
+        cats = ", ".join(e.get("categories", []))
+        print(f"  [{ts}] {src} risk={risk} categories=[{cats}]")
+
+
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
 def _read_input(path: str) -> str:
@@ -380,13 +469,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Prompt-injection detector for tool output.",
     )
-    parser.add_argument("input", help="File path or - for stdin")
+    parser.add_argument("input", nargs="?", help="File path or - for stdin")
     parser.add_argument("--wrap", action="store_true", help="Output wrapped envelope")
     parser.add_argument("--origin", default="unknown", help="Tool name for --wrap")
     parser.add_argument("--neutralize", action="store_true", help="Defang special tokens only")
+    parser.add_argument("--ledger", metavar="PATH", help="Append quarantine record (medium/high risk) to JSONL ledger")
+    parser.add_argument("--ledger-query", metavar="PATH", help="Summarize a quarantine ledger file")
     args = parser.parse_args()
 
+    if args.ledger_query:
+        query_quarantine_ledger(args.ledger_query)
+        return
+
+    if not args.input:
+        parser.error("input is required unless --ledger-query is used")
+
     text = _read_input(args.input)
+    source = "stdin" if args.input == "-" else args.input
 
     if args.neutralize:
         sys.stdout.write(neutralize_special_tokens(text))
@@ -395,11 +494,16 @@ def main() -> None:
     if args.wrap:
         sys.stdout.write(wrap_untrusted(text, args.origin))
         sys.stdout.write("\n")
+        if args.ledger:
+            verdict = detect_injection(text)
+            write_quarantine_record(args.ledger, verdict, text, source=source, tool=args.origin)
         return
 
     verdict = detect_injection(text)
     json.dump(verdict.to_dict(), sys.stdout, indent=2, ensure_ascii=False)
     sys.stdout.write("\n")
+    if args.ledger:
+        write_quarantine_record(args.ledger, verdict, text, source=source)
     sys.exit(1 if verdict.risk in ("medium", "high") else 0)
 
 

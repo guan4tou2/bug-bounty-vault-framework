@@ -130,10 +130,25 @@ authorized_windows:
   - { start: "2026-11-01T00:00:00", end: "2026-12-01T00:00:00" }
 blackout_windows:
   - { start: "2026-11-28T00:00:00", end: "2026-11-29T00:00:00" }
+# Blue-team deconfliction (from Decepticon engagement middleware)
+deconfliction:
+  user_agent: "BugBounty-Authorized/1.0 (Ticket: ENG-1234)"
+  source_ip_tag: "203.0.113.42"
+  ticket_id: "ENG-1234"
 ---
 ```
 
 When frontmatter is absent, the validator falls back to parsing `## In Scope` / `## Out of Scope` sections as plain-text target lists.
+
+## Deconfliction (from Decepticon engagement middleware)
+
+If `SCOPE.md` frontmatter contains a `deconfliction` block, inject the coordination identifiers into active requests:
+
+- **User-Agent**: set `User-Agent` header to `deconfliction.user_agent` value in all HTTP requests
+- **Source IP tag**: record `deconfliction.source_ip_tag` in Operation Log header so SOC can filter
+- **Ticket ID**: include `deconfliction.ticket_id` in Operation Log entries
+
+If no `deconfliction` block exists, note "no deconfliction ID" in the first Operation Log entry. This prevents SOC from mistaking authorized testing for a real attack.
 
 ## Hard Rules
 

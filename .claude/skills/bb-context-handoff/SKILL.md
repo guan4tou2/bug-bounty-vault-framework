@@ -17,6 +17,24 @@ description: Use when session context is low, work needs checkpointing, takeover
 | Natural LLM milestone | Finished writing a report, completed a large PoC, confirmed or ruled out a hypothesis — natural breakpoint |
 | Structural check | Same session has run >= 30 turns or >= 1.5 hours — check whether a handoff is appropriate |
 | System signal | Claude Code displays a context warning |
+| Budget approaching | `<total_tokens>` in system reminder drops below 2M — start wrap-up: persist findings, write HANDOFF, do NOT start new deep analysis |
+
+## Budget Awareness (adapted from Decepticon step budget middleware)
+
+The model receives a `<total_tokens>` count in system reminders. Use this as a budget gauge:
+
+| Remaining tokens | Action |
+|---|---|
+| > 5M | Normal operation |
+| 2M–5M | Finish current task, do not start new deep analysis or chain exploration |
+| < 2M | **Wrap-up mode**: persist all findings to disk, write HANDOFF.md, produce final summary. Do not invoke new subagents. |
+| < 1M | Emergency: write HANDOFF.md immediately with whatever state exists |
+
+When in wrap-up mode, the priority order is:
+1. Write unsaved findings/attempts to vault
+2. Update CHAIN_GRAPH.md if chain state changed
+3. Write HANDOFF.md with in-progress block
+4. Produce session summary for user
 
 ## Handoff Process (current session — context nearly full)
 
