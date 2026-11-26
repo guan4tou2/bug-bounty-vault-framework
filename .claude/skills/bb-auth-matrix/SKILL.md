@@ -1,139 +1,137 @@
 ---
 name: bb-auth-matrix
-description: "Use when testing authorization, IDOR, privilege escalation, role confusion, multi-tenant isolation, JWT/session scope, or any access control boundary. Builds a Role × Endpoint × Operation matrix and tests every cell systematically."
+description: "Structured authorization testing with Role x Endpoint x Operation matrix. Triggers: 'auth matrix', 'test auth', 'role testing', 'privilege escalation testing', 'access control audit', multiple roles identified, IDOR hunting, permission matrix."
 ---
 
-# Bug Bounty — Auth Matrix
+# Bug Bounty — Authorization Matrix
 
-Structured authorization testing. Builds a complete Role × Endpoint × Operation matrix, tests every cell, and flags anomalies where actual behavior diverges from expected access control.
+Systematic role-based access control testing. Build a matrix of roles x endpoints x operations, execute it, and flag deviations.
 
 ## Trigger
 
-- Testing authorization or access control on any target
-- IDOR hunting, privilege escalation, role confusion
-- Multi-tenant isolation verification
-- JWT/session scope analysis
-- User says "auth test", "check permissions", "role testing", "who can access what"
-- After `bb-surface-mapping` identifies multiple roles or auth-gated endpoints
+- Multiple user roles identified during recon
+- IDOR candidate found — need systematic role coverage
+- API endpoints discovered with varying auth requirements
+- User says "test auth", "auth matrix", "privilege escalation", "role testing"
 
-## Protocol
+## Phase 1: Enumerate Roles
 
-### Step 1: Enumerate Roles
+List all discovered roles:
 
-Extract all roles from recon data, surface map, and RECON_DB:
+| Role | How to Obtain | Priority |
+|------|--------------|----------|
+| Unauthenticated | No session | Always test |
+| User A (owner) | Registration / given credentials | Always test |
+| User B (non-owner, same privilege) | Separate registration | Always test (horizontal) |
+| Low-privilege role | Limited account / free tier | Test if exists |
+| Moderator / manager | Invitation / escalation | Test if exists |
+| Admin | Admin panel / escalation | Test if accessible |
+| Service account / API key | API key management | Test if discovered |
 
-| Role | Auth Mechanism | How Obtained | Notes |
-|------|---------------|-------------|-------|
-| Unauthenticated | None | — | Default starting point |
-| Regular user | Session cookie / JWT | Registration | |
-| Admin | Session cookie / JWT | Invite / escalation | |
-| API key (read) | Bearer token | Developer portal | |
-| Service account | OAuth2 client credentials | Internal | |
+Minimum viable matrix: unauthenticated + User A (owner) + User B (non-owner) + highest available privilege.
 
-Include: unauthenticated, every named role, API key tiers, service accounts, cross-tenant users.
+## Phase 2: Enumerate Operations
 
-### Step 2: Enumerate Endpoints and Operations
+Group by resource:
 
-From surface map and RECON_DB, list every endpoint with its operations:
+| Resource | Endpoints | Methods | Sensitivity |
+|----------|-----------|---------|-------------|
+| Users | `/api/users`, `/api/users/:id` | GET, PUT, DELETE | PII |
+| Billing | `/api/billing`, `/api/invoices` | GET, POST | Financial |
+| Admin | `/api/admin/*` | GET, POST, PUT | Administrative |
+| Content | `/api/posts`, `/api/comments` | GET, POST, PUT, DELETE | Standard |
+| Settings | `/api/settings`, `/api/config` | GET, PUT | Configuration |
 
-| Endpoint | Method | Operation | Auth documented? | Sensitive? |
-|----------|--------|-----------|-------------------|------------|
-| /api/users | GET | List users | Yes (admin) | PII |
-| /api/users/{id} | GET | Get user | Yes (self or admin) | PII |
-| /api/users/{id} | PUT | Update user | Yes (self or admin) | Write |
-| /api/admin/config | GET | Read config | Yes (admin) | Config |
+Prioritize:
+1. State-changing endpoints (POST/PUT/PATCH/DELETE)
+2. Sensitive read endpoints (PII, billing, admin, internal)
+3. Meta operations (password reset, role change, invitation, export)
 
-Prioritize: write operations, PII endpoints, admin functions, payment/billing, cross-tenant data.
+## Phase 3: Build & Execute Matrix
 
-### Step 3: Build the Matrix
+| Endpoint | Method | Operation | Unauth | User A | User B | Admin | Expected |
+|----------|--------|-----------|--------|--------|--------|-------|----------|
+| `/api/users/A` | GET | Read own profile | | | | | A:200, B:403 |
+| `/api/users/A` | PUT | Edit own profile | | | | | A:200, B:403 |
+| `/api/admin/config` | GET | Read admin config | | | | | Admin:200, others:403 |
 
-For every Role × Endpoint × Method combination:
+Cell notation:
+- `200✓` — 200 with data returned
+- `200✗` — 200 with empty/filtered response (soft denial)
+- `401` — authentication required
+- `403` — forbidden
+- `404` — not found (may be access-dependent)
+- `500` — server error
 
-| Endpoint | Method | Role | Expected | Actual | Status |
-|----------|--------|------|----------|--------|--------|
-| /api/users | GET | unauth | deny | | ⏳ untested |
-| /api/users | GET | user | allow (self) | | ⏳ untested |
-| /api/users | GET | admin | allow (all) | | ⏳ untested |
-| /api/users/{id} | PUT | user (other) | deny | | ⏳ untested |
+Testing order:
+1. Admin token → establish the baseline of what SHOULD work
+2. Unauthenticated → find public leaks
+3. User A (owner) → establish owner access
+4. User B (non-owner, same role) → horizontal privilege (IDOR)
+5. Low-privilege role → vertical privilege escalation
 
-Status values: `⏳ untested`, `✅ pass` (matches expected), `❌ fail` (anomaly), `⚠️ partial` (inconsistent).
+## Phase 4: Deviation Analysis
 
-### Step 4: Test Systematically
+| Pattern | Classification | Severity |
+|---------|---------------|----------|
+| Unauth gets `200✓` on sensitive endpoint | Broken authentication | Critical |
+| User B accesses User A's data | Horizontal privilege escalation (IDOR) | High |
+| Low priv accesses admin-only data | Vertical privilege escalation | High-Critical |
+| `200✗` instead of `403` | Soft denial — may leak metadata or be bypassable | Medium |
+| `404` for some roles, `403` for others | Inconsistent error — role oracle | Low-Medium |
+| Admin-only action accessible to regular user | Broken function-level authorization | High |
+| Response time differs by role (slow 403) | Timing oracle for resource existence | Low |
 
-Order of testing:
-
-1. **Horizontal first** — same role across all endpoints (reveals missing auth on specific routes)
-2. **Vertical second** — same endpoint across all roles (reveals privilege escalation)
-3. **Cross-tenant** — same role, different tenant's resources (reveals isolation failures)
-4. **Parameter manipulation** — swap IDs, GUIDs, emails between roles (reveals IDOR)
-
-For each test:
-- Send the request with the role's credentials
-- Record exact status code and response body hash
-- Compare against expected behavior
-- Mark status in the matrix
-
-### Step 5: Classify Anomalies
-
-| Anomaly Type | Pattern | Severity Signal |
-|-------------|---------|----------------|
-| Missing auth | Deny expected → 200 OK | High: unauth access |
-| Privilege escalation | User gets admin response | High: vertical escalation |
-| IDOR | User A reads User B data | Medium–High: depends on data |
-| Role confusion | Mixed response (partial data) | Medium: broken access control |
-| Tenant isolation | Tenant A accesses Tenant B | Critical: multi-tenant bypass |
-| Mass assignment | Extra fields accepted in write | Medium–High: depends on fields |
-
-### Step 6: Chain Assessment
-
-For each anomaly, evaluate chain potential with `bb-exploit-chain`:
-- Does this access enable further escalation?
-- Can leaked data (IDs, tokens, config) chain into other findings?
-- Does privilege escalation reach admin/system level?
-
-## Output Format
+## Phase 5: Output Format
 
 ```markdown
-## Auth Matrix — <target>
+## Authorization Matrix — <target>
+- Roles tested: <list>
+- Endpoints tested: <count>
+- Matrix cells: <count>
+- Deviations found: <count>
 
-### Summary
-- Roles tested: <N>
-- Endpoints tested: <N>
-- Matrix cells: <total> (tested: <N>, pass: <N>, fail: <N>, untested: <N>)
-- Anomalies found: <N>
+### Matrix
+| Endpoint | Method | Unauth | User A | User B | Admin | Expected | Deviation? |
+<rows>
 
-### Matrix (anomalies only)
-| Endpoint | Method | Role | Expected | Actual | Type | Severity |
-|----------|--------|------|----------|--------|------|----------|
+### Deviations
+| # | Endpoint | Expected | Actual | Role | Classification | Severity |
+<rows>
 
-### Recommended Findings
-1. <anomaly → finding recommendation with evidence pointer>
+### Horizontal IDOR Summary
+<User A vs User B differences>
+
+### Vertical Escalation Summary
+<Low priv vs Admin differences>
+
+### Chain Opportunities
+<recommendations via bb-exploit-chain>
 ```
 
-## Anti-Patterns
+## Efficiency Rules
 
-| Anti-Pattern | Why It Fails | Matrix Fix |
-|-------------|-------------|------------|
-| Testing only admin endpoints | Misses auth bypass on "public" routes | Matrix covers ALL endpoints × ALL roles |
-| Testing only own role | Misses cross-role escalation | Vertical testing is mandatory |
-| Swapping only numeric IDs | Misses GUID/email/slug IDOR | Test all identifier types per parameter |
-| Ignoring 403 vs 401 | Different bypass strategies | Record exact status codes |
-| Skipping unauthenticated | Misses missing-auth bugs entirely | Unauth is always the first role tested |
+- Cap the matrix at 200 cells — prioritize state-changing and sensitive-read endpoints
+- One session/token per role, stored in variables — do not re-authenticate per request
+- Record raw HTTP status codes AND response body indicators — `403` is not always "secure"
+- A `200` with empty array is NOT the same as `403` — record separately
+- If the API uses cursor-based pagination, test whether User B can paginate through User A's resources
 
-## Hard Rules
+## Safety Rules
 
-- GET-first: read operations before writes
-- Lowest-privilege first: test unauthenticated → user → admin order
-- Do not modify or delete real user data during testing
-- Record every test in Operation Log
-- Run `bb-scope-safety-check` before any write operation testing
-- Do not brute-force IDs — use known IDs from authorized recon
+- Run `bb-scope-safety-check` before active testing
+- GET-first for each endpoint before state-changing methods
+- Record all state-changing requests in Operation Log
+- If a mutation succeeds unexpectedly (privilege escalation): screenshot/record immediately, do NOT repeat
+- Do not create/delete real user accounts unless explicitly authorized
+- Rate limit: max 2 req/sec per role rotation
+- If a successful escalation modifies real data: note it in the finding and stop testing that path
 
 ## Cross-References
 
-- `bb-scope-safety-check` — before write-operation testing
-- `bb-idor-coverage` — IDOR-specific deep testing
-- `bb-exploit-chain` — chain anomalies into higher impact
-- `bb-evidence-readiness` — prepare anomalies as findings
-- `bb-counterevidence` — challenge anomaly severity
-- `bb-surface-mapping` — source of endpoints and roles
+- `bb-scope-safety-check` — before active testing
+- `bb-idor-coverage` — IDOR-specific deep dive
+- `bb-graphql-audit` — GraphQL authorization testing
+- `bb-exploit-chain` — chain deviations into higher impact
+- `bb-evidence-readiness` — evidence quality
+- `Reference Card - Severity Calibration Anchors` — severity assessment

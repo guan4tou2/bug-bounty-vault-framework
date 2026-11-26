@@ -1,134 +1,116 @@
 ---
 name: bb-race-condition
-description: "Use when testing race conditions, TOCTOU, single-packet attacks, or concurrency bugs. Covers limit bypass, state confusion, and check-then-act patterns in rate limits, balance operations, coupon redemption, token consumption, and file processing."
+description: "Race condition and TOCTOU testing framework. Triggers: 'race condition', 'TOCTOU', 'double spend', 'single packet attack', 'concurrent requests', 'limit bypass', coupon/balance/vote/inventory endpoint discovered."
 ---
 
-# Bug Bounty — Race Condition
+# Bug Bounty — Race Condition Testing
 
-Structured race condition and TOCTOU testing. Identifies check-then-act patterns, executes concurrent requests with proper synchronization, and verifies real impact.
+Structured methodology for testing time-of-check-to-time-of-use (TOCTOU) vulnerabilities using single-packet attack techniques.
 
 ## Trigger
 
-- Target has rate limits, balance/credit operations, coupon/voucher redemption
-- File upload with server-side processing (rename, move, convert)
-- One-time-use tokens (password reset, invite, verification)
-- Inventory/stock operations (purchase, reserve, claim)
-- State transitions (order status, approval workflows)
-- User says "race condition", "concurrency", "single-packet", "limit bypass", "double spend"
+- State-changing endpoint that enforces a limit (balance, coupon, vote, invitation, quantity)
+- Coupon/voucher/credit/balance/inventory/vote endpoint discovered
+- Any "apply once" or "limited use" operation
+- User says "race condition", "TOCTOU", "double spend", "concurrent", "single packet"
 
-## Protocol
+## Phase 1: Identify Candidates
 
-### Step 1: Identify Race Windows
+| Category | Example Endpoint | What Breaks |
+|----------|-----------------|-------------|
+| Balance/credit | Apply coupon, transfer funds, redeem points | Double-spend |
+| Inventory | Purchase limited item, claim offer | Oversell |
+| Voting/rating | Upvote, like, rate | Multi-vote |
+| Invitation/referral | Send invite, claim referral bonus | Multi-claim |
+| Account operations | Register with same email, password reset | Duplicate account, token reuse |
+| File upload | Upload → process → move | Overwrite, TOCTOU on validation |
+| Feature flags | Enable/disable + use simultaneously | State inconsistency |
+| Rate limits | Send N requests simultaneously | Bypass rate limiter |
 
-Map state-changing operations with check-then-act patterns:
+## Phase 2: Technique Selection
 
-| Operation | Check Phase | Act Phase | Race Window |
-|-----------|------------|-----------|-------------|
-| Coupon redeem | Is coupon valid + unused? | Mark used + apply discount | Between check and mark |
-| Balance transfer | Is balance ≥ amount? | Deduct balance | Between check and deduct |
-| Password reset | Is token valid? | Consume token + set password | Between validate and consume |
-| File upload | Save to temp → process → move | Processing time | During async processing |
-| Rate limit | Count < threshold? | Increment counter | Between count and increment |
+### Single-Packet Attack — HTTP/1.1 (last-byte sync)
 
-### Step 2: Classify Target Type
+1. Open N TCP connections to target
+2. Send all but the last byte of each request on each connection
+3. Send all final bytes simultaneously
+4. Synchronizes arrival at the server within microseconds
 
-| Type | Description | Expected Result on Win |
-|------|-------------|----------------------|
-| Limit overrun | Use N times what should be 1 | Coupon applied 2×, rate limit bypassed |
-| State confusion | Get inconsistent state | Partial writes, mixed responses |
-| TOCTOU | Bypass check via timing | Token reused, auth check skipped |
-| Double spend | Same resource consumed twice | Balance deducted once, credited twice |
+### Single-Packet Attack — HTTP/2
 
-### Step 3: Prepare Test
+1. Open one HTTP/2 connection
+2. Prepare N requests as HTTP/2 frames
+3. Send all frames in a single TCP packet (multiplexing)
+4. Tightest possible timing — server processes all from one packet
 
-1. Identify the exact HTTP request(s) that trigger the race window
-2. Determine the synchronization point — which requests must arrive simultaneously?
-3. Prepare N identical requests (start with N=10)
-4. Set up monitoring — how to detect a successful race:
-   - Response differences (status code, body content, balance value)
-   - Side effects (email count, database state, audit log entries)
+### Tool Options
 
-### Step 4: Choose Synchronization Technique
+| Tool | Technique | Precision | Notes |
+|------|-----------|-----------|-------|
+| Turbo Intruder (Burp) | Single-packet, connection warming | Highest | Requires Burp Suite Pro |
+| `curl --parallel` | HTTP/2 multiplexing | Medium | Quick, scriptable |
+| Custom Python (httpx/h2) | Full frame-level control | High | For custom scenarios |
+| `fetch()` + `Promise.all` | Browser-level concurrency | Lowest | Last resort |
 
-| Target Protocol | Technique | How |
-|----------------|-----------|-----|
-| HTTP/2 | Single-packet attack | All requests in one TCP packet — server processes simultaneously |
-| HTTP/1.1 | Last-byte sync | Send N requests minus last byte → send all last bytes at once |
-| HTTP/1.1 (multi-conn) | Connection pool + barrier | Open N connections → release all simultaneously |
-| WebSocket | Burst messages | Send N messages in rapid succession on one connection |
+## Phase 3: Execution Protocol
 
-Tools: turbo-intruder (Burp Suite), curl --parallel, Python asyncio + aiohttp, Burp Repeater group send.
+1. **Baseline**: Send the operation once normally, record state (balance, count, inventory)
+2. **Dry run**: Send 2 concurrent identical requests, compare results
+3. **Full test**: Send 5 concurrent requests (increase to 10-20 if 5 shows no effect)
+4. **Verification**: Check server-side state — response codes alone are insufficient
+5. **Variants**:
+   - Same operation, same user, concurrent (classic race)
+   - Same operation, different users, same resource (contention)
+   - Different operations on same resource (read during write)
 
-### Step 5: Execute
+## Phase 4: Detection & Evidence
 
-1. Run with N=5 first (minimize risk)
-2. Collect ALL responses — status codes, timestamps, response bodies
-3. Count successes — did more than 1 succeed when only 1 should?
-4. If no race detected at N=5, increase to N=10, then N=20 max
+| Signal | Interpretation |
+|--------|---------------|
+| All N requests return 200 with state change | Strong race — server did not serialize |
+| N-1 return 200, 1 returns error | Partial race — some requests slip through |
+| All return 200 but only 1 state change | Server serialized correctly (not vulnerable) |
+| Response time variance < 5ms across N | Requests likely hit the same processing window |
 
-### Step 6: Verify Impact
+Evidence must include:
+- **Pre-state**: value before test (balance, count, inventory)
+- **Request timing**: all requests within the same millisecond window
+- **All N responses**: status code + relevant body field for each
+- **Post-state**: value after test
+- **Delta**: expected vs actual (e.g., "balance decreased by $10 once but coupon applied twice")
 
-| Verification | Method | Why |
-|-------------|--------|-----|
-| Real state change | Check balance/count/status via separate GET | Distinguish server-side vs client-side |
-| Not duplicate responses | Different response bodies or database state | Server may return 200 to all but process one |
-| Persistent effect | Check after delay (30s, 60s) | Race may be rolled back asynchronously |
-| Quantify impact | Calculate exact duplicate amount/count | "Applied 2× instead of 1×" with values |
-
-### Step 7: Evidence Collection
-
-```markdown
-## Race Condition Evidence
-- Target operation: <what was raced>
-- Race window: <check → act description>
-- Requests sent: <N> concurrent
-- Technique: <single-packet / last-byte sync / other>
-- Successful extra operations: <count>
-- Impact: <quantified — e.g., "$10 coupon applied 3×, net $20 unearned discount">
-- Request/response pairs: <with timestamps showing simultaneity>
-```
-
-## Output Format
+## Phase 5: Output Format
 
 ```markdown
-## Race Condition — <target>
-
-### Race Window Analysis
-| Operation | Window | Type | Testable? |
-|-----------|--------|------|-----------|
-
-### Test Results
-| Operation | N | Technique | Wins | Expected | Actual | Impact |
-|-----------|---|-----------|------|----------|--------|--------|
-
-### Recommended Findings
-1. <finding with quantified impact>
+## Race Condition Test — <endpoint>
+- Endpoint: <URL + method>
+- Category: <balance/inventory/voting/account/...>
+- Technique: <single-packet HTTP/1.1 | HTTP/2 multiplexing | other>
+- Concurrent requests: <N>
+- Pre-state: <value>
+- Post-state: <value>
+- Expected post-state: <value>
+- Delta: <expected - actual>
+- Result: vulnerable / not vulnerable / inconclusive
+- Kill chain stage: <typically privilege-escalation or impact>
+- Severity: <reference Severity Calibration Anchors>
+- Evidence: <timing log, response bodies, state proof>
 ```
 
-## Anti-Patterns
+## Safety Rules
 
-| Anti-Pattern | Why It Fails | Fix |
-|-------------|-------------|-----|
-| No race window analysis | Sending concurrent requests randomly | Step 1: map check-then-act first |
-| N=1000 requests | DoS risk, not race testing | Start N=5, max N=20 |
-| No impact verification | Duplicate 200s ≠ duplicate state changes | Step 6: verify server-side state |
-| Testing only rate limits | Misses business logic races | Test all state-changing operations |
-| Ignoring HTTP version | Wrong sync technique for the protocol | Match technique to HTTP/1.1 vs HTTP/2 |
-| Claiming win without quantification | "Race condition exists" is not a finding | Quantify: how many extra? what value? |
-
-## Hard Rules
-
-- Start with small N (5–10) — concurrent requests at scale are indistinguishable from DoS
-- Never test financial transactions without explicit scope authorization
-- Never test destructive operations (delete, cancel) — only additive ones
-- Record every race test in Operation Log with exact N and timestamps
-- Run `bb-scope-safety-check` before first race test on any target
-- Verify impact is real and persistent, not just duplicate HTTP responses
+- Run `bb-scope-safety-check` before testing
+- Start with the MINIMUM concurrency (2-5) — do not blast 50+ from the start
+- Record pre-state before every test
+- If the race creates irreversible state (real money, real purchase): STOP after first successful proof, do NOT repeat
+- If no test/sandbox environment: warn user before testing balance/payment operations
+- DELETE operations: do NOT test unless explicitly authorized and the resource is test data
+- Operation Log: record every race test with timing, concurrency level, and pre/post state
 
 ## Cross-References
 
-- `bb-scope-safety-check` — before any race testing
-- `bb-evidence-readiness` — prepare concurrent request evidence
-- `bb-exploit-chain` — chain race wins into higher impact
-- `bb-counterevidence` — challenge whether race is exploitable in production
-- `bb-reflexion-retry` — if race test fails, diagnose before retry
+- `bb-scope-safety-check` — before active testing
+- `bb-exploit-chain` — chain race into higher impact
+- `bb-evidence-readiness` — evidence quality
+- `bb-web-vuln-scan` — standard vuln testing
+- `Reference Card - Severity Calibration Anchors` — severity assessment

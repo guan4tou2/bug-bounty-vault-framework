@@ -1,6 +1,6 @@
 ---
 name: bb-graphql-audit
-description: Use when target exposes a GraphQL endpoint. Covers introspection, schema analysis, batch query abuse, injection, field-level authorization, and subscription testing.
+description: Structured GraphQL endpoint deep testing. Triggers: GraphQL endpoint discovered, introspection response, 'graphql audit', 'schema analysis', 'test graphql', 'batch query', 'alias abuse', 'nested query', 'depth attack'.
 ---
 
 # Bug Bounty — GraphQL Audit
