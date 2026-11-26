@@ -63,7 +63,14 @@ After recon and **before any pattern/hunter/scan**, map the full attack surface 
 
 ### Target Work DAG
 
-For targets with branching recon, multiple validation criteria, decision gates, pentest routes, or potential exploit chains, keep a four-column DAG (`from | edge | to | status`). It is a working state map for improving coverage, exploitable-path discovery, evidence decisions, and stop conditions. It grows as new surfaces and capabilities appear. Use `bash automation/dag_gaps.sh <target>` to list pending `⏳` edges.
+For targets with branching recon, multiple validation criteria, decision gates, pentest routes, or potential exploit chains, keep a DAG table (`from | edge | to | status` or `from | edge | to | status | blocked_by`). The optional 5th column declares dependencies (adapted from Decepticon's OPPLAN DAG):
+
+- `blocked_by:<edge-id>` — cannot start until that edge is ✅
+- `any_of:<id1>,<id2>` — unblocked when ANY listed edge is ✅
+- `requires:<fact>` — unblocked when a named fact is established (free-text)
+- (empty) — no dependency, can start immediately
+
+Use `bash automation/dag_gaps.sh <target>` to list pending `⏳` edges. Add `--ready` to see edges that can start now, or `--blocked` to see edges stuck on unresolved dependencies.
 
 ### Coverage gate (`bb-web-vuln-scan`)
 
