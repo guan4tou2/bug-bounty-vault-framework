@@ -15,8 +15,10 @@ Generated wrappers:
 | `bb-ad-lateral-audit` | `.gemini/skills/bb-ad-lateral-audit/SKILL.md` |
 | `bb-agent-prompts` | `.gemini/skills/bb-agent-prompts/SKILL.md` |
 | `bb-ai-audit` | `.gemini/skills/bb-ai-audit/SKILL.md` |
+| `bb-api-schema-diff` | `.gemini/skills/bb-api-schema-diff/SKILL.md` |
 | `bb-attack-chain-review` | `.gemini/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.gemini/skills/bb-attempt-recorder/SKILL.md` |
+| `bb-auth-matrix` | `.gemini/skills/bb-auth-matrix/SKILL.md` |
 | `bb-bucket-ownership` | `.gemini/skills/bb-bucket-ownership/SKILL.md` |
 | `bb-context-handoff` | `.gemini/skills/bb-context-handoff/SKILL.md` |
 | `bb-counterevidence` | `.gemini/skills/bb-counterevidence/SKILL.md` |
@@ -29,10 +31,13 @@ Generated wrappers:
 | `bb-firmware-audit` | `.gemini/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.gemini/skills/bb-form-writer/SKILL.md` |
 | `bb-gap-research` | `.gemini/skills/bb-gap-research/SKILL.md` |
+| `bb-graphql-audit` | `.gemini/skills/bb-graphql-audit/SKILL.md` |
 | `bb-idor-coverage` | `.gemini/skills/bb-idor-coverage/SKILL.md` |
 | `bb-incident-response` | `.gemini/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.gemini/skills/bb-knowledge-capture/SKILL.md` |
 | `bb-multi-search` | `.gemini/skills/bb-multi-search/SKILL.md` |
+| `bb-race-condition` | `.gemini/skills/bb-race-condition/SKILL.md` |
+| `bb-reflexion-retry` | `.gemini/skills/bb-reflexion-retry/SKILL.md` |
 | `bb-retest-gate` | `.gemini/skills/bb-retest-gate/SKILL.md` |
 | `bb-scope-safety-check` | `.gemini/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.gemini/skills/bb-submission-readiness/SKILL.md` |

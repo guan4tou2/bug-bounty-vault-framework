@@ -15,8 +15,10 @@ Generated wrappers:
 | `bb-ad-lateral-audit` | `.codex/skills/bb-ad-lateral-audit/SKILL.md` |
 | `bb-agent-prompts` | `.codex/skills/bb-agent-prompts/SKILL.md` |
 | `bb-ai-audit` | `.codex/skills/bb-ai-audit/SKILL.md` |
+| `bb-api-schema-diff` | `.codex/skills/bb-api-schema-diff/SKILL.md` |
 | `bb-attack-chain-review` | `.codex/skills/bb-attack-chain-review/SKILL.md` |
 | `bb-attempt-recorder` | `.codex/skills/bb-attempt-recorder/SKILL.md` |
+| `bb-auth-matrix` | `.codex/skills/bb-auth-matrix/SKILL.md` |
 | `bb-bucket-ownership` | `.codex/skills/bb-bucket-ownership/SKILL.md` |
 | `bb-context-handoff` | `.codex/skills/bb-context-handoff/SKILL.md` |
 | `bb-counterevidence` | `.codex/skills/bb-counterevidence/SKILL.md` |
@@ -29,10 +31,13 @@ Generated wrappers:
 | `bb-firmware-audit` | `.codex/skills/bb-firmware-audit/SKILL.md` |
 | `bb-form-writer` | `.codex/skills/bb-form-writer/SKILL.md` |
 | `bb-gap-research` | `.codex/skills/bb-gap-research/SKILL.md` |
+| `bb-graphql-audit` | `.codex/skills/bb-graphql-audit/SKILL.md` |
 | `bb-idor-coverage` | `.codex/skills/bb-idor-coverage/SKILL.md` |
 | `bb-incident-response` | `.codex/skills/bb-incident-response/SKILL.md` |
 | `bb-knowledge-capture` | `.codex/skills/bb-knowledge-capture/SKILL.md` |
 | `bb-multi-search` | `.codex/skills/bb-multi-search/SKILL.md` |
+| `bb-race-condition` | `.codex/skills/bb-race-condition/SKILL.md` |
+| `bb-reflexion-retry` | `.codex/skills/bb-reflexion-retry/SKILL.md` |
 | `bb-retest-gate` | `.codex/skills/bb-retest-gate/SKILL.md` |
 | `bb-scope-safety-check` | `.codex/skills/bb-scope-safety-check/SKILL.md` |
 | `bb-submission-readiness` | `.codex/skills/bb-submission-readiness/SKILL.md` |

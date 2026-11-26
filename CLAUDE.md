@@ -45,6 +45,11 @@ Skills live in `.claude/skills/<name>/SKILL.md`. When a trigger matches, load th
 | **bb-multi-search** | Mid-hunting quick research; "look this up"; "any writeups"; "research this" — parallel multi-source search | `.claude/skills/bb-multi-search/SKILL.md` |
 | **bb-retest-gate** | "retest"; "verify fixes"; "check if patched"; "regression test" — structured 6-phase vendor fix verification | `.claude/skills/bb-retest-gate/SKILL.md` |
 | **bb-ad-lateral-audit** | AD/Windows domain in scope; DC/LDAP/Kerberos found; "lateral movement"; "AD audit"; "domain enum" | `.claude/skills/bb-ad-lateral-audit/SKILL.md` |
+| **bb-auth-matrix** | Multi-role target; IDOR/BOLA testing; "authorization matrix"; "access control"; "role-based testing" | `.claude/skills/bb-auth-matrix/SKILL.md` |
+| **bb-race-condition** | Rate limit/balance/coupon/state race; "race condition"; "TOCTOU"; "single-packet"; "concurrency" | `.claude/skills/bb-race-condition/SKILL.md` |
+| **bb-graphql-audit** | GraphQL endpoint found; `/graphql`; `__schema`; "GraphQL audit"; introspection | `.claude/skills/bb-graphql-audit/SKILL.md` |
+| **bb-reflexion-retry** | Tool/exploit failure; "retry"; "try again"; same action failed 2+ times; "why did that fail" | `.claude/skills/bb-reflexion-retry/SKILL.md` |
+| **bb-api-schema-diff** | OpenAPI/Swagger spec found; "hidden endpoints"; "undocumented API"; "shadow API"; "API diff"; comparing documented vs actual API | `.claude/skills/bb-api-schema-diff/SKILL.md` |
 
 **Trigger matched -> immediately load skill -> strictly follow skill content.**
 
@@ -154,6 +159,9 @@ bash automation/session_end_brief.sh <scope>
 | Kill chain stages | chain-tracker agent (CHAIN_GRAPH.md) | ATT&CK tactical phases on nodes; chain progression tracking |
 | Severity calibration | `Reference Card - Severity Calibration Anchors` | Concrete anchors at each severity level to prevent inflation |
 | Cost-aware gate | bb-scope-safety-check (Cost-Aware Gate) | Smoke-test go/no-go before expensive operations |
+| API schema diff | `automation/api_schema_diff.py` | OpenAPI spec vs discovered endpoints — shadow/untested endpoint detection |
+| Reflexion retry | bb-reflexion-retry skill | 5-question diagnosis mandatory before any tool/exploit retry |
+| Strategy optimization | `Reference Card - Strategy Optimization` | File-based target type × strategy × outcome ledger with ROI heuristic |
 | Anti-exaggeration + severity | AGENTS.md sections 5 + 8 | Theoretical chains not written as facts; severity matches evidence |
 | Triage response | AGENTS.md section 9 | Submission + Kanban + KB sync on vendor reply |
 | Incident response | bb-incident-response skill | Stop testing, document, apologize, disclose |

@@ -33,6 +33,11 @@ This registry keeps Claude workspace skills discoverable and reviewable. Each sk
 | `bb-multi-search` | Use when mid-hunting quick research is needed; parallel multi-source search and synthesis | `.claude/skills/bb-multi-search/SKILL.md` |
 | `bb-retest-gate` | Use when retesting vendor fixes; structured 6-phase verification methodology with regression scripts | `.claude/skills/bb-retest-gate/SKILL.md` |
 | `bb-ad-lateral-audit` | Use when an AD/Windows domain, LDAP, or Kerberos environment is in scope; structured lateral movement audit with DreadGOAD isolation and cost-aware gates | `.claude/skills/bb-ad-lateral-audit/SKILL.md` |
+| `bb-auth-matrix` | Use when testing authorization across roles/endpoints; structured role × endpoint × operation matrix for broken access control | `.claude/skills/bb-auth-matrix/SKILL.md` |
+| `bb-race-condition` | Use when testing race conditions, TOCTOU, single-packet attacks, or concurrency bugs; limit bypass, state confusion, check-then-act patterns | `.claude/skills/bb-race-condition/SKILL.md` |
+| `bb-graphql-audit` | Use when target exposes a GraphQL endpoint; introspection, schema analysis, batch query abuse, injection, field-level authorization | `.claude/skills/bb-graphql-audit/SKILL.md` |
+| `bb-reflexion-retry` | Use when a tool call, exploit attempt, or validation step fails; structured reflection before retry instead of blind repetition | `.claude/skills/bb-reflexion-retry/SKILL.md` |
+| `bb-api-schema-diff` | Use when target has OpenAPI/Swagger spec or API documentation; compare documented vs actual endpoints to find shadow APIs and auth mismatches | `.claude/skills/bb-api-schema-diff/SKILL.md` |
 
 ## Maintenance
 
