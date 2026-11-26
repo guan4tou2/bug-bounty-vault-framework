@@ -69,6 +69,14 @@
 
 ---
 
+## Artifact Handles
+
+> Large tool outputs saved on disk this session (scan JSON, logs, source dumps). One line each: `path — size — fingerprint (hit count / timestamp / first-bytes)`. The next session verifies the fingerprint before trusting the file (see bb-context-handoff → Artifact Handle Discipline). Never paste raw output here.
+
+- (none)
+
+---
+
 ## Open Leads (no Vault Finding created yet)
 
 > Found, worth pursuing, but not confirmed or turned into a Vault Finding. Give each lead a temporary ID (`L-001`, …) so a continuation can name it.
