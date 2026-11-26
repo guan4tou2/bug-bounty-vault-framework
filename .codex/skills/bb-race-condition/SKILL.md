@@ -1,9 +1,9 @@
 ---
 name: bb-race-condition
-description: Use when testing race conditions, TOCTOU, single-packet attacks, or concurrency bugs. Covers limit bypass, state confusion, and check-then-act patterns in rate limits, balance operations, coupon redemption, token consumption, and file processing.
+description: Race condition and TOCTOU testing framework. Triggers: 'race condition', 'TOCTOU', 'double spend', 'single packet attack', 'concurrent requests', 'limit bypass', coupon/balance/vote/inventory endpoint discovered.
 ---
 
-# Bug Bounty — Race Condition
+# Bug Bounty — Race Condition Testing
 
 This is a Codex compatibility wrapper. The canonical workspace skill remains:
 

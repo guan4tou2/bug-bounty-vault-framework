@@ -89,6 +89,47 @@ After every 5 outcomes per target type, review:
 7. After 5 outcomes per type, review and update weights
 ```
 
+## Confidence Decay
+
+Strategies that worked months ago on a different target carry lower confidence:
+
+| Data Age | Confidence Multiplier |
+|----------|-----------------------|
+| < 1 month | 1.0 (full weight) |
+| 1-3 months | 0.8 |
+| 3-6 months | 0.6 |
+| > 6 months | 0.4 (verify before relying) |
+
+Apply this discount when looking up historical rewards.
+
+## Session Planning Template
+
+At the start of each engagement, generate a priority-ordered strategy list:
+
+```markdown
+## Strategy Plan — <target>
+
+Based on: <target type>, <tech stack>, <program maturity>
+Log matches: <N similar targets, top strategies>
+
+### Priority Order
+
+1. **<strategy>** — expected ROI: <high/medium/low>, basis: <log match / heuristic / novel>
+2. ...
+
+### Time Budget
+
+| Strategy | Allocated Time | Go/No-Go Checkpoint |
+|----------|---------------|---------------------|
+| Strategy 1 | 2h | After 1h: any candidates? |
+| Strategy 2 | 1h | After 30m: any anomalies? |
+
+### Pivot Rules
+
+- If Strategy 1 produces 0 candidates in allocated time → skip to Strategy 2
+- If all strategies exhausted → chain review + creative brainstorm before marking exhausted
+```
+
 ## Integration Points
 
 - **Session start**: check STRATEGY_LOG.md for prior outcomes on this target type

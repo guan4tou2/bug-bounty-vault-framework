@@ -1,9 +1,9 @@
 ---
 name: bb-auth-matrix
-description: Use when testing authorization, IDOR, privilege escalation, role confusion, multi-tenant isolation, JWT/session scope, or any access control boundary. Builds a Role × Endpoint × Operation matrix and tests every cell systematically.
+description: Structured authorization testing with Role x Endpoint x Operation matrix. Triggers: 'auth matrix', 'test auth', 'role testing', 'privilege escalation testing', 'access control audit', multiple roles identified, IDOR hunting, permission matrix.
 ---
 
-# Bug Bounty — Auth Matrix
+# Bug Bounty — Authorization Matrix
 
 This is a Codex compatibility wrapper. The canonical workspace skill remains:
 
