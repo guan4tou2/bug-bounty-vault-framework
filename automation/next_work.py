@@ -206,6 +206,33 @@ def compute(target: str) -> dict:
     except Exception:
         pass
 
+    # 1c. second-dimension coverage gaps: a surface tested for one risk_area but not
+    # another. Block 1/1b handle the surface denominator (untested surfaces, untouched
+    # hosts); this handles the risk_area denominator on surfaces already in play. A
+    # surface with a reported XSS but no IDOR verdict is not "done" — the empty cell is
+    # where the next intent comes from (ported from ARTEX-CC record_coverage semantics).
+    # Conservative: only surfaces that ALREADY carry a signal, so this never re-proposes
+    # the untested surfaces 1/1b own, and only the classes actually in play on this target.
+    try:
+        import coverage_matrix
+        m = coverage_matrix.matrix(target)
+        for surface in m["surfaces"]:
+            cells = m["grid"][surface]
+            if not any(c["outcome"] for c in cells.values()):
+                continue  # wholly untested surface — owned by block 1
+            gaps = [r for r in m["risks"] if not cells[r]["outcome"]]
+            if gaps:
+                items.append({"kind": "coverage-cell",
+                              "action": f"補測 surface 未涵蓋的風險類別：{surface}",
+                              "detail": f"已測 {sum(1 for c in cells.values() if c['outcome'])} 類，"
+                                        f"未測：{', '.join(gaps[:8])}"
+                                        + (f"（+{len(gaps) - 8}）" if len(gaps) > 8 else ""),
+                              "skill": "bb-web-vuln-scan", "priority": 2})
+    except LedgerReadError:
+        raise
+    except Exception:
+        pass
+
     # 2. unlock-ready chains: a path with findings that is not terminal
     TERMINAL = {"dead_end", "fixed_upstream", "not_applicable", "live-verified",
                 "code-confirmed", "withdrawn", "downgraded", "confirmed"}
