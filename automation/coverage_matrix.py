@@ -53,12 +53,6 @@ GLYPH = {
     "": " ",
 }
 
-# A small standard column set, added only with --standard, so a fresh target still
-# shows the classes worth asking about even before any event names them.
-STANDARD_RISKS = ("idor", "xss", "sqli", "ssrf", "auth", "info-disclosure",
-                  "csrf", "rce", "open-redirect", "business-logic")
-
-
 def _events(target: str | Path) -> list[dict]:
     led = asg.ledger_path(target)
     if not led.exists():
@@ -99,19 +93,17 @@ def _finding_cells(events: list[dict]) -> dict[tuple[str, str], str]:
     return cells
 
 
-def matrix(target: str | Path, *, standard: bool = False) -> dict:
+def matrix(target: str | Path) -> dict:
     """Build the surface × risk_area grid from the ledger. Pure projection."""
     events = _events(target)
     surfaces = sorted(asg.surface_state(target).keys())
     cov = _coverage_events(events)
     fnd = _finding_cells(events)
 
-    # Columns = every risk_area that any signal mentions, plus the standard set on
-    # request. Rows = every surface, plus any surface a coverage event names that
-    # the surface projection has not yet registered.
+    # Columns = every risk_area that any signal mentions (a finding's vuln_class or
+    # a recorded coverage event). Rows = every surface, plus any surface a coverage
+    # event names that the surface projection has not yet registered.
     risks: set[str] = {r for (_, r) in cov} | {r for (_, r) in fnd}
-    if standard:
-        risks |= {asg.canonical_vuln_class(r) for r in STANDARD_RISKS}
     extra_rows = {s for (s, _) in cov} | {s for (s, _) in fnd}
     all_rows = sorted(set(surfaces) | extra_rows)
     cols = sorted(risks)
@@ -179,8 +171,7 @@ def _render(m: dict) -> str:
         return f"{m['target']}: no surfaces in ledger."
     if not cols:
         return (f"{m['target']}: {len(rows)} surfaces, no risk_area signal yet. "
-                f"Run with --standard to show the standard class columns, or "
-                f"`record` a coverage verdict.")
+                f"`record` a coverage verdict, or report a finding with a vuln_class.")
     # Width: surface label clipped, one char per risk column.
     w = min(max((len(s) for s in rows), default=8), 44)
     head = " " * (w + 2) + " ".join(c[:3].ljust(3) for c in cols)
@@ -206,8 +197,6 @@ def main() -> int:
 
     show = sub.add_parser("show", help="print the matrix (default)")
     show.add_argument("target")
-    show.add_argument("--standard", action="store_true",
-                      help="add the standard OWASP-ish risk columns")
     show.add_argument("--json", action="store_true")
 
     rec = sub.add_parser("record", help="append one coverage verdict")
@@ -233,7 +222,7 @@ def main() -> int:
               f"recorded: {out['recorded']}")
         return 0
 
-    m = matrix(args.target, standard=getattr(args, "standard", False))
+    m = matrix(args.target)
     print(json.dumps(m, ensure_ascii=False, indent=2) if args.json else _render(m))
     return 0
 
