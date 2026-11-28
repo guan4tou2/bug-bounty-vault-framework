@@ -36,6 +36,22 @@ A rule keyed on a payload string dies when the attacker changes one character. K
 | `cmdline contains "whoami"` | a web-server process **spawns a child process** (httpd / nginx / java -> shell), whatever it runs |
 | User-Agent = `sqlmap` | many syntax variants of one parameter in a short window, plus a bimodal response-length distribution |
 
+Most of the right column is **multi-event behaviour** ("many 4xx then one 200", "many syntax variants"), which a single Sigma `detection:` block cannot express. To turn such invariants into deployable rules, use the two-layer model below.
+
+## Two-layer rule model (atomic + correlation)
+
+Static strings can be changed; behaviour is harder to hide. So write rules in two layers — this is the core structure of this agent's output, not an option.
+
+1. **Atomic rules** — one rule, one observable fact, with a stable `id`. Each matches a single observable request / response / process / file event. On its own an atomic rule is usually a **supporting indicator** (the attacker can change the UA / payload to evade it).
+2. **Correlation rules** — reference one or more atomic rules by `id` and encode the **behavioural invariant** a single `detection:` block cannot. Three archetypes:
+   - `event_count` (velocity / burst): one source produces the same atomic event ≥N times in a short window. E.g. a 4xx burst on one endpoint; enumeration with no rate limit.
+   - `value_count` (fan-out): one source touches ≥N **distinct** objects (endpoints / hosts / parameters). The **breadth** (distinct count) is the tell, not the raw volume.
+   - `temporal` (co-occurrence / sequence): two or more atomic events follow within a window. E.g. enumerate → auth attempt → injection; or, host-side, a specific marker → destructive command.
+
+**Dependency integrity**: a correlation rule references atomic rules by `id`, so it **must be delivered together with its atomic rules** (the whole tree) or the reference will not resolve. Keep each atomic rule next to the correlation rules that cite it, and state the dependency in the handback summary.
+
+**Grounding discipline**: every `selection` field must trace to a concrete place in the evidence (the Finding's reproduction steps, the Operation Log, the attack narrative). Do not write a field you inferred but the evidence does not show — flag it as a log source to deploy instead.
+
 ## Inputs
 
 - **Finding ID** (required): `01 - Targets/<target>/Findings/Finding - <target> - <ID>.md`, or a path to an attack-chain / narrative note
@@ -44,7 +60,8 @@ A rule keyed on a payload string dies when the attacker changes one character. K
 ## Workflow
 
 1. **Read the evidence, extract invariants.** From the Finding's reproduction steps and the Operation Log in `$WORKSHOP_ROOT/<target>/RECON_DB.md`, identify what the attacker cannot avoid doing. Work in three layers: network (request shape), application (response / state change), host (process / file / registry). The deeper the layer, the harder to evade — but the owner may not have that layer's logs.
-2. **Write one rule per layer**, stating which log source it needs. If the owner lacks that source, say "deploy X first" — that recommendation is valuable on its own.
+2. **Write one atomic rule per layer**, stating which log source it needs. If the owner lacks that source, say "deploy X first" — that recommendation is valuable on its own.
+2b. **Decide which invariants are multi-event behaviour** (burst / fan-out / sequence) and write correlation rules for them, referencing the atomic `id`s above. If an invariant can be keyed on behaviour with a correlation rule, do not leave only a static atomic rule — that is the "detecting my PoC" trap.
 3. **Sigma first** (portable across platforms); add a platform query (e.g. SPL / KQL / Elastic) where useful.
 4. **Attack every rule yourself** (do not skip):
    - How would I bypass it? Put the bypass in `falsenegatives`.
@@ -58,7 +75,9 @@ A rule keyed on a payload string dies when the attacker changes one character. K
 title: <attack behaviour, not the vulnerability name>
 id: <uuid>
 status: experimental
-description: <what behaviour this rule catches, and why that behaviour is necessary for the attack>
+description: <what behaviour this rule catches, and why that behaviour is necessary for the attack.
+  End with a scoped-negative line: this fingerprint can be changed by the operator, so a quiet
+  result does not mean safety (absence != safety); pair it with the behavioural layer.>
 references:
   - <Finding ID / attack-narrative section>
 author: <engagement name>
@@ -78,6 +97,28 @@ falsenegatives:          # not a standard Sigma field, but what defenders need m
 level: <low|medium|high|critical>
 ```
 
+For multi-event behaviour, add a correlation rule (delivered together with its atomic rule):
+
+```yaml
+# references base atomic: <atomic filename> (<atomic title>)
+title: <behaviour, e.g. "X enumeration velocity (single source)">
+id: <uuid>
+status: experimental
+description: <which behaviour this correlation catches, and why a single atomic rule misses it>
+correlation:
+  type: event_count          # or value_count (fan-out) / temporal (sequence)
+  rules:
+    - <id of the base atomic rule>
+  group-by:
+    - <correlation dimension, e.g. c-ip>
+  timespan: 5m               # conservative default; note "tune to baseline" on handback
+  condition:
+    gte: <N>                 # value_count uses field + gte; temporal uses multiple rules + ordered
+falsepositives:
+  - <normal business that polls at this rate; give an allow-list suggestion>
+level: <low|medium|high|critical>
+```
+
 ## Pre-delivery checklist
 
 - [ ] Every rule states **which log source it needs**; sources the owner lacks are flagged
@@ -85,6 +126,10 @@ level: <low|medium|high|critical>
 - [ ] `falsepositives` lists concrete business scenarios, not placeholders
 - [ ] No credentials or personal data in any rule
 - [ ] Rules key on behavioural invariants, not on our PoC strings
+- [ ] Multi-event invariants (burst / fan-out / sequence) are written as correlation rules, not left as static atomic rules only
+- [ ] Every correlation rule ships with the atomic rule it references (dependency resolves); the handback summary states the dependency and the timespan/threshold to tune
+- [ ] Every atomic rule's description carries a scoped-negative line (absence != safety)
+- [ ] Every selection field traces to a place in the evidence (grounded, not inferred)
 - [ ] ATT&CK IDs are tagged
 
 ## Hard Rules
